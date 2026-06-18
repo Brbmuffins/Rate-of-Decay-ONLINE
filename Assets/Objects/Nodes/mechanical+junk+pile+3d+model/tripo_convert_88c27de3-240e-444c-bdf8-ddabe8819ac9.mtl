@@ -1,0 +1,16 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_88c27de3-240e-444c-bdf8-ddabe8819ac9
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd mechanicaljunkpile3dmodel_basecolor.JPEG
+map_Ns mechanicaljunkpile3dmodel_roughness.JPEG
+map_Pr mechanicaljunkpile3dmodel_roughness.JPEG
+map_refl mechanicaljunkpile3dmodel_metallic.JPEG
+map_Pm mechanicaljunkpile3dmodel_metallic.JPEG
+map_Bump -bm 1.000000 mechanicaljunkpile3dmodel_normal.JPEG

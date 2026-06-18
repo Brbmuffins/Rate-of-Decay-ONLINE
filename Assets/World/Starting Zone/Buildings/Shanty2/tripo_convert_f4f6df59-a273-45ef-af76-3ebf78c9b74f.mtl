@@ -1,0 +1,16 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_f4f6df59-a273-45ef-af76-3ebf78c9b74f
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd shanty2_basecolor.JPEG
+map_Ns shanty2_roughness.JPEG
+map_Pr shanty2_roughness.JPEG
+map_refl shanty2_metallic.JPEG
+map_Pm shanty2_metallic.JPEG
+map_Bump -bm 1.000000 shanty2_normal.JPEG

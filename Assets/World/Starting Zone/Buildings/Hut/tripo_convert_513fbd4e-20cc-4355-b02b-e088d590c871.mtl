@@ -1,0 +1,16 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_513fbd4e-20cc-4355-b02b-e088d590c871
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd roundhouse3dmodel_basecolor.JPEG
+map_Ns roundhouse3dmodel_roughness.JPEG
+map_Pr roundhouse3dmodel_roughness.JPEG
+map_refl roundhouse3dmodel_metallic.JPEG
+map_Pm roundhouse3dmodel_metallic.JPEG
+map_Bump -bm 1.000000 roundhouse3dmodel_normal.JPEG

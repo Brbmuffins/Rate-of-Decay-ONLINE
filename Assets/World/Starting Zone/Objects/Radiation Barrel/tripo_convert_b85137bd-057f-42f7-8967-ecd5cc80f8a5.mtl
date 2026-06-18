@@ -1,0 +1,16 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_b85137bd-057f-42f7-8967-ecd5cc80f8a5
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd yellow_radiation_barrel_3d_model_basecolor.JPEG
+map_Ns yellow_radiation_barrel_3d_model_roughness.JPEG
+map_Pr yellow_radiation_barrel_3d_model_roughness.JPEG
+map_refl yellow_radiation_barrel_3d_model_metallic.JPEG
+map_Pm yellow_radiation_barrel_3d_model_metallic.JPEG
+map_Bump -bm 1.000000 yellow_radiation_barrel_3d_model_normal.JPEG

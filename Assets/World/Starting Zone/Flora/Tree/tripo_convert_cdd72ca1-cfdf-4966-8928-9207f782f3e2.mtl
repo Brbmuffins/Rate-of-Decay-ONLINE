@@ -1,0 +1,16 @@
+# Blender 5.0.1 MTL File: 'None'
+# www.blender.org
+
+newmtl tripo_mat_cdd72ca1-cfdf-4966-8928-9207f782f3e2
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd stylizedtree3dmodel_basecolor.JPEG
+map_Ns stylizedtree3dmodel_roughness.JPEG
+map_Pr stylizedtree3dmodel_roughness.JPEG
+map_refl stylizedtree3dmodel_metallic.JPEG
+map_Pm stylizedtree3dmodel_metallic.JPEG
+map_Bump -bm 1.000000 stylizedtree3dmodel_normal.JPEG

@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e1a472e0e8b6df44db6455f017b1e88a
+timeCreated: 1425440388
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 127325
+  packageName: Particle Pack
+  packageVersion: 3.1
+  assetPath: Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Resources/LineBreaking
+    Leading Characters.txt
+  uploadId: 691001

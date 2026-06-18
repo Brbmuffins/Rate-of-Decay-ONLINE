@@ -1,0 +1,17 @@
+fileFormatVersion: 2
+guid: a89e5db3a4b8f1d4c8e55d26da1e5f09
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 127325
+  packageName: Particle Pack
+  packageVersion: 3.1
+  assetPath: Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Shaders/SDFFunctions.hlsl
+  uploadId: 691001
