@@ -1,0 +1,236 @@
+══════════════════════════════════════════════════════════════════════════════
+  RATE OF DECAY — CHARACTER SELECT SETUP GUIDE
+  Follow every step in order. Each section builds on the last.
+══════════════════════════════════════════════════════════════════════════════
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 1 — ADD SCENES TO BUILD SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Go to File → Build Settings
+2. Click "Add Open Scenes" for each scene, OR drag scenes from the Project window
+3. Order them like this (index matters):
+     0 — MainMenu
+     1 — CharacterSelect
+     2 — SampleScene  (your game world)
+4. Close Build Settings
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 2 — CREATE THE "CharacterPreview" LAYER
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This keeps the spinning character visible only to the preview camera.
+
+1. Go to Edit → Project Settings → Tags and Layers
+2. Find the first empty "User Layer" slot (e.g. Layer 8)
+3. Type:  CharacterPreview
+4. Close Project Settings
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 3 — CREATE THE RENDER TEXTURE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. In the Project window, right-click inside  Assets/UI/
+2. Create → Render Texture
+3. Name it:  CharacterPreviewRT
+4. In the Inspector set:  Width = 512,  Height = 512
+5. Leave everything else as default
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 4 — CREATE THE CharacterSelect SCENE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. File → New Scene → select "Basic (Built-in)"
+2. File → Save As → save to  Assets/Scenes/CharacterSelect.unity
+3. Delete the default "Main Camera" that appears — we'll add a dedicated one below
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 5 — SET UP THE PREVIEW CAMERA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This camera only renders the spinning character — not the UI.
+
+1. In the Hierarchy, right-click → Camera
+2. Rename it:  PreviewCamera
+3. In the Inspector on the Camera component:
+     - Clear Flags:       Solid Color
+     - Background:        set to black  (R=0, G=0, B=0, A=0)
+     - Culling Mask:      set ONLY "CharacterPreview" (uncheck everything else)
+     - Target Texture:    drag in  CharacterPreviewRT
+4. Position the camera so it faces where the character will stand.
+   Suggested transform:  Position (0, 1.2, -3)   Rotation (10, 0, 0)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 6 — CREATE THE PREVIEW SPAWN POINT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. In the Hierarchy, right-click → Create Empty
+2. Rename it:  PreviewSpawnPoint
+3. Set its Position to  (0, 0, 0)  — the camera above should be pointing at this
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 7 — SET UP THE CANVAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. In the Hierarchy, right-click → UI → Canvas
+2. On the Canvas component:
+     - Render Mode:  Screen Space - Overlay
+3. On the Canvas Scaler component:
+     - UI Scale Mode:  Scale With Screen Size
+     - Reference Resolution:  1920 x 1080
+     - Match:  0.5
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 8 — ADD THE CharacterSelectUI SCRIPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The script builds all UI elements automatically inside the Canvas.
+
+1. In the Hierarchy, right-click inside the Canvas → Create Empty
+2. Rename it:  CharacterSelectManager
+3. In the Inspector → Add Component → search "CharacterSelectUI" → add it
+4. Fill in the fields:
+     Game Scene:             SampleScene
+     Preview Camera:         drag in  PreviewCamera
+     Preview Render Texture: drag in  CharacterPreviewRT
+     Preview Spawn Point:    drag in  PreviewSpawnPoint
+     Rotation Speed:         28  (or adjust to taste)
+     Characters:             leave empty for now — fill in Section 10
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 9 — CREATE THE CharacterData ASSETS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Each class needs one CharacterData ScriptableObject.
+
+1. In the Project window, right-click  Assets/Characters/Engineer/
+   → Create → RoD → Character Data
+   Name it:  Engineer
+
+2. Fill in the Engineer fields:
+     Class Name:      Engineer
+     Role Tagline:    Support  ·  Builder  ·  Tactician
+     Lore Description:
+       Before the Collapse, Engineers kept the city-minds running — vast
+       neural architectures woven into every wall. Now they turn that
+       knowledge against what shattered them, deploying salvaged Liberation
+       War turrets reprogrammed to fight for the living.
+     Class Color:     R=1  G=0.55  B=0.1   (orange)
+     Class Color Dark: R=0.12  G=0.07  B=0.02
+     Prefab:          drag in your Engineer prefab (once you make one)
+     Preview Prefab:  same as above
+
+     TRAITS (hit + on the list, fill each row):
+       Label: High Defense       Icon: Buff_1 (from brbmuffins Icons)
+       Label: Area Denial        Icon: Earth_1
+       Label: Turret Deploy      Icon: Buff_3
+       Label: Team Shield        Icon: Holy_2
+       Label: Energy Management  Icon: Buff_5
+
+     STATS:
+       Damage    — 2
+       Defense   — 4
+       Range     — 3
+       Mobility  — 2
+       Control   — 5
+
+     CORE ABILITIES (3):
+       Name: Deploy Turret   Icon: Buff_3   Desc: Places a combat turret that targets nearby enemies.
+       Name: Magic Shield    Icon: Holy_2   Desc: Absorbs 50 damage for the caster.
+       Name: Dark Blast      Icon: Dark_1   Desc: Charged cone blast — hold to increase damage.
+
+     DEPLOYABLE:
+       Name:        Engineer Turret
+       Description: A reprogrammed Liberation-era combat drone. Targets enemies on sight.
+       Icon:        Buff_3 (or any turret-looking icon)
+
+3. Repeat for Phaser — right-click  Assets/Characters/
+   → Create → RoD → Character Data
+   Name it:  Phaser
+
+4. Fill in the Phaser fields:
+     Class Name:      Phaser
+     Role Tagline:    Ranged DPS  ·  Blaster  ·  Controller
+     Lore Description:
+       Phasers carry arm cannons recovered from the Automaton War — weapons
+       designed to disrupt robotic nervous systems. They never expected to
+       turn them on the world that built them. Phase energy lingers in the
+       ruins, and Phasers know exactly how to reshape it.
+     Class Color:     R=0.6  G=0.2  B=1.0   (purple)
+     Class Color Dark: R=0.08  G=0.03  B=0.15
+
+     TRAITS:
+       Label: High Burst Damage  Icon: Dark_1
+       Label: Area Control       Icon: Cold_2
+       Label: Long Range         Icon: Wind_1
+       Label: Slows & Debuffs    Icon: Debuff_1
+       Label: Mobility           Icon: Wind_3
+       Label: Energy Management  Icon: Buff_5
+
+     STATS:
+       Damage    — 5
+       Defense   — 2
+       Range     — 5
+       Mobility  — 3
+       Control   — 4
+
+     CORE ABILITIES (3):
+       Name: Phase Orb     Icon: Dark_3   Desc: A slow orb that explodes on impact for high area damage.
+       Name: Gravity Lance Icon: Cold_1   Desc: Piercing lance of phase energy that slows all targets hit.
+       Name: Phase Rift    Icon: Dark_5   Desc: Creates a rift that damages and slows enemies inside.
+
+     DEPLOYABLE:
+       Name:        Phase Relay
+       Description: Increases Phase Orb size and slow radius in an area.
+       Icon:        Cold_5
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 10 — ASSIGN CHARACTERS TO THE SCRIPT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Select  CharacterSelectManager  in the Hierarchy
+2. On the CharacterSelectUI component, find the  Characters  array
+3. Set Size to 2
+4. Element 0: drag in  Engineer  (CharacterData asset)
+5. Element 1: drag in  Phaser    (CharacterData asset)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  SECTION 11 — TEST IT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Make sure you're in the CharacterSelect scene
+2. Hit Play
+3. You should see the dark UI appear with the left/right panels
+4. Press the arrow buttons (or Left/Right arrow keys) to switch between classes
+5. Each class should change the background tint, name, role, lore, traits, stats,
+   ability cards, and deployable callout
+6. The 3D preview requires a prefab assigned — you can test the rest without it
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  QUICK REFERENCE — ICON PATHS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+All icons are in:
+  Assets/brbmuffins Icons/Icons/Magic Spell/
+  Assets/brbmuffins Icons/Icons/Magic Spell_250507new/
+
+  Dark_1–5   → purple/void energy    → Phaser damage abilities
+  Cold_1–5   → blue ice/phase        → Phaser control abilities
+  Buff_1–5   → golden/support        → Engineer abilities
+  Holy_1–5   → white/gold light      → Engineer shield/heal
+  Debuff_1–5 → green/corruption      → slow/control effects
+  Wind_1–5   → white/air             → mobility/range traits
+  Fire_1–5   → red/orange flame      → raw damage
+  Earth_1–5  → brown/green           → area denial/structures
+
+══════════════════════════════════════════════════════════════════════════════
