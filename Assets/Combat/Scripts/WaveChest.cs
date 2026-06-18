@@ -41,13 +41,14 @@ public class WaveChest : MonoBehaviour
     {
         if (_opened) return;
 
-        // Simple proximity check — swap for your input system if needed
+        // Simple proximity check — swap for InputSystem.InputAction if your players use it
         GameObject nearest = FindNearestPlayer();
         if (nearest == null) return;
 
         float dist = Vector3.Distance(transform.position, nearest.transform.position);
         bool inRange = dist <= 2.5f;
 
+        // NOTE: Uses old Input.GetKey — if your game uses InputSystem, wire an InputAction here instead
         if (inRange && Input.GetKey(KeyCode.E))
         {
             _holdProgress += Time.deltaTime;
@@ -98,10 +99,10 @@ public class WaveChest : MonoBehaviour
     {
         if (wave.enemyPrefab == null) yield break;
 
-        _aliveCount = wave.count;
         int nearby = CountNearbyPlayers(20f);
-        // Scale count slightly with player count (min 1 player worth)
+        // Scale count with player count (min 1 player worth)
         int scaled = Mathf.Max(wave.count, wave.count * nearby / 2);
+        _aliveCount = scaled;
 
         for (int j = 0; j < scaled; j++)
         {
