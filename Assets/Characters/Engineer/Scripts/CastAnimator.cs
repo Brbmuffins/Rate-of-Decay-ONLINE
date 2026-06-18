@@ -2,24 +2,25 @@ using UnityEngine;
 
 public class CastAnimator : MonoBehaviour
 {
-    public AnimationClip castClip;
-    public float crossfadeTime = 0.1f;
+    // In your AnimatorController create 3 triggers: CastDamage, CastHeal, CastSupport
+    // Each trigger transitions from Any State into its own animation state.
 
     private Animator anim;
-    private AnimatorOverrideController overrideController;
 
     void Start()
     {
         anim = GetComponentInChildren<Animator>();
-        if (anim == null) return;
-
-        overrideController = new AnimatorOverrideController(anim.runtimeAnimatorController);
-        anim.runtimeAnimatorController = overrideController;
     }
 
-    public void PlayCast()
+    public void PlayCast(AbilityCategory category)
     {
-        if (anim == null || castClip == null) return;
-        anim.CrossFadeInFixedTime(castClip.name, crossfadeTime);
+        if (anim == null) return;
+
+        switch (category)
+        {
+            case AbilityCategory.Heal:    anim.SetTrigger("CastHeal");    break;
+            case AbilityCategory.Support: anim.SetTrigger("CastSupport"); break;
+            default:                      anim.SetTrigger("CastDamage");  break;
+        }
     }
 }

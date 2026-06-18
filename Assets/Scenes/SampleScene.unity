@@ -10937,6 +10937,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityCaster
   cam: {fileID: 330585545}
   inventory: {fileID: 0}
+  castAnimator: {fileID: 0}
   castDelay: 0.3
   minimumAimDistance: 1
   spellbook:
@@ -11302,6 +11303,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::AbilityCaster
   cam: {fileID: 0}
   inventory: {fileID: 0}
+  castAnimator: {fileID: 0}
   castDelay: 0.3
   minimumAimDistance: 1
   spellbook:
@@ -11595,6 +11597,18 @@ MonoBehaviour:
     hitVFX: {fileID: 0}
     shieldAbsorb: 0
     shieldDuration: 0
+--- !u!114 &1285153657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1285153640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ca93769a4cf1824696ebd38dfb364db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CastAnimator
 --- !u!1 &1293764905
 GameObject:
   m_ObjectHideFlags: 0
@@ -17010,6 +17024,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8f50577b41958994daa0685f4b38dcf6, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1285153654}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 8f50577b41958994daa0685f4b38dcf6, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1285153657}
   m_SourcePrefab: {fileID: 100100000, guid: 8f50577b41958994daa0685f4b38dcf6, type: 3}
 --- !u!1001 &2141555094
 PrefabInstance:

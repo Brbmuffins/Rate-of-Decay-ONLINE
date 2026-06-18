@@ -45,6 +45,7 @@ public class AbilityCaster : MonoBehaviour
 {
     public Camera cam;
     public Inventory inventory;
+    public CastAnimator castAnimator;
     public float castDelay = 0.3f;
 
     [Header("Mouse Aim")]
@@ -388,6 +389,8 @@ public class AbilityCaster : MonoBehaviour
     void FinalizeCast(AbilityDef ability, GameObject indicator, float aimTime)
     {
         Debug.Log("Cast ability: " + ability.abilityName);
+
+        castAnimator?.PlayCast(ability.category);
 
         if (ability.castVFX != null)
             SpawnVFX(ability.castVFX, transform.position + Vector3.up * 1f, transform.rotation);
