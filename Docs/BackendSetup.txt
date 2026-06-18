@@ -1,0 +1,392 @@
+===========================================================
+  RATE OF DECAY ONLINE — UNITY 6.4 BACKEND SETUP GUIDE
+===========================================================
+Generated for Unity 6.4 (URP). All paths are relative to Assets/.
+
+-----------------------------------------------------------
+PART 1 — COMBAT SYSTEMS
+-----------------------------------------------------------
+
+1.1  Health.cs  (Combat/Scripts/Health.cs)
+  Place on: every Player prefab, every Enemy prefab, every
+            destructible object.
+  Inspector settings:
+    • maxHealth       — 100 for players, varies per enemy
+    • isPlayer        — tick for all 5 player characters
+                        (goes DOWNED instead of dying)
+    • isRobotic       — tick for robotic enemies
+                        (Defibrillator deals 60 extra dmg)
+
+1.2  StatusEffectManager.cs  (Combat/Scripts/StatusEffectManager.cs)
+  Place on: same GameObjects as Health.cs.
+  No inspector setup needed — all code-driven.
+
+1.3  EnemyAI.cs  (Combat/Scripts/EnemyAI.cs)
+  Place on: every Enemy prefab.
+  Inspector settings:
+    • moveSpeed  = 3 (fast enemy) / 1.5 (slow)
+    • aggroRange = 15
+    • isElite    — tick for boss/elite enemies
+                   (affects BountySystem CDR: 5s vs 2s)
+    • isRobotic  — tick for robotic enemies
+  Needs: NavMeshAgent OR Rigidbody on same GO.
+  How it works: auto-finds nearest Player on Start.
+    ThreatProtocol passive can call SetAggroTarget() to
+    redirect all nearby enemies to the Guardian.
+
+1.4  DeployableManager.cs  (Combat/Scripts/DeployableManager.cs)
+  Place on: a persistent scene-root GameObject called
+            "GameManagers" (DontDestroyOnLoad).
+  This is a singleton — only ONE in the scene.
+  No inspector setup. Used by:
+    • ShockMineBehaviour
+    • RestorationBeacon
+    • BastionNode
+    • PhaseRelayDeployable
+    • ShadowRelayDeployable
+    • TurretController (output multiplier)
+    • AbilityCaster (SpawnDeployableAt helper)
+
+1.5  SnapshotSystem.cs  (Combat/Scripts/SnapshotSystem.cs)
+  Place on: same "GameManagers" object.
+  Singleton. AbilityCaster calls Track() on Start for each
+  player. System Rollback calls Rollback(5f).
+
+
+-----------------------------------------------------------
+PART 2 — PLAYER PREFAB SETUP
+-----------------------------------------------------------
+
+Create one prefab per class. All share this component stack:
+
+  • PlayerMovement.cs
+  • Health.cs            (isPlayer = true)
+  • StatusEffectManager.cs
+  • AbilityCaster.cs
+  • CastAnimator.cs
+  • LineRenderer         (required by Tether handlers)
+  • Rigidbody            (isKinematic for non-physics, or
+                          not kinematic for dash physics)
+
+Then add the CLASS-SPECIFIC components below.
+
+──────────────────────────────────────────────────────────
+  ENGINEER  (3-deployable limit, Overengineered passive)
+──────────────────────────────────────────────────────────
+  Add: PassiveOverengineered.cs
+       (scans deployables within 12u every 4s, adds stacks)
+
+  AbilityCaster inspector — Deployable Prefabs:
+    • Shock Mine Prefab     → ShockMine.prefab
+                              (ShockMineBehaviour, SphereCollider trigger)
+    • Shock Mine VFX        → assign:
+        castVFX    = ElectricalSparks.prefab (brbmuffins Technologies)
+        hitVFX     = SmallExplosion.prefab   (brbmuffins Technologies)
+    No special handlers needed. Turret prefab wired in
+    spawnTurret abilities as before.
+
+  ClassAbilityPool: set className = "Engineer"
+    (gives 3-deployable limit in DeployableManager)
+
+──────────────────────────────────────────────────────────
+  GUARDIAN  (Threat aggro, Breach Slam, Siege Mode, Iron Tether)
+──────────────────────────────────────────────────────────
+  Add: PassiveThreatProtocol.cs
+       DashHandler.cs
+       KineticReversalHandler.cs
+       SiegeModeHandler.cs
+       IronTetherHandler.cs       (needs LineRenderer)
+
+  AbilityCaster inspector — Handler References:
+    • kineticReversalHandler  → drag KineticReversalHandler
+    • siegeModeHandler        → drag SiegeModeHandler
+    • dashHandler             → drag DashHandler
+    • ironTetherHandler       → drag IronTetherHandler
+
+  VFX assignments:
+    KineticReversalHandler:
+      absorbVFX  = Shield buff.prefab   (Dark Arts, tint blue)
+      releaseVFX = EnergyExplosion.prefab (Technologies)
+    SiegeModeHandler:
+      anchorVFX  = Steam.prefab         (Technologies)
+      auraVFX    = Shield buff.prefab   (Dark Arts)
+    IronTetherHandler:
+      anchorVFX  = Leaves shield.prefab (Dark Arts, tint blue/grey)
+    DashHandler:
+      breachSlamVFX = EarthShatter.prefab + SparksEffect.prefab
+      phaseShiftDepartVFX = Dissolve.prefab (Technologies)
+      phaseShiftArrivVFX  = Plazma sphere.prefab (Technologies)
+
+  Deployable Prefab:
+    Bastion Node Prefab → BastionNode.prefab
+      (BastionNode.cs, SphereCollider trigger,
+       shieldVFX = Shield buff.prefab tint blue)
+
+──────────────────────────────────────────────────────────
+  PHASER  (Phase Charge passive, Phase Shift dash,
+            Singularity / Event Horizon, Arc Lance)
+──────────────────────────────────────────────────────────
+  Add: PassivePhaseCharge.cs
+       DashHandler.cs  (for Phase Shift)
+
+  AbilityCaster inspector:
+    • dashHandler       → drag DashHandler
+
+  Deployable Prefabs:
+    • singularityPrefab   → Singularity.prefab
+        (SingularityBehaviour.cs, pullRadius=8, pullForce=12,
+         VFX: Death magic circle.prefab + PlasmaExplosionEffect.prefab)
+    • eventHorizonPrefab  → EventHorizon.prefab
+        (Same SingularityBehaviour, applyExposed=true,
+         larger radius — configure in prefab)
+    • phaseRelayPrefab    → PhaseRelay.prefab
+        (PhaseRelayDeployable.cs,
+         VFX: Magic buff.prefab tint purple)
+
+  Phase Charge notes:
+    PassivePhaseCharge is auto-found by AbilityCaster in Awake.
+    After 6 ability casts (Phase Shift NOT counted),
+    the next damage ability fires at ×1.4 damage.
+    No inspector setup needed.
+
+──────────────────────────────────────────────────────────
+  MEDIC  (Triage Loop passive, Transfer Protocol,
+           Nanite Swarm, Defibrillator, Adaptive Shield,
+           Purge Protocol, System Rollback, Restoration Beacon)
+──────────────────────────────────────────────────────────
+  Add: PassiveTriageLoop.cs
+       TransferProtocolHandler.cs  (needs LineRenderer)
+
+  AbilityCaster inspector:
+    • transferProtocolHandler → drag TransferProtocolHandler
+
+  VFX:
+    TransferProtocolHandler:
+      tetherOrbVFX = Glowing orbs.prefab (Dark Arts, tint green)
+
+  Deployable Prefabs:
+    • naniteSwarmPrefab  → NaniteSwarm.prefab
+        (NaniteSwarmBehaviour.cs, moves to target ally,
+         VFX: Healing buff.prefab + SparksEffect.prefab tint green)
+    • beaconPrefab       → RestorationBeacon.prefab
+        (RestorationBeacon.cs, pulses every 3s heals 8u radius,
+         VFX: Magic circle.prefab + Healing buff.prefab)
+
+  Triage Loop notes:
+    Call PassiveTriageLoop.HookAllAllies() after all players
+    spawn (e.g. in a GameManager.Start after network ready).
+    It subscribes to every Player-tagged Health's onHealApplied.
+    Self-heal = 8% of each ally heal event.
+
+──────────────────────────────────────────────────────────
+  WRAITH  (Bounty System passive, Phase Cloak, Null Field,
+            Collapse, Shadow Relay)
+──────────────────────────────────────────────────────────
+  Add: PassiveBountySystem.cs
+       StealthHandler.cs
+
+  AbilityCaster inspector:
+    • stealthHandler → drag StealthHandler
+
+  VFX:
+    StealthHandler:
+      cloakFX  = DissolveSolidHorizontal.prefab (Technologies)
+      breakFX  = DissolveSolidHorizontal.prefab (reversed)
+
+  Deployable Prefabs:
+    • nullFieldPrefab     → NullField.prefab
+        (NullFieldZone.cs, SphereCollider trigger,
+         VFX: GroundFog.prefab tint purple)
+    • shadowRelayPrefab   → ShadowRelay.prefab
+        (ShadowRelayDeployable.cs,
+         VFX: GroundFog.prefab dark)
+
+  Bounty System notes:
+    For each new enemy, call:
+      passiveBountySystem.HookEnemy(enemyGameObject)
+    Best place: EnemySpawner.OnEnemySpawned or
+                EnemyAI.Start (find Wraith player and call it).
+
+
+-----------------------------------------------------------
+PART 3 — ABILITY PREFABS TO CREATE
+-----------------------------------------------------------
+
+Each prefab lives in Assets/Abilities/Prefabs/.
+
+  ShockMine.prefab
+    Components: ShockMineBehaviour, SphereCollider (trigger,
+                radius=0.4 for arming), Rigidbody (isKinematic)
+    Child VFX: ElectricalSparks.prefab as child (looping)
+    On detonation: spawns SmallExplosion.prefab at self pos
+
+  NaniteSwarm.prefab
+    Components: NaniteSwarmBehaviour, Rigidbody (gravity=false)
+    Child VFX: Healing buff.prefab (trail, tint green)
+
+  Singularity.prefab  /  EventHorizon.prefab
+    Components: SingularityBehaviour
+    Child VFX: Death magic circle.prefab (idle pull phase)
+    On burst:  instantiates PlasmaExplosionEffect.prefab
+
+  LastBastion.prefab
+    Components: LastBastionWall (spawns Mana wall.prefab child),
+                BoxCollider (trigger), Rigidbody (isKinematic)
+
+  NullField.prefab
+    Components: NullFieldZone, SphereCollider (trigger, radius=5)
+    Child VFX: GroundFog.prefab (tint purple, looping)
+    Self-destroys after 5s
+
+  RestorationBeacon.prefab
+    Components: RestorationBeacon
+    Child VFX: Magic circle.prefab (idle pulse aura)
+
+  BastionNode.prefab
+    Components: BastionNode, SphereCollider (trigger, radius=3)
+    Child VFX: Shield buff.prefab (tint blue)
+
+  PhaseRelay.prefab
+    Components: PhaseRelayDeployable
+    Child VFX: Magic buff.prefab (tint purple, looping)
+
+  ShadowRelay.prefab
+    Components: ShadowRelayDeployable
+    Child VFX: GroundFog.prefab (dark)
+
+
+-----------------------------------------------------------
+PART 4 — ENEMY PREFAB SETUP
+-----------------------------------------------------------
+
+Standard enemy:
+  • MeshRenderer / Animator
+  • Rigidbody (not isKinematic — EnemyAI moves it)
+  • CapsuleCollider (tag = "Enemy")
+  • Health.cs          (isPlayer=false)
+  • StatusEffectManager.cs
+  • EnemyAI.cs
+
+Robotic enemy (Defibrillator bonus dmg):
+  Same as above + set Health.isRobotic = true
+
+Elite enemy (Bounty System: 5s CDR on kill):
+  Same as above + set EnemyAI.isElite = true
+
+
+-----------------------------------------------------------
+PART 5 — TAGS & LAYERS
+-----------------------------------------------------------
+
+Required tags (Project Settings > Tags and Layers):
+  "Player"   — all 5 player characters
+  "Enemy"    — all enemies
+  "Deployed" — optional, for deployable tracking
+
+
+-----------------------------------------------------------
+PART 6 — SCENE HIERARCHY
+-----------------------------------------------------------
+
+Recommended scene root structure:
+
+  GameManagers/
+    ├─ DeployableManager    (DeployableManager.cs)
+    └─ SnapshotSystem       (SnapshotSystem.cs)
+
+  Players/
+    ├─ Engineer_Player      (all Engineer components)
+    ├─ Guardian_Player      (...)
+    ├─ Phaser_Player
+    ├─ Medic_Player
+    └─ Wraith_Player
+
+  Enemies/
+    └─ (spawned at runtime)
+
+  Level/
+    ├─ Terrain
+    ├─ Props
+    └─ NavMesh (bake for EnemyAI pathfinding)
+
+
+-----------------------------------------------------------
+PART 7 — HOOK CALL ORDER / INITIALIZATION
+-----------------------------------------------------------
+
+In your GameManager.Start() (or NetworkManager equivalent):
+
+  1. Instantiate players
+  2. For each player call:
+       SnapshotSystem.Instance.Track(playerGO)
+  3. After all players exist:
+       FindObjectOfType<PassiveTriageLoop>()?.HookAllAllies()
+  4. For each enemy spawn (in spawner script):
+       FindObjectOfType<PassiveBountySystem>()?.HookEnemy(enemyGO)
+
+
+-----------------------------------------------------------
+PART 8 — VFX ASSET REFERENCE
+-----------------------------------------------------------
+
+brbmuffins Technologies Particle Pack
+  Path: Assets/brbmuffins Technologies Particle Pack/
+  Key prefabs used:
+    SmallExplosion.prefab        → Shock Mine blast
+    ElectricalSparks.prefab      → Shock Mine idle / Arc Lance
+    EnergyExplosion.prefab       → Kinetic Reversal release
+    SparksEffect.prefab          → Breach Slam, Nanite Swarm
+    EarthShatter.prefab          → Breach Slam ground hit
+    Steam.prefab                 → Siege Mode anchor
+    PlasmaExplosionEffect.prefab → Singularity burst
+    Dissolve.prefab              → Phase Shift depart
+    DissolveSolidHorizontal.prefab → Phase Cloak enter/exit
+    Plazma sphere.prefab         → Phase Shift arrive
+    GroundFog.prefab             → Null Field, Shadow Relay
+
+brbmuffins Dark Arts Fantasy Pack
+  Path: Assets/brbmuffins Dark Arts/Fantasy Pack/Prefabs/
+  Key prefabs used:
+    Healing buff.prefab          → Restoration Beacon, Nanite Swarm
+    Shield buff.prefab           → Kinetic Reversal absorb,
+                                   Siege Mode aura, Bastion Node
+    Magic circle.prefab          → Restoration Beacon idle
+    Magic buff.prefab            → Phase Relay
+    Death magic circle.prefab    → Singularity pull phase
+    Glowing orbs.prefab          → Transfer Protocol orb on ally
+    Leaves shield.prefab         → Iron Tether anchor (tint blue)
+    Mana wall.prefab             → Last Bastion wall
+
+
+-----------------------------------------------------------
+PART 9 — COMPILER / DEPENDENCY NOTES
+-----------------------------------------------------------
+
+Scripts that require other scripts on the same GameObject:
+  AbilityCaster      → Health, (optional) PassivePhaseCharge,
+                       PassiveBountySystem, CastAnimator
+  SiegeModeHandler   → Health, PlayerMovement,
+                       PassiveThreatProtocol
+  KineticReversalHandler → Health
+  TransferProtocolHandler → Health, LineRenderer
+  IronTetherHandler  → Health, StatusEffectManager, LineRenderer
+  StealthHandler     → Renderer(s) as children
+  DashHandler        → Rigidbody OR CharacterController
+  PassiveTriageLoop  → Health (self)
+  PassiveThreatProtocol → Health
+  PassivePhaseCharge  → AbilityCaster (finds via GetComponent)
+  PassiveBountySystem → (hooks external enemy Health events)
+
+Unity 6.4 API reminders:
+  • FindObjectsByType<T>(FindObjectsSortMode.None) replaces
+    FindObjectsOfType<T>() — already used throughout.
+  • Physics.OverlapSphere returns Collider[] (not Collider2D[]).
+  • rb.MovePosition requires Rigidbody.interpolation ≠ None
+    for smooth visual results.
+  • LineRenderer.material must be set (Sprites/Default used
+    as fallback in all handlers).
+
+
+===========================================================
+END OF SETUP GUIDE
+===========================================================

@@ -1,0 +1,116 @@
+Guardian New Spell Ideas
+Kinetic Reversal
+Absorb damage for 3 sec.
+Release it in cone.
+VFX
+Blue energy accumulation.
+Shockwave burst.
+⸻
+Magnetize
+Pull enemies together.
+Sets up Phaser AoE.
+VFX
+Electric arcs.
+Metal fragments.
+⸻
+Fortification Drone
+Deploy shield drone.
+Projects bubble.
+VFX
+Hex shield.
+Floating emitter.
+⸻
+Siege Mode
+Become stationary.
+Massive defense.
+Massive threat. Is threat even needed? 
+VFX
+Anchors deploy into ground.
+⸻
+Medic New Spell Ideas
+Nanite Swarm
+Cloud moves toward ally.
+Heals allies.
+Damages enemies.
+VFX
+Green particle flock.
+⸻
+Defibrillator
+Revive.
+Or massive damage to robotic enemies.
+VFX
+Lightning pulse.
+⸻
+Adaptive Shield
+Shield grows stronger as target takes damage.
+VFX
+Layered hex shield.
+⸻
+Transfer Protocol
+Take ally damage.
+Redirect to yourself.
+VFX
+Green energy tether.
+⸻
+Phaser New Spell Ideas
+Singularity
+Creates mini black hole.
+Pulls enemies.
+VFX
+Purple vortex.
+Distortion shader.
+⸻
+Arc Lance
+Chain attack.
+Jumps between enemies.
+VFX
+Purple lightning.
+⸻
+Quantum Echo
+Creates clone.
+Repeats next attack.
+VFX
+Afterimage ghost.
+⸻
+Collapse
+Consume all active phase effects.
+Massive burst.
+VFX
+Reality shatter.
+Fractal particles.
+⸻
+Ultimate Abilities
+Every class gets one? 
+⸻
+Guardian
+Last Bastion
+Plants shield.
+Entire team hides behind it.
+Boss mechanics blocked.
+VFX
+Huge wall.
+Blue holograms.
+⸻
+Medic
+System Rollback
+Rewind team 5 seconds.
+Restore HP.
+Restore Stability.
+Remove Decay.
+VFX
+
+Green timeline effect.
+Reverse particles.
+⸻
+Phaser
+Event Horizon
+Massive singularity.
+Pulls enemies.
+Creates exposed weakpoints.
+VFX
+
+Black hole.
+Purple lens distortion.
+⸻
+
+Environmental Combat? Kill a node for a power up or deploy another drone or something

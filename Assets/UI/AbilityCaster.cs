@@ -36,9 +36,27 @@ public class AbilityDef
     public GameObject castVFX;
     public GameObject hitVFX;
 
-    [Header("Shield (Magic Shield ability)")]
-    public float shieldAbsorb = 0f;
+    [Header("Shield")]
+    public float shieldAbsorb   = 0f;
     public float shieldDuration = 0f;
+
+    [Header("Heal")]
+    public float healAmount = 0f;          // Field Repair single-target heal
+
+    [Header("Timed Effects")]
+    public float activeDuration = 0f;      // Phase Cloak, Siege Mode, Iron Tether, Transfer Protocol
+
+    [Header("Chain Lightning")]
+    public int   chainTargets       = 0;   // Arc Lance: 4
+    public float chainDamageFalloff = 5f;  // damage lost per jump
+
+    [Header("Pull / Zone")]
+    public float pullRadius   = 0f;        // Magnetize, Singularity, Event Horizon
+    public float pullDuration = 0f;        // Singularity pull phase
+
+    [Header("Deployable Scene Prefab")]
+    // The runtime object spawned in the world by this ability (mine, wall, zone, etc.)
+    public GameObject deployablePrefab;
 }
 
 public class AbilityCaster : MonoBehaviour
@@ -48,20 +66,113 @@ public class AbilityCaster : MonoBehaviour
     public CastAnimator castAnimator;
     public float castDelay = 0.3f;
 
+    [Header("Class")]
+    [Tooltip("Assign the chosen class's ClassAbilityPool asset before play starts.")]
+    public ClassAbilityPool classPool;
+
+    [Header("Ability Handlers — assign if your class uses these abilities")]
+    public KineticReversalHandler kineticReversalHandler;
+    public SiegeModeHandler       siegeModeHandler;
+    public DashHandler            dashHandler;
+    public StealthHandler         stealthHandler;
+    public TransferProtocolHandler transferProtocolHandler;
+    public IronTetherHandler      ironTetherHandler;
+
+    [Header("Deployable Prefabs — assign the matching runtime prefabs")]
+    [Tooltip("ShockMineBehaviour prefab — brbmuffins Technologies SmallExplosion as castVFX on it")]
+    public GameObject shockMinePrefab;
+    [Tooltip("NaniteSwarmBehaviour prefab — HealingBuff child VFX")]
+    public GameObject naniteSwarmPrefab;
+    [Tooltip("SingularityBehaviour prefab (Singularity ability)")]
+    public GameObject singularityPrefab;
+    [Tooltip("SingularityBehaviour prefab with applyExposed=true (Event Horizon)")]
+    public GameObject eventHorizonPrefab;
+    [Tooltip("LastBastionWall prefab — Mana wall child VFX")]
+    public GameObject lastBastionPrefab;
+    [Tooltip("NullFieldZone prefab — GroundFog child VFX")]
+    public GameObject nullFieldPrefab;
+
+    [Header("Class Deployables")]
+    [Tooltip("RestorationBeacon (Medic) or BastionNode (Guardian)")]
+    public GameObject beaconPrefab;
+    [Tooltip("PhaseRelayDeployable (Phaser)")]
+    public GameObject phaseRelayPrefab;
+    [Tooltip("ShadowRelayDeployable (Wraith)")]
+    public GameObject shadowRelayPrefab;
+
     [Header("Mouse Aim")]
     public float minimumAimDistance = 1f;
 
     [Header("Spellbook — all available spells")]
     public AbilityDef[] spellbook = new AbilityDef[]
     {
-        new AbilityDef { abilityName = "Deploy Turret",   shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 1.5f, spawnTurret = true, cooldown = 6f },
-        new AbilityDef { abilityName = "Dark Blast",      shape = AbilityShape.Cone,      category = AbilityCategory.Damage,  range = 8f, coneAngle = 60f, cooldown = 3f, chargeable = true, maxChargeTime = 1.5f, damage = 10f, maxChargeDamage = 30f, maxChargeSizeMultiplier = 1.6f, targetTag = "Enemy", chargedTint = new Color(0.4f, 0.1f, 0.8f, 0.9f) },
-        new AbilityDef { abilityName = "Healing Pulse",   shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 3f, cooldown = 5f },
-        new AbilityDef { abilityName = "Holy Beam",       shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 10f, rectWidth = 1.5f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 15f, maxChargeDamage = 50f, maxChargeSizeMultiplier = 1.8f, targetTag = "Enemy" },
-        new AbilityDef { abilityName = "Fireball",        shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 12f, indicatorSize = 2f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 20f, maxChargeDamage = 45f, maxChargeSizeMultiplier = 2f, targetTag = "Enemy", chargedTint = new Color(1f, 0.4f, 0.05f, 0.9f) },
-        new AbilityDef { abilityName = "Lightning Strike", shape = AbilityShape.Circle,   category = AbilityCategory.Damage,  range = 10f, indicatorSize = 2.5f, cooldown = 5f, damage = 35f, targetTag = "Enemy" },
-        new AbilityDef { abilityName = "Ice Nova",        shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 5f, indicatorSize = 5f, cooldown = 6f, damage = 15f, targetTag = "Enemy" },
-        new AbilityDef { abilityName = "Magic Shield",    shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 8f, shieldAbsorb = 50f, shieldDuration = 5f },
+        // ── SHARED / CROSS-CLASS (indices 0–7) ─────────────────────────────────────────
+        new AbilityDef { abilityName = "Sentinel Drop",    shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 1.5f, spawnTurret = true, cooldown = 6f },
+        new AbilityDef { abilityName = "Dark Blast",       shape = AbilityShape.Cone,      category = AbilityCategory.Damage,  range = 8f, coneAngle = 60f, cooldown = 3f, chargeable = true, maxChargeTime = 1.5f, damage = 10f, maxChargeDamage = 30f, maxChargeSizeMultiplier = 1.6f, targetTag = "Enemy", chargedTint = new Color(0.4f, 0.1f, 0.8f, 0.9f) },
+        new AbilityDef { abilityName = "Repair Wave",      shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 3f, cooldown = 5f },
+        new AbilityDef { abilityName = "Arc Cannon",       shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 10f, rectWidth = 1.5f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 15f, maxChargeDamage = 50f, maxChargeSizeMultiplier = 1.8f, targetTag = "Enemy" },
+        new AbilityDef { abilityName = "Thermal Charge",   shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 12f, indicatorSize = 2f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 20f, maxChargeDamage = 45f, maxChargeSizeMultiplier = 2f, targetTag = "Enemy", chargedTint = new Color(1f, 0.4f, 0.05f, 0.9f) },
+        new AbilityDef { abilityName = "Neural Spike",     shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 2.5f, cooldown = 5f, damage = 35f, targetTag = "Enemy" },
+        new AbilityDef { abilityName = "Stasis Wave",      shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 5f, indicatorSize = 5f, cooldown = 6f, damage = 15f, targetTag = "Enemy" },
+        new AbilityDef { abilityName = "Deflect Protocol", shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 8f, shieldAbsorb = 50f, shieldDuration = 5f },
+
+        // ── ENGINEER (indices 8–14) ─────────────────────────────────────────────────────
+        // [8]  Shock Mine — proximity burst trap; engineer and wraith
+        new AbilityDef { abilityName = "Shock Mine",       shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 8f, indicatorSize = 1f, cooldown = 5f, damage = 40f, targetTag = "Enemy" },
+        // [9]  Overdrive — team damage aura; instant self-cast
+        new AbilityDef { abilityName = "Overdrive",        shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 6f, cooldown = 12f },
+        // [10] Drone Command — redirect active Sentinel onto focus target
+        new AbilityDef { abilityName = "Drone Command",    shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 12f, indicatorSize = 1f, cooldown = 8f },
+        // [11] Field Repair — single-target direct heal + debuff cleanse
+        new AbilityDef { abilityName = "Field Repair",     shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 1f, cooldown = 6f },
+        // [12] System Overload (Engineer Ultimate) — all deployables fire at max stacks simultaneously
+        new AbilityDef { abilityName = "System Overload",  shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 45f },
+
+        // ── GUARDIAN (indices 13–19) ───────────────────────────────────────────────────
+        // [13] Kinetic Reversal — absorb damage for 3s, release as cone burst up to 60 dmg
+        new AbilityDef { abilityName = "Kinetic Reversal", shape = AbilityShape.Cone,      category = AbilityCategory.Support, range = 8f, coneAngle = 70f, cooldown = 10f, damage = 60f, targetTag = "Enemy" },
+        // [14] Magnetize — pull all enemies in radius to anchor point, no damage
+        new AbilityDef { abilityName = "Magnetize",        shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 4f, cooldown = 7f },
+        // [15] Breach Slam — charge forward 6 units, 25 dmg, stagger + 3 Threat stacks
+        new AbilityDef { abilityName = "Breach Slam",      shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 6f, rectWidth = 2f, cooldown = 6f, damage = 25f, targetTag = "Enemy" },
+        // [16] Siege Mode — stationary stance: 40% DR + 3x Threat generation for 6s
+        new AbilityDef { abilityName = "Siege Mode",       shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 14f },
+        // [17] Iron Tether — leash one enemy within 8 units for 5s; absorb 15% of their attacks on allies
+        new AbilityDef { abilityName = "Iron Tether",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 9f },
+        // [18] Last Bastion (Guardian Ultimate) — full-width hardlight wall, blocks projectiles 10s
+        new AbilityDef { abilityName = "Last Bastion",     shape = AbilityShape.Rectangle, category = AbilityCategory.Support, range = 8f, rectWidth = 8f, cooldown = 50f },
+
+        // ── PHASER (indices 19–24) ─────────────────────────────────────────────────────
+        // [19] Phase Shift — teleport up to 10 units in aimed direction
+        new AbilityDef { abilityName = "Phase Shift",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 0.5f, cooldown = 4f },
+        // [20] Singularity — pull enemies to center for 3s then 20 AoE burst
+        new AbilityDef { abilityName = "Singularity",      shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 8f, cooldown = 9f, damage = 20f, targetTag = "Enemy" },
+        // [21] Arc Lance — chain lightning, jumps up to 4 enemies (30/25/20/15 dmg)
+        new AbilityDef { abilityName = "Arc Lance",        shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 1.5f, cooldown = 7f, damage = 30f, targetTag = "Enemy" },
+        // [22] Event Horizon (Phaser Ultimate) — 12-unit pull, 3s collapse, 60 AoE + 25% exposed window
+        new AbilityDef { abilityName = "Event Horizon",    shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 14f, indicatorSize = 12f, cooldown = 50f, damage = 60f, targetTag = "Enemy" },
+
+        // ── MEDIC (indices 23–27) ──────────────────────────────────────────────────────
+        // [23] Transfer Protocol — tether ally: their incoming damage reroutes to you for 5s
+        new AbilityDef { abilityName = "Transfer Protocol",shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 9f },
+        // [24] Nanite Swarm — mobile heal cloud, drifts toward ally, chips enemies it passes through
+        new AbilityDef { abilityName = "Nanite Swarm",     shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 10f, indicatorSize = 2f, cooldown = 7f },
+        // [25] Defibrillator — revive downed ally at 30% HP OR 60 burst dmg to robotic enemies
+        new AbilityDef { abilityName = "Defibrillator",    shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 1.5f, cooldown = 14f, damage = 60f, targetTag = "Enemy" },
+        // [26] Adaptive Shield — shield on ally that scales 20→80 absorb as they take hits over 8s
+        new AbilityDef { abilityName = "Adaptive Shield",  shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 10f, shieldAbsorb = 20f, shieldDuration = 8f },
+        // [27] Purge Protocol — instant cleanse all debuffs from target ally
+        new AbilityDef { abilityName = "Purge Protocol",   shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 7f },
+        // [28] System Rollback (Medic Ultimate) — rewind entire team 5 seconds: HP, position, debuffs
+        new AbilityDef { abilityName = "System Rollback",  shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 0f, indicatorSize = 1f, cooldown = 60f },
+
+        // ── WRAITH (indices 29–31) ─────────────────────────────────────────────────────
+        // [29] Phase Cloak — full invisibility for 4s; breaking with Neural Spike = +50% damage
+        new AbilityDef { abilityName = "Phase Cloak",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 10f },
+        // [30] Null Field — suppress all enemy abilities in radius for 5s
+        new AbilityDef { abilityName = "Null Field",       shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 5f, cooldown = 12f },
+        // [31] Collapse (Wraith Ultimate) — consume all active debuffs on enemies in range: 20 dmg per stack
+        new AbilityDef { abilityName = "Collapse",         shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 8f, indicatorSize = 8f, cooldown = 40f, damage = 20f, targetTag = "Enemy" },
     };
 
     [Header("Equipped slots (indices into spellbook)")]
@@ -80,11 +191,25 @@ public class AbilityCaster : MonoBehaviour
     private GameObject activeShieldVFX;
     private float shieldVFXTimer = 0f;
 
+    // ── Cached component refs ──────────────────────────────────────
+    private ClassPassive         _passive;
+    private PassivePhaseCharge   _phaseCharge;
+    private PassiveBountySystem  _bounty;
+    private Health               _health;
+
     public int HeldAbilityIndex => heldAbilityIndex;
 
     void Awake()
     {
         SyncEquippedFromSpellbook();
+
+        _passive     = GetComponent<ClassPassive>();
+        _phaseCharge = GetComponent<PassivePhaseCharge>();
+        _bounty      = GetComponent<PassiveBountySystem>();
+        _health      = GetComponent<Health>();
+
+        // Register this player with SnapshotSystem
+        SnapshotSystem.Instance?.Track(gameObject);
     }
 
     void Start()
@@ -107,6 +232,7 @@ public class AbilityCaster : MonoBehaviour
     {
         if (slot < 0 || slot >= 4) return;
         if (spellbookIndex < 0 || spellbookIndex >= spellbook.Length) return;
+        if (!IsAllowedByClass(spellbookIndex)) return;
 
         if (heldAbilityIndex == slot)
             CancelAim();
@@ -114,6 +240,28 @@ public class AbilityCaster : MonoBehaviour
         equippedIndices[slot] = spellbookIndex;
         _equippedAbilities[slot] = spellbook[spellbookIndex];
         cooldownTimers[slot] = 0f;
+    }
+
+    // Returns true if this spellbook index is permitted for the current class.
+    // Always returns true when no classPool is assigned (editor / testing).
+    public bool IsAllowedByClass(int spellbookIndex)
+    {
+        if (classPool == null) return true;
+        foreach (int idx in classPool.availableIndices)
+            if (idx == spellbookIndex) return true;
+        return false;
+    }
+
+    // Apply a class pool and reset to its default loadout.
+    public void ApplyClass(ClassAbilityPool pool)
+    {
+        classPool = pool;
+        if (pool == null) return;
+
+        for (int i = 0; i < 4; i++)
+            equippedIndices[i] = (i < pool.defaultEquipped.Length) ? pool.defaultEquipped[i] : -1;
+
+        SyncEquippedFromSpellbook();
     }
 
     public bool IsEquipped(int spellbookIndex, out int slot)
@@ -386,9 +534,24 @@ public class AbilityCaster : MonoBehaviour
         Destroy(fx, 4f);
     }
 
+    // Called by BountySystem passive when a kill is registered.
+    public void ReduceAllCooldowns(float seconds)
+    {
+        for (int i = 0; i < cooldownTimers.Length; i++)
+            cooldownTimers[i] = Mathf.Max(0f, cooldownTimers[i] - seconds);
+    }
+
     void FinalizeCast(AbilityDef ability, GameObject indicator, float aimTime)
     {
         Debug.Log("Cast ability: " + ability.abilityName);
+
+        // Notify passive (Phase Charge meter, etc.)
+        _passive?.OnAbilityCast(ability);
+
+        // Phase Charge: scale next damage ability
+        float damageMultiplier = _phaseCharge != null
+            ? _phaseCharge.ConsumeBonusIfCharged(ability)
+            : 1f;
 
         castAnimator?.PlayCast(ability.category);
 
@@ -398,14 +561,14 @@ public class AbilityCaster : MonoBehaviour
         if (ability.shape == AbilityShape.Rectangle && ability.damage > 0f && indicator != null)
         {
             float chargeFraction = GetChargeFraction(ability, aimTime);
-            float damage = Mathf.Lerp(ability.damage, ability.maxChargeDamage, chargeFraction);
+            float damage = Mathf.Lerp(ability.damage, ability.maxChargeDamage, chargeFraction) * damageMultiplier;
             ApplyRectangleDamage(ability, indicator, damage);
         }
 
         if (ability.shape == AbilityShape.Cone && ability.damage > 0f && indicator != null)
         {
             float chargeFraction = GetChargeFraction(ability, aimTime);
-            float damage = Mathf.Lerp(ability.damage, ability.maxChargeDamage, chargeFraction);
+            float damage = Mathf.Lerp(ability.damage, ability.maxChargeDamage, chargeFraction) * damageMultiplier;
             float coneRange = ability.range * indicator.transform.localScale.x;
             ApplyConeDamage(ability, indicator, damage, coneRange);
 
@@ -415,7 +578,7 @@ public class AbilityCaster : MonoBehaviour
 
         if (ability.shape == AbilityShape.Circle && ability.damage > 0f)
         {
-            ApplyCircleDamage(ability, indicator);
+            ApplyCircleDamage(ability, indicator, damageMultiplier);
         }
 
         if (ability.shieldAbsorb > 0f)
@@ -424,11 +587,487 @@ public class AbilityCaster : MonoBehaviour
         if (ability.spawnTurret && indicator != null)
             SpawnTurret(ability, indicator.transform.position);
 
+        // ── Route to ability-specific behaviours ──────────────────
+        Vector3 castPoint = indicator != null ? indicator.transform.position : transform.position;
+        DispatchAbility(ability, castPoint, damageMultiplier);
+
         if (indicator != null)
             Destroy(indicator, castDelay);
     }
 
-    void ApplyCircleDamage(AbilityDef ability, GameObject indicator)
+    // ── Ability dispatch ─────────────────────────────────────────
+    void DispatchAbility(AbilityDef ability, Vector3 castPoint, float dmgMult)
+    {
+        switch (ability.abilityName)
+        {
+            // ─ Engineer ──────────────────────────────────────────
+            case "Shock Mine":
+                SpawnDeployableAt(shockMinePrefab ?? ability.deployablePrefab, castPoint,
+                    go => { var m = go.GetComponent<ShockMineBehaviour>(); if (m) m.owner = gameObject; });
+                break;
+
+            case "Overdrive":
+                CastOverdrive(ability);
+                break;
+
+            case "Drone Command":
+                CastDroneCommand(castPoint);
+                break;
+
+            case "Field Repair":
+                CastFieldRepair(ability, castPoint);
+                break;
+
+            case "System Overload":
+                CastSystemOverload();
+                break;
+
+            // ─ Guardian ──────────────────────────────────────────
+            case "Kinetic Reversal":
+                kineticReversalHandler?.Activate();
+                break;
+
+            case "Magnetize":
+                CastMagnetize(ability, castPoint);
+                break;
+
+            case "Breach Slam":
+                dashHandler?.BreachSlam(GetComponent<PassiveThreatProtocol>());
+                break;
+
+            case "Siege Mode":
+                siegeModeHandler?.Activate();
+                break;
+
+            case "Iron Tether":
+                CastIronTether(castPoint);
+                break;
+
+            case "Last Bastion":
+                SpawnDeployableAt(lastBastionPrefab ?? ability.deployablePrefab, castPoint, null, transform.rotation);
+                break;
+
+            // ─ Phaser ────────────────────────────────────────────
+            case "Phase Shift":
+                dashHandler?.PhaseShift(castPoint);
+                break;
+
+            case "Singularity":
+                CastSingularity(ability, castPoint, false, dmgMult);
+                break;
+
+            case "Arc Lance":
+                CastArcLance(ability, castPoint, dmgMult);
+                break;
+
+            case "Event Horizon":
+                CastSingularity(ability, castPoint, true, dmgMult);
+                break;
+
+            // ─ Medic ─────────────────────────────────────────────
+            case "Transfer Protocol":
+                CastTransferProtocol(castPoint);
+                break;
+
+            case "Nanite Swarm":
+                CastNaniteSwarm(ability, castPoint);
+                break;
+
+            case "Defibrillator":
+                CastDefibrillator(ability, castPoint, dmgMult);
+                break;
+
+            case "Adaptive Shield":
+                CastAdaptiveShield(castPoint);
+                break;
+
+            case "Purge Protocol":
+                CastPurgeProtocol(castPoint);
+                break;
+
+            case "System Rollback":
+                SnapshotSystem.Instance?.Rollback(5f);
+                break;
+
+            // ─ Wraith ────────────────────────────────────────────
+            case "Phase Cloak":
+            {
+                float dur = ability.activeDuration > 0f ? ability.activeDuration : 4f;
+                stealthHandler?.BeginCloak(dur);
+                break;
+            }
+
+            case "Null Field":
+                SpawnDeployableAt(nullFieldPrefab ?? ability.deployablePrefab, castPoint, null);
+                break;
+
+            case "Collapse":
+                CastCollapse(ability, castPoint, dmgMult);
+                break;
+        }
+    }
+
+    // ── New ability methods ──────────────────────────────────────
+
+    void CastOverdrive(AbilityDef ability)
+    {
+        float duration = ability.activeDuration > 0f ? ability.activeDuration : 4f;
+        // Find all nearby players and apply a temporary +25% outgoing damage flag via a coroutine.
+        // Implemented as a simple component-based buff — future expansion point.
+        Collider[] hits = Physics.OverlapSphere(transform.position, 8f);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Player")) continue;
+            // Spawn buff VFX on each ally
+            if (ability.castVFX != null)
+                SpawnVFX(ability.castVFX, col.transform.position + Vector3.up, Quaternion.identity);
+        }
+        // NOTE: actual damage multiplier buff requires a BuffSystem component (future work).
+        // For now this is a placeholder that fires the VFX and communicates to the team.
+    }
+
+    void CastDroneCommand(Vector3 castPoint)
+    {
+        // Find the nearest enemy to the cast point and redirect all active turrets to it.
+        Collider[] hits = Physics.OverlapSphere(castPoint, 2f);
+        Transform focusTarget = null;
+        float best = Mathf.Infinity;
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Enemy")) continue;
+            float d = Vector3.Distance(castPoint, col.transform.position);
+            if (d < best) { best = d; focusTarget = col.transform; }
+        }
+
+        if (focusTarget == null) return;
+
+        // Find this player's deployed turrets and set their focus target.
+        if (DeployableManager.Instance != null)
+        {
+            foreach (var dep in DeployableManager.Instance.GetAll(gameObject.GetInstanceID()))
+            {
+                if (dep == null) continue;
+                var tc = dep.GetComponent<TurretController>();
+                if (tc != null) tc.SetFocusTarget(focusTarget, 6f);
+            }
+        }
+    }
+
+    void CastFieldRepair(AbilityDef ability, Vector3 castPoint)
+    {
+        float healAmt = ability.healAmount > 0f ? ability.healAmount : 40f;
+        // Find nearest ally at cast point
+        Collider[] hits = Physics.OverlapSphere(castPoint, 1.5f);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Player")) continue;
+            Health h = col.GetComponent<Health>();
+            if (h == null || h == _health) continue;
+            h.Heal(healAmt);
+            col.GetComponent<StatusEffectManager>()?.RemoveAll();   // clears 1 debuff
+            if (ability.hitVFX != null)
+                SpawnVFX(ability.hitVFX, col.transform.position + Vector3.up, Quaternion.identity);
+            break;
+        }
+    }
+
+    void CastSystemOverload()
+    {
+        if (DeployableManager.Instance == null) return;
+        DeployableManager.Instance.SystemOverload(gameObject.GetInstanceID(), 8f);
+
+        // Force all turrets to rapid-fire mode for 8 seconds
+        foreach (var dep in DeployableManager.Instance.GetAll(gameObject.GetInstanceID()))
+        {
+            if (dep == null) continue;
+            var tc = dep.GetComponent<TurretController>();
+            if (tc != null) tc.SetOverloadMode(8f);
+        }
+    }
+
+    void CastMagnetize(AbilityDef ability, Vector3 castPoint)
+    {
+        float radius   = ability.pullRadius > 0f ? ability.pullRadius : 4f;
+        float duration = ability.pullDuration > 0f ? ability.pullDuration : 2f;
+
+        Collider[] hits = Physics.OverlapSphere(castPoint, radius);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag(ability.targetTag)) continue;
+            StartCoroutine(PullToPoint(col, castPoint, duration));
+        }
+
+        if (ability.castVFX != null)
+            SpawnVFX(ability.castVFX, castPoint, Quaternion.identity);
+    }
+
+    System.Collections.IEnumerator PullToPoint(Collider col, Vector3 center, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration && col != null)
+        {
+            elapsed += Time.fixedDeltaTime;
+            Rigidbody rb = col.GetComponent<Rigidbody>();
+            Vector3 dir = (center - col.transform.position).normalized;
+            if (rb != null) rb.AddForce(dir * 14f, ForceMode.Acceleration);
+            else            col.transform.position += dir * 5f * Time.fixedDeltaTime;
+            yield return new WaitForFixedUpdate();
+        }
+    }
+
+    void CastIronTether(Vector3 castPoint)
+    {
+        if (ironTetherHandler == null) return;
+        // Find nearest enemy near the cast point
+        Collider[] hits = Physics.OverlapSphere(castPoint, 2f);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Enemy")) continue;
+            ironTetherHandler.Activate(col.gameObject);
+            return;
+        }
+    }
+
+    void CastSingularity(AbilityDef ability, Vector3 castPoint, bool isEventHorizon, float dmgMult)
+    {
+        GameObject prefab = isEventHorizon
+            ? (eventHorizonPrefab ?? ability.deployablePrefab)
+            : (singularityPrefab  ?? ability.deployablePrefab);
+
+        if (prefab == null) return;
+
+        SpawnDeployableAt(prefab, castPoint, go =>
+        {
+            var s = go.GetComponent<SingularityBehaviour>();
+            if (s == null) return;
+            s.burstDamage     *= dmgMult;
+            s.applyExposed     = isEventHorizon;
+            s.owner            = gameObject;
+            // Check for Phase Relay bonus
+            float bonus = PhaseRelayDeployable.GetBonusNearPoint(castPoint, gameObject.GetInstanceID());
+            s.pullDurationBonus = bonus;
+        });
+    }
+
+    void CastArcLance(AbilityDef ability, Vector3 startPoint, float dmgMult)
+    {
+        int   maxChain   = ability.chainTargets > 0 ? ability.chainTargets : 4;
+        float dmg        = ability.damage * dmgMult;
+        float falloff    = ability.chainDamageFalloff;
+        float jumpRadius = 6f;
+        string tag       = ability.targetTag;
+
+        Transform last = null;
+        Collider   nearest = FindNearestInRadius(startPoint, jumpRadius, tag, null);
+
+        for (int i = 0; i < maxChain && nearest != null; i++)
+        {
+            Health h = nearest.GetComponent<Health>();
+            h?.TakeDamage(Mathf.Max(1f, dmg), gameObject);
+
+            if (ability.hitVFX != null)
+                SpawnVFX(ability.hitVFX, nearest.transform.position + Vector3.up * 0.5f, Quaternion.identity);
+
+            // Draw lightning between jumps (quick LineRenderer)
+            Vector3 from = last != null ? last.position + Vector3.up * 0.8f
+                                        : startPoint    + Vector3.up * 0.8f;
+            DrawLightningLine(from, nearest.transform.position + Vector3.up * 0.8f, 0.15f);
+
+            last  = nearest.transform;
+            dmg   = Mathf.Max(1f, dmg - falloff);
+            nearest = FindNearestInRadius(last.position, jumpRadius, tag, last);
+        }
+    }
+
+    Collider FindNearestInRadius(Vector3 center, float radius, string tag, Transform exclude)
+    {
+        Collider[] hits = Physics.OverlapSphere(center, radius);
+        float best = Mathf.Infinity;
+        Collider found = null;
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag(tag)) continue;
+            if (exclude != null && col.transform == exclude) continue;
+            float d = Vector3.Distance(center, col.transform.position);
+            if (d < best) { best = d; found = col; }
+        }
+        return found;
+    }
+
+    void DrawLightningLine(Vector3 from, Vector3 to, float duration)
+    {
+        GameObject go   = new GameObject("ArcLance");
+        LineRenderer lr = go.AddComponent<LineRenderer>();
+        lr.positionCount = 8;
+        lr.startWidth    = 0.05f;
+        lr.endWidth      = 0.01f;
+        lr.material      = new Material(Shader.Find("Sprites/Default"));
+        lr.startColor    = new Color(0.8f, 0.4f, 1f, 0.9f);
+        lr.endColor      = new Color(0.5f, 0.2f, 1f, 0.3f);
+
+        for (int i = 0; i < 8; i++)
+        {
+            float t   = i / 7f;
+            Vector3 p = Vector3.Lerp(from, to, t);
+            if (i > 0 && i < 7)
+            {
+                Vector3 perp = Vector3.Cross((to - from).normalized, Vector3.up);
+                p += perp * (Random.Range(-0.3f, 0.3f));
+                p += Vector3.up * Random.Range(-0.15f, 0.15f);
+            }
+            lr.SetPosition(i, p);
+        }
+
+        Destroy(go, duration);
+    }
+
+    void CastTransferProtocol(Vector3 castPoint)
+    {
+        if (transferProtocolHandler == null) return;
+        Collider[] hits = Physics.OverlapSphere(castPoint, 1.5f);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Player")) continue;
+            if (col.gameObject == gameObject) continue;
+            transferProtocolHandler.Activate(col.gameObject);
+            return;
+        }
+    }
+
+    void CastNaniteSwarm(AbilityDef ability, Vector3 castPoint)
+    {
+        GameObject prefab = naniteSwarmPrefab ?? ability.deployablePrefab;
+        if (prefab == null) return;
+
+        // Find nearest ally to target
+        Collider[] hits = Physics.OverlapSphere(castPoint, 3f);
+        Health targetH = null; Transform targetT = null;
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Player")) continue;
+            targetH = col.GetComponent<Health>();
+            targetT = col.transform;
+            break;
+        }
+        if (targetH == null) { targetH = _health; targetT = transform; }
+
+        SpawnDeployableAt(prefab, transform.position + Vector3.up, go =>
+        {
+            var s = go.GetComponent<NaniteSwarmBehaviour>();
+            if (s == null) return;
+            s.targetHealth = targetH;
+            s.target       = targetT;
+            if (ability.healAmount > 0f) s.healAmount = ability.healAmount;
+        });
+    }
+
+    void CastDefibrillator(AbilityDef ability, Vector3 castPoint, float dmgMult)
+    {
+        // Priority 1: revive a downed ally nearby
+        Collider[] allies = Physics.OverlapSphere(castPoint, 2f);
+        foreach (var col in allies)
+        {
+            if (!col.CompareTag("Player")) continue;
+            Health h = col.GetComponent<Health>();
+            if (h != null && h.IsDowned)
+            {
+                h.Revive(0.30f);
+                if (ability.hitVFX != null)
+                    SpawnVFX(ability.hitVFX, col.transform.position + Vector3.up, Quaternion.identity);
+                return;
+            }
+        }
+
+        // Priority 2: deal burst damage to robotic enemies in range
+        Collider[] enemies = Physics.OverlapSphere(castPoint, 2f);
+        foreach (var col in enemies)
+        {
+            if (!col.CompareTag("Enemy")) continue;
+            Health h = col.GetComponent<Health>();
+            if (h == null || !h.isRobotic) continue;
+            float dmg = (ability.damage > 0f ? ability.damage : 60f) * dmgMult;
+            h.TakeDamage(dmg, gameObject);
+            if (ability.hitVFX != null)
+                SpawnVFX(ability.hitVFX, col.transform.position + Vector3.up, Quaternion.identity);
+        }
+    }
+
+    void CastAdaptiveShield(Vector3 castPoint)
+    {
+        // Apply a 20-absorb shield to nearest ally that grows as they take hits.
+        Collider[] hits = Physics.OverlapSphere(castPoint, 2f);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Player")) continue;
+            Health h = col.GetComponent<Health>();
+            if (h == null) continue;
+            h.ApplyShield(20f);
+            // Subscribe to grow shield on each hit for 8s
+            StartCoroutine(AdaptiveShieldRoutine(h, 8f));
+            return;
+        }
+    }
+
+    System.Collections.IEnumerator AdaptiveShieldRoutine(Health target, float duration)
+    {
+        float expiry = Time.time + duration;
+        void OnHit(float _) { target.GrowShield(10f); }
+        target.onDamageTaken.AddListener(OnHit);
+        while (Time.time < expiry) yield return null;
+        target.onDamageTaken.RemoveListener(OnHit);
+    }
+
+    void CastPurgeProtocol(Vector3 castPoint)
+    {
+        Collider[] hits = Physics.OverlapSphere(castPoint, 1.5f);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag("Player")) continue;
+            col.GetComponent<StatusEffectManager>()?.RemoveAll();
+            return;
+        }
+    }
+
+    void CastCollapse(AbilityDef ability, Vector3 castPoint, float dmgMult)
+    {
+        float baseDmg = ability.damage > 0f ? ability.damage : 20f;
+        float radius  = ability.indicatorSize > 0f ? ability.indicatorSize / 2f : 4f;
+
+        Collider[] hits = Physics.OverlapSphere(castPoint, radius);
+        foreach (var col in hits)
+        {
+            if (!col.CompareTag(ability.targetTag)) continue;
+            var sem = col.GetComponent<StatusEffectManager>();
+            if (sem == null) continue;
+            int stacks = sem.ConsumeDebuffStacks();
+            if (stacks > 0)
+            {
+                float dmg = baseDmg * stacks * dmgMult;
+                col.GetComponent<Health>()?.TakeDamage(dmg, gameObject);
+                if (ability.hitVFX != null)
+                    SpawnVFX(ability.hitVFX, col.transform.position + Vector3.up * 0.5f, Quaternion.identity);
+            }
+        }
+    }
+
+    // Generic helper: instantiate a deployable prefab, run optional init, register it.
+    void SpawnDeployableAt(GameObject prefab, Vector3 pos, System.Action<GameObject> init,
+                            Quaternion? rot = null)
+    {
+        if (prefab == null) return;
+        GameObject go = Instantiate(prefab, pos, rot ?? Quaternion.identity);
+        init?.Invoke(go);
+        DeployableManager.Instance?.Register(go, gameObject.GetInstanceID(),
+            classPool != null ? GetClassDeployableLimit() : 1);
+    }
+
+    int GetClassDeployableLimit()
+    {
+        if (classPool == null) return 1;
+        return classPool.className == "Engineer" ? 3 : 1;
+    }
+
+    void ApplyCircleDamage(AbilityDef ability, GameObject indicator, float damageMultiplier = 1f)
     {
         Vector3 center = indicator != null ? indicator.transform.position : transform.position;
         Collider[] hits = Physics.OverlapSphere(center, ability.indicatorSize / 2f);
@@ -440,7 +1079,7 @@ public class AbilityCaster : MonoBehaviour
             Health health = hit.GetComponent<Health>();
             if (health != null)
             {
-                health.TakeDamage(ability.damage);
+                health.TakeDamage(ability.damage * damageMultiplier);
                 SpawnVFX(ability.hitVFX, hit.transform.position + Vector3.up * 0.5f, Quaternion.identity);
             }
         }

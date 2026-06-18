@@ -1,38 +1,114 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+// Extended Health — replaces the original.
+// Backward compatible: TakeDamage / Heal / ApplyShield / currentHealth / maxHealth
+// all work identically. New features are additive.
 public class Health : MonoBehaviour
 {
+    [Header("Settings")]
     public float maxHealth = 100f;
     public float currentHealth;
+    public bool isPlayer  = false;  // players go downed instead of dying outright
+    public bool isRobotic = false;  // Defibrillator deals 60 burst dmg to robotics
 
-    public UnityEvent<float, float> onHealthChanged;
-    public UnityEvent onDeath;
+    // ── Events ────────────────────────────────────────────────────
+    public UnityEvent<float, float> onHealthChanged;    // (current, max)
+    public UnityEvent               onDeath;
+    public UnityEvent<float>        onDamageTaken;      // raw final damage (after shield, after redirect)
+    public UnityEvent<float>        onHealApplied;      // heal amount (for Triage Loop)
+    public UnityEvent<bool>         onDownedChanged;    // true = just went down, false = revived
+    public UnityEvent<GameObject>   onKilledBy;         // who dealt the killing blow (for BountySystem)
+
+    // ── Shield ────────────────────────────────────────────────────
+    private float _shieldRemaining = 0f;
+    public  bool  HasShield      => _shieldRemaining > 0f;
+    public  float ShieldRemaining => _shieldRemaining;
+
+    // ── Down State (players only) ──────────────────────────────────
+    private bool _isDowned = false;
+    public  bool IsDowned  => _isDowned;
+    public  bool IsAlive   => !_isDowned && currentHealth > 0f;
+
+    // ── Damage Redirect (Transfer Protocol) ───────────────────────
+    // When set, a fraction of incoming damage is sent to redirectTarget instead.
+    private Health _redirectTarget      = null;
+    private float  _redirectFraction    = 0f;
+    private float  _redirectExpiry      = 0f;
+
+    // ── Damage Absorption (Kinetic Reversal) ──────────────────────
+    // When active, absorbed damage accumulates instead of hitting HP.
+    private bool  _absorbing        = false;
+    private float _absorptionExpiry = 0f;
+    private float _absorbedAmount   = 0f;
+    public  float AbsorbedAmount    => _absorbedAmount;
+
+    // ── DR modifier (Siege Mode, Threat Protocol) ─────────────────
+    private float _damageReductionBonus = 0f; // 0.4 = 40% reduction
+    public  float DamageReductionBonus  => _damageReductionBonus;
 
     public float Fraction => maxHealth > 0f ? currentHealth / maxHealth : 0f;
 
-    private float shieldRemaining = 0f;
-    public bool HasShield => shieldRemaining > 0f;
-    public float ShieldRemaining => shieldRemaining;
+    // ── StatusEffect integration ───────────────────────────────────
+    private StatusEffectManager _statusEffects;
 
     void Awake()
     {
-        currentHealth = maxHealth;
+        currentHealth  = maxHealth;
+        _statusEffects = GetComponent<StatusEffectManager>();
     }
+
+    void Update()
+    {
+        // Clear expired redirect
+        if (_redirectTarget != null && Time.time >= _redirectExpiry)
+            ClearRedirect();
+
+        // Clear expired absorption
+        if (_absorbing && Time.time >= _absorptionExpiry)
+            _absorbing = false;
+    }
+
+    // ── Public API ────────────────────────────────────────────────
 
     public void ApplyShield(float amount)
     {
-        shieldRemaining = Mathf.Max(shieldRemaining, amount);
+        _shieldRemaining = Mathf.Max(_shieldRemaining, amount);
     }
 
-    public void TakeDamage(float amount)
+    public void TakeDamage(float amount, GameObject source = null)
     {
+        if (_isDowned) return;
         if (currentHealth <= 0f) return;
 
-        if (shieldRemaining > 0f)
+        // Exposed: +25% incoming (Event Horizon)
+        if (_statusEffects != null && _statusEffects.IsExposed)
+            amount *= 1.25f;
+
+        // Damage reduction (Siege Mode, Threat Protocol)
+        amount *= (1f - Mathf.Clamp01(_damageReductionBonus));
+
+        // Damage redirect (Transfer Protocol) — redirect sends a portion to the medic
+        if (_redirectTarget != null && _redirectTarget.IsAlive && Time.time < _redirectExpiry)
         {
-            float absorbed = Mathf.Min(shieldRemaining, amount);
-            shieldRemaining -= absorbed;
+            float redirected = amount * _redirectFraction;
+            amount -= redirected;
+            _redirectTarget.TakeDamage(redirected); // no source override for the redirect
+        }
+
+        // Absorption (Kinetic Reversal) — intercept damage before shield/HP
+        if (_absorbing && Time.time < _absorptionExpiry)
+        {
+            _absorbedAmount += amount;
+            onDamageTaken?.Invoke(amount);
+            return; // absorbed — no HP lost
+        }
+
+        // Shield
+        if (_shieldRemaining > 0f)
+        {
+            float absorbed = Mathf.Min(_shieldRemaining, amount);
+            _shieldRemaining -= absorbed;
             amount -= absorbed;
         }
 
@@ -40,16 +116,84 @@ public class Health : MonoBehaviour
 
         currentHealth = Mathf.Max(0f, currentHealth - amount);
         onHealthChanged?.Invoke(currentHealth, maxHealth);
+        onDamageTaken?.Invoke(amount);
 
         if (currentHealth <= 0f)
-        {
-            onDeath?.Invoke();
-        }
+            HandleDeath(source);
     }
 
     public void Heal(float amount)
     {
-        currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        if (_isDowned || currentHealth <= 0f) return;
+        float actual = Mathf.Min(amount, maxHealth - currentHealth);
+        if (actual <= 0f) return;
+        currentHealth += actual;
         onHealthChanged?.Invoke(currentHealth, maxHealth);
+        onHealApplied?.Invoke(actual);
+    }
+
+    // Defibrillator: revive a downed player at hpPercent (e.g. 0.3 = 30%)
+    public void Revive(float hpPercent)
+    {
+        if (!_isDowned) return;
+        _isDowned     = false;
+        currentHealth = maxHealth * Mathf.Clamp01(hpPercent);
+        onDownedChanged?.Invoke(false);
+        onHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    // ── Transfer Protocol ──────────────────────────────────────────
+    // Redirects `fraction` (0–1) of incoming damage to `target` for `duration` seconds.
+    public void SetDamageRedirect(Health target, float fraction, float duration)
+    {
+        _redirectTarget   = target;
+        _redirectFraction = fraction;
+        _redirectExpiry   = Time.time + duration;
+    }
+
+    public void ClearRedirect()
+    {
+        _redirectTarget   = null;
+        _redirectFraction = 0f;
+    }
+
+    // ── Kinetic Reversal ──────────────────────────────────────────
+    public void BeginAbsorption(float duration)
+    {
+        _absorbing        = true;
+        _absorbedAmount   = 0f;
+        _absorptionExpiry = Time.time + duration;
+    }
+
+    public void EndAbsorption()
+    {
+        _absorbing = false;
+    }
+
+    // ── Siege Mode / Threat Protocol ─────────────────────────────
+    public void SetDamageReduction(float fraction) => _damageReductionBonus = Mathf.Clamp01(fraction);
+    public void ClearDamageReduction()             => _damageReductionBonus = 0f;
+
+    // ── Adaptive Shield ───────────────────────────────────────────
+    // Called by AdaptiveShieldHandler each time the target takes a hit.
+    public void GrowShield(float amount)
+    {
+        _shieldRemaining = Mathf.Min(_shieldRemaining + amount, 80f);
+    }
+
+    // ── Private ───────────────────────────────────────────────────
+    private void HandleDeath(GameObject source)
+    {
+        if (isPlayer)
+        {
+            _isDowned = true;
+            onDownedChanged?.Invoke(true);
+            // Do NOT invoke onDeath for players — they are downed, not dead.
+        }
+        else
+        {
+            onDeath?.Invoke();
+            onKilledBy?.Invoke(source);
+        }
     }
 }

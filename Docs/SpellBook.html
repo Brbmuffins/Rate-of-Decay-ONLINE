@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate of Decay — Combat Reference</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0c0c0e;
+  --surface: #111115;
+  --surface2: #18181e;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.12);
+  --text: #d4d4dc;
+  --muted: #6b6b7a;
+  --faint: #2e2e38;
+  --dmg: #e8622a;
+  --heal: #3fc26a;
+  --supp: #4d8fff;
+  --dmg-dim: rgba(232,98,42,0.1);
+  --heal-dim: rgba(63,194,106,0.1);
+  --supp-dim: rgba(77,143,255,0.1);
+  --accent: #c084fc;
+}
+html { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+body { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.site-header {
+  padding: 3rem 0 2rem;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.header-left h1 {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+.header-left h2 {
+  font-size: 32px;
+  font-weight: 300;
+  letter-spacing: -1px;
+  color: var(--text);
+  line-height: 1;
+}
+.header-left h2 span { color: var(--accent); font-weight: 500; }
+.header-right {
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 340px;
+}
+
+/* ── FILTERS ─────────────────────────────────────────────── */
+.filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 2rem;
+}
+.filter-label { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-right: 8px; }
+.filt {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 5px 16px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.filt:hover { border-color: var(--border2); color: var(--text); }
+.filt.on { background: var(--surface2); border-color: var(--border2); color: var(--text); }
+.filt.on[data-f="Damage"] { border-color: var(--dmg); color: var(--dmg); }
+.filt.on[data-f="Heal"] { border-color: var(--heal); color: var(--heal); }
+.filt.on[data-f="Support"] { border-color: var(--supp); color: var(--supp); }
+
+/* ── GRID ────────────────────────────────────────────────── */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+
+/* ── SPELL CARD ──────────────────────────────────────────── */
+.spell-card { background: var(--surface); transition: background 0.15s; }
+.spell-card:hover { background: var(--surface2); }
+
+.card-top {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+.card-cat-bar {
+  width: 3px;
+  flex-shrink: 0;
+}
+.card-top-inner {
+  flex: 1;
+  padding: 16px 18px 14px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.card-name-block {}
+.card-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  margin-bottom: 4px;
+}
+.card-role {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.card-slot-cd {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.slot-pill {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  color: var(--muted);
+}
+.cd-val {
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text);
+  line-height: 1;
+}
+.cd-lbl { font-size: 10px; color: var(--muted); text-align: right; }
+
+/* ── CANVAS ──────────────────────────────────────────────── */
+.canvas-wrap {
+  position: relative;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+canvas.preview {
+  display: block;
+  width: 100%;
+  height: 170px;
+}
+.replay-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.canvas-wrap:hover .replay-hint { opacity: 1; }
+
+/* ── CARD BODY ───────────────────────────────────────────── */
+.card-body { padding: 14px 18px 16px; }
+.card-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #8a8a9a;
+  margin-bottom: 14px;
+}
+.stat-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.stat { display: flex; flex-direction: column; gap: 2px; }
+.stat-val { font-size: 15px; font-weight: 500; }
+.stat-val.c-dmg { color: var(--dmg); }
+.stat-val.c-heal { color: var(--heal); }
+.stat-val.c-supp { color: var(--supp); }
+.stat-val.c-neutral { color: var(--text); }
+.stat-lbl { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+.charge-section { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px; }
+.charge-header { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+input[type=range] {
+  width: 100%;
+  height: 2px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--faint);
+  border-radius: 1px;
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+}
+.charge-dmg-out {
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--text);
+  margin-top: 8px;
+  letter-spacing: -0.5px;
+}
+.charge-dmg-out span { font-size: 12px; color: var(--muted); margin-left: 4px; }
+
+.tag-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 10px; }
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--faint);
+  color: #44445a;
+}
+
+/* ── COMBAT NOTES ────────────────────────────────────────── */
+.combat-note {
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: var(--bg);
+  border-left: 2px solid var(--border2);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.combat-note strong { color: var(--text); font-weight: 500; }
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.site-footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.site-footer p { font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <h1>Rate of Decay Online</h1>
+    <h2>Combat <span>Reference</span></h2>
+  </div>
+  <div class="header-right">
+    Abilities define how the world responds to you. Every mechanic here shapes terrain, enemies, and teammates — not just health bars. Click any ability to replay its animation. Chargeable abilities have a slider.
+  </div>
+</header>
+
+<div class="filter-row">
+  <span class="filter-label">Filter</span>
+  <button class="filt on" data-f="all">All</button>
+  <button class="filt" data-f="Damage">Damage</button>
+  <button class="filt" data-f="Heal">Heal</button>
+  <button class="filt" data-f="Support">Support</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer class="site-footer">
+  <p>Rate of Decay Online &mdash; internal combat reference</p>
+  <p>13 abilities &mdash; 3 categories &mdash; 4 equip slots</p>
+</footer>
+
+<script>
+const CAT_COL = { Damage:"#e8622a", Heal:"#3fc26a", Support:"#4d8fff" };
+const CAT_DIM  = { Damage:"rgba(232,98,42,0.08)", Heal:"rgba(63,194,106,0.08)", Support:"rgba(77,143,255,0.08)" };
+
+const SPELLS = [
+  { id:"turret",     name:"Sentinel Drop",      category:"Support", shape:"Circle",    slot:"[1]", cooldown:6,  damage:0,   maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:10, indicator:1.5, coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Deploys a salvaged Liberation-era combat drone at the target location. Boots up, locks the nearest hostile, holds position until destroyed.",
+    combatNote:"<strong>Positioning matters.</strong> Place behind cover or at a chokepoint — the drone doesn't move, so your placement is the decision.",
+    tags:["deploy","persistent","auto-aim"],
+    animate: animateTurret },
+  { id:"darkblast",  name:"Dark Blast",         category:"Damage",  shape:"Cone",      slot:"[2]", cooldown:3,  damage:10,  maxDamage:30, shieldAbsorb:0, shieldDuration:0, range:8,  indicator:0,   coneAngle:60, rectWidth:0,  chargeable:true,
+    desc:"Channels corrupted phase energy into a forward cone. Hold to charge — the field widens and output triples at full power.",
+    combatNote:"<strong>Fastest cooldown in the kit.</strong> Uncharged at 3s it becomes reliable filler. Full charge punishes grouped enemies.",
+    tags:["cone","chargeable","aoe"],
+    animate: animateDarkBlast },
+  { id:"repairwave", name:"Repair Wave",         category:"Heal",    shape:"Circle",    slot:"[3]", cooldown:5,  damage:0,   maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:6,  indicator:3,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Pulses a nanite cloud outward from the target point. Any ally caught in the field gets structural repairs.",
+    combatNote:"<strong>Aim ahead of movement.</strong> Cast where your team is retreating to, not where they are.",
+    tags:["heal","aoe","allies"],
+    animate: animateHealPulse },
+  { id:"arccannon",  name:"Arc Cannon",          category:"Damage",  shape:"Rectangle", slot:"[2]", cooldown:4,  damage:15,  maxDamage:50, shieldAbsorb:0, shieldDuration:0, range:10, indicator:0,   coneAngle:0,  rectWidth:1.5,chargeable:true,
+    desc:"Fires a high-voltage arc beam that punches through every target in a line. Charge to widen the discharge up to 1.8x.",
+    combatNote:"<strong>Best against choke points.</strong> A fully charged Arc Cannon through a doorway can chain 4 enemies at once.",
+    tags:["beam","chargeable","piercing"],
+    animate: animateHolyBeam },
+  { id:"thermal",    name:"Thermal Charge",      category:"Damage",  shape:"Circle",    slot:"[2]", cooldown:4,  damage:20,  maxDamage:45, shieldAbsorb:0, shieldDuration:0, range:12, indicator:2,   coneAngle:0,  rectWidth:0,  chargeable:true,
+    desc:"Launches a superheated plasma slug that detonates on impact. Charge grows the blast radius up to 2x.",
+    combatNote:"<strong>Longest range AoE available.</strong> Use it to punish clusters before they close distance on your team.",
+    tags:["projectile","chargeable","aoe"],
+    animate: animateFireball },
+  { id:"neural",     name:"Neural Spike",        category:"Damage",  shape:"Circle",    slot:"[2]", cooldown:5,  damage:35,  maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:10, indicator:2.5, coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Drives a concentrated neural-disruptor spike into the target zone. No charge needed. Highest flat damage in the kit.",
+    combatNote:"<strong>Use on isolated targets.</strong> Wasted on groups — for crowd clear use Stasis Wave or Thermal Charge instead.",
+    tags:["instant","high-damage","single-target"],
+    animate: animateLightning },
+  { id:"stasis",     name:"Stasis Wave",         category:"Damage",  shape:"Circle",    slot:"[2]", cooldown:6,  damage:15,  maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:5,  indicator:5,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Releases a cryo-field shockwave from the caster's position. Widest radius in the kit — you must be in close.",
+    combatNote:"<strong>High risk, high clear.</strong> Only effective when surrounded. Pair with Deflect Protocol before committing.",
+    tags:["aoe","close-range","huge-radius"],
+    animate: animateIceNova },
+  { id:"deflect",    name:"Deflect Protocol",    category:"Support", shape:"Instant",   slot:"[4]", cooldown:8,  damage:0,   maxDamage:0,  shieldAbsorb:50,shieldDuration:5, range:0,  indicator:0,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Activates a hardlight deflection layer. The next 50 damage hits the barrier before your HP. Instant, no aim, fires on keypress.",
+    combatNote:"<strong>Pre-cast before engaging.</strong> Commit to a Stasis Wave or close-range fight with this already running.",
+    tags:["instant","self-cast","defensive"],
+    animate: animateShield },
+  { id:"kinetic",    name:"Kinetic Reversal",    category:"Support", shape:"Cone",      slot:"[3]", cooldown:10, damage:0,   maxDamage:60, shieldAbsorb:0, shieldDuration:0, range:8,  indicator:0,   coneAngle:70, rectWidth:0,  chargeable:false,
+    desc:"Arms you for 3 seconds — every hit taken gets stored as kinetic energy. Release it all as a cone burst. The more you absorb, the harder it hits.",
+    combatNote:"<strong>Counter mechanic.</strong> Walk into enemy fire intentionally, then punish. Synergizes with low-defense aggressive positioning.",
+    tags:["counter","absorb","reflect","reactive"],
+    animate: animateKineticReversal },
+  { id:"magnetize",  name:"Magnetize",           category:"Support", shape:"Circle",    slot:"[3]", cooldown:7,  damage:0,   maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:10, indicator:4,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Drops a magnetic anchor that drags every enemy in range toward its center over 2 seconds. Zero damage. Pure setup for follow-up AoE.",
+    combatNote:"<strong>Combo tool — not a damage dealer.</strong> Call it out to your team before casting. Neural Spike, Thermal Charge, or Stasis Wave follow-up.",
+    tags:["pull","crowd-control","combo-setup"],
+    animate: animateMagnetize },
+  { id:"overdrive",  name:"Overdrive",           category:"Support", shape:"Circle",    slot:"[4]", cooldown:12, damage:0,   maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:0,  indicator:5,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Overclocks every ally within range for 4 seconds — boosted damage output and faster ability recovery. Self-cast, instant.",
+    combatNote:"<strong>Call it before the push.</strong> This is a coordination ability. Most effective when 3+ teammates are within range and ready to commit.",
+    tags:["buff","team","aura","instant"],
+    animate: animateOverdrive },
+  { id:"shockmine",  name:"Shock Mine",          category:"Damage",  shape:"Circle",    slot:"[2]", cooldown:5,  damage:40,  maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:12, indicator:2,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Plants a proximity charge at the target location. Invisible until triggered. Detonates on contact for high burst damage.",
+    combatNote:"<strong>Environmental play.</strong> Stack two on a doorway before combat starts, or bait enemies into a corridor. The map becomes a weapon.",
+    tags:["trap","proximity","positional","burst"],
+    animate: animateShockMine },
+  { id:"transfer",   name:"Transfer Protocol",   category:"Heal",    shape:"Circle",    slot:"[3]", cooldown:9,  damage:0,   maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:8,  indicator:1,   coneAngle:0,  rectWidth:0,  chargeable:false,
+    desc:"Tethers to the nearest ally. For 5 seconds their incoming damage routes to you instead. They become untouchable. You take the hit.",
+    combatNote:"<strong>Self-sacrifice.</strong> Use when an ally is low and can't be healed in time. One of the highest skill-expression abilities in the kit.",
+    tags:["tether","redirect","sacrifice","ally"],
+    animate: animateTransferProtocol },
+  { id:"naniteswarm",  name:"Nanite Swarm",       category:"Heal",    shape:"Circle",    slot:"[3]", cooldown:7,  damage:8,   maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:10, indicator:2.5, coneAngle:0, rectWidth:0, chargeable:false,
+    desc:"Releases a drifting nanite cloud toward the target. Heals any ally it passes through. Deals minor damage to any enemy it touches. The cloud moves — positioning it is the skill.",
+    combatNote:"<strong>Dual-use.</strong> Aim it between a wounded ally and a pack of enemies. You get the heal and they take chip damage on the same cast.",
+    tags:["heal","damage","mobile","aoe","dual-use"],
+    animate: animateNaniteSwarm },
+  { id:"defibrillator", name:"Defibrillator",     category:"Heal",    shape:"Circle",    slot:"[3]", cooldown:14, damage:60,  maxDamage:0,  shieldAbsorb:0, shieldDuration:0, range:6,  indicator:1.5, coneAngle:0, rectWidth:0, chargeable:false,
+    desc:"Context-sensitive. Target a downed ally — revives them with 30% HP. Target a robotic enemy — deals 60 burst damage to mechanical systems. Same button. Read the situation.",
+    combatNote:"<strong>Highest cooldown in the kit.</strong> Against robotic enemies this is your hardest-hitting single ability. Save it or use it — the choice defines the fight.",
+    tags:["revive","burst","anti-robot","context-sensitive"],
+    animate: animateDefibrillator }
+];
+
+function lerp(a,b,t){return a+(b-a)*t;}
+function rand(a,b){return a+Math.random()*(b-a);}
+
+class Anim {
+  constructor(canvas, spell) {
+    this.c=canvas; this.ctx=canvas.getContext("2d");
+    this.spell=spell; this.t=0; this.particles=[]; this.running=false; this.raf=null;
+  }
+  start(){this.t=0;this.particles=[];this.running=true;if(this.raf)cancelAnimationFrame(this.raf);this._loop();}
+  _loop(){
+    if(!this.running)return;
+    const W=this.c.width,H=this.c.height;
+    this.ctx.clearRect(0,0,W,H);
+    this.spell.animate(this.ctx,W,H,this.t,this.particles);
+    this.t+=1/60;
+    this.raf=requestAnimationFrame(()=>this._loop());
+  }
+  stop(){this.running=false;if(this.raf)cancelAnimationFrame(this.raf);}
+}
+
+function drawPlayer(ctx,x,y,col){
+  ctx.save();
+  ctx.beginPath();ctx.arc(x,y,7,0,Math.PI*2);
+  ctx.fillStyle="#1a1a22";ctx.fill();
+  ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+  ctx.restore();
+}
+function drawEnemy(ctx,x,y,alpha=1){
+  ctx.save();ctx.globalAlpha=alpha;
+  ctx.beginPath();ctx.arc(x,y,6,0,Math.PI*2);
+  ctx.fillStyle="#2a1010";ctx.fill();
+  ctx.strokeStyle="#c0392b";ctx.lineWidth=1.5;ctx.stroke();
+  ctx.restore();
+}
+function addP(particles,x,y,count,col,speed,life,size=3){
+  for(let i=0;i<count;i++){
+    const a=Math.random()*Math.PI*2,spd=rand(speed*0.5,speed);
+    particles.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,decay:1/(life*60),col,size:rand(size*0.5,size*1.5)});
+  }
+}
+function updateP(ctx,particles){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.93;p.vy*=0.93;p.life-=p.decay;
+    if(p.life<=0){particles.splice(i,1);continue;}
+    ctx.save();ctx.globalAlpha=p.life*0.85;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size*p.life,0,Math.PI*2);
+    ctx.fillStyle=p.col;ctx.fill();ctx.restore();
+  }
+}
+function label(ctx,text,x,y,col){
+  ctx.save();ctx.fillStyle=col;ctx.font="11px 'Segoe UI',sans-serif";ctx.textAlign="center";
+  ctx.fillText(text,x,y);ctx.restore();
+}
+
+function animateTurret(ctx,W,H,t,particles){
+  const cx=W*0.28,cy=H*0.75,tx=W*0.58,ty=H*0.42,ex=W*0.8,ey=H*0.3;
+  const col=CAT_COL.Support, phase=t%3;
+  ctx.save();ctx.strokeStyle=col+"28";ctx.lineWidth=1;ctx.setLineDash([3,6]);
+  ctx.beginPath();ctx.arc(cx,cy,82,0,Math.PI*2);ctx.stroke();ctx.restore();
+  drawPlayer(ctx,cx,cy,col);
+  if(phase>0.35){
+    const show=Math.min(1,(phase-0.35)/0.25);
+    ctx.save();ctx.globalAlpha=show;
+    ctx.beginPath();ctx.arc(tx,ty,13,0,Math.PI*2);
+    ctx.fillStyle=col+"20";ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();
+    const spin=t*2.8;
+    for(let i=0;i<3;i++){const a=spin+(i/3)*Math.PI*2;ctx.beginPath();ctx.moveTo(tx+Math.cos(a)*7,ty+Math.sin(a)*7);ctx.lineTo(tx+Math.cos(a)*13,ty+Math.sin(a)*13);ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();}
+    ctx.restore();
+    if(phase>1.1){
+      const ft=Math.min(1,(phase-1.1)/0.3);
+      const bx=lerp(tx,ex,ft),by=lerp(ty,ey,ft);
+      ctx.save();ctx.globalAlpha=0.9;ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();
+      if(ft>0.05)addP(particles,bx,by,1,col,1,0.25,2);
+      if(ft>=0.99){addP(particles,ex,ey,6,col,3,0.5,3);drawEnemy(ctx,ex,ey,0);}
+      else drawEnemy(ctx,ex,ey,1);
+    } else drawEnemy(ctx,ex,ey,1);
+  } else drawEnemy(ctx,ex,ey,1);
+  updateP(ctx,particles);
+  label(ctx,"auto-targets within range",W/2,H-10,col+"99");
+}
+
+function animateDarkBlast(ctx,W,H,t,particles){
+  const cx=W*0.28,cy=H*0.8,col=CAT_COL.Damage,cc="#8b7ee8";
+  const phase=t%2.5,charging=phase<1,chargeT=charging?phase/1:1,aimA=-0.4;
+  const cA=60*Math.PI/180,rng=Math.min(W*0.55,120)*(1+chargeT*0.6);
+  if(charging){
+    ctx.save();ctx.globalAlpha=0.12+chargeT*0.25;ctx.beginPath();
+    ctx.moveTo(cx,cy);ctx.arc(cx,cy,rng,aimA-cA/2*(1+chargeT*0.6),aimA+cA/2*(1+chargeT*0.6));
+    ctx.closePath();ctx.fillStyle=chargeT>0.5?cc:col;ctx.fill();
+    ctx.strokeStyle=chargeT>0.5?cc:col;ctx.lineWidth=1;ctx.stroke();ctx.restore();
+  } else {
+    const bt=(phase-1)/0.4;
+    if(bt<1){
+      ctx.save();ctx.globalAlpha=1-bt;ctx.beginPath();
+      ctx.moveTo(cx,cy);ctx.arc(cx,cy,rng*(1+bt*0.25),aimA-cA/2*1.6,aimA+cA/2*1.6);
+      ctx.closePath();ctx.fillStyle=cc;ctx.fill();ctx.restore();
+      if(Math.floor(t*60)%2===0){const a=aimA+(Math.random()-0.5)*cA*1.6;addP(particles,cx+Math.cos(a)*rng*Math.random(),cy+Math.sin(a)*rng*Math.random(),3,cc,3,0.4,3);}
+    }
+    [{x:W*0.78,y:H*0.32},{x:W*0.65,y:H*0.44}].forEach(e=>drawEnemy(ctx,e.x,e.y,Math.max(0,1-(phase-1)/0.5)));
+  }
+  if(charging)[{x:W*0.78,y:H*0.32},{x:W*0.65,y:H*0.44}].forEach(e=>drawEnemy(ctx,e.x,e.y,1));
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+  const dmg=Math.round(10+chargeT*20);
+  label(ctx,charging?`charging — ${dmg} dmg`:"released",W/2,H-10,col+"99");
+}
+
+function animateHealPulse(ctx,W,H,t,particles){
+  const cx=W*0.5,cy=H*0.58,col=CAT_COL.Heal,phase=t%2.5,maxR=62;
+  ctx.save();ctx.strokeStyle=col+"20";ctx.lineWidth=1;ctx.setLineDash([3,6]);
+  ctx.beginPath();ctx.arc(cx,cy,maxR,0,Math.PI*2);ctx.stroke();ctx.restore();
+  if(phase>0.3){
+    const ring=(phase-0.3)/0.55;
+    if(ring<1){
+      ctx.save();ctx.globalAlpha=1-ring;ctx.beginPath();ctx.arc(cx,cy,maxR*ring,0,Math.PI*2);
+      ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+      if(Math.floor(t*60)%4===0)addP(particles,cx+Math.cos(Math.random()*Math.PI*2)*maxR*ring,cy+Math.sin(Math.random()*Math.PI*2)*maxR*ring,2,col,1.5,0.6,2);
+    }
+    const fill=Math.max(0,0.14-(Math.min(1,(phase-0.3)/0.35))*0.14);
+    ctx.save();ctx.globalAlpha=fill;ctx.beginPath();ctx.arc(cx,cy,maxR,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();
+  }
+  [{x:W*0.36,y:H*0.52},{x:W*0.62,y:H*0.56},{x:W*0.5,y:H*0.74}].forEach(a=>{
+    drawPlayer(ctx,a.x,a.y,col);
+    if(phase>0.5){const ht=Math.min(1,(phase-0.5)/0.45);ctx.save();ctx.globalAlpha=(1-ht)*0.8;ctx.fillStyle=col;ctx.font="600 12px sans-serif";ctx.textAlign="center";ctx.fillText("+",a.x,a.y-12-ht*12);ctx.restore();}
+  });
+  updateP(ctx,particles);label(ctx,"heals allies in radius",W/2,H-10,col+"99");
+}
+
+function animateHolyBeam(ctx,W,H,t,particles){
+  const cx=W*0.15,cy=H*0.8,col="#e8c84a",phase=t%2.8,cT=Math.min(1,phase/1);
+  const bLen=W*0.72,ey2=H*0.35;
+  if(phase<1){
+    ctx.save();ctx.globalAlpha=0.5+cT*0.4;ctx.strokeStyle=col;ctx.lineWidth=cT*3+1;ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+bLen,cy-(cy-ey2));ctx.stroke();ctx.restore();
+  } else {
+    const bt=Math.min(1,(phase-1)/0.45),bW=(1.5+1.2)*10*(1-bt*0.5);
+    ctx.save();ctx.globalAlpha=1-bt*0.7;ctx.strokeStyle=col;ctx.lineWidth=bW;ctx.lineCap="round";
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+bLen,cy-(cy-ey2));ctx.stroke();
+    ctx.globalAlpha=(1-bt)*0.35;ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.stroke();ctx.restore();
+    if(Math.floor(t*60)%2===0&&bt<0.9){const p2=Math.random();addP(particles,cx+bLen*p2,cy-(cy-ey2)*p2,3,col,3,0.35,2);}
+    [{x:W*0.62,y:H*0.46},{x:W*0.76,y:H*0.37}].forEach(e=>drawEnemy(ctx,e.x,e.y,Math.max(0,1-bt)));
+  }
+  if(phase<1)[{x:W*0.62,y:H*0.46},{x:W*0.76,y:H*0.37}].forEach(e=>drawEnemy(ctx,e.x,e.y,1));
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+  label(ctx,`beam — ${Math.round(15+cT*35)} dmg — piercing`,W/2,H-10,col+"99");
+}
+
+function animateFireball(ctx,W,H,t,particles){
+  const cx=W*0.18,cy=H*0.8,ex=W*0.76,ey=H*0.3,col=CAT_COL.Damage;
+  const phase=t%2.5,tD=0.55,trav=phase>0.15&&phase<0.15+tD,exploding=phase>=0.15+tD;
+  const tT=trav?(phase-0.15)/tD:0,eT=exploding?Math.min(1,(phase-0.15-tD)/0.6):0;
+  if(!trav&&!exploding){const pu=Math.sin(t*7)*0.4+0.6;ctx.save();ctx.globalAlpha=pu*0.7;ctx.beginPath();ctx.arc(cx,cy,11,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();}
+  if(trav){const bx=lerp(cx,ex,tT),by=lerp(cy,ey,tT);ctx.save();ctx.beginPath();ctx.arc(bx,by,10,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();addP(particles,bx,by,3,"#f5a040",2,0.3,2);}
+  if(exploding){
+    ctx.save();ctx.globalAlpha=1-eT;ctx.beginPath();ctx.arc(ex,ey,38*Math.min(1,eT*2),0,Math.PI*2);
+    ctx.fillStyle=col+"30";ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    if(Math.floor(t*60)%2===0&&eT<0.65)addP(particles,ex,ey,5,col,5,0.5,4);
+    drawEnemy(ctx,ex,ey,Math.max(0,1-eT));
+  } else drawEnemy(ctx,ex,ey,1);
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+  label(ctx,"travels to target — detonates on impact",W/2,H-10,col+"99");
+}
+
+function animateLightning(ctx,W,H,t,particles){
+  const cx=W*0.35,cy=H*0.76,tx=W*0.68,ty=H*0.38,col="#d4b800";
+  const phase=t%2,sT=phase;
+  ctx.save();ctx.strokeStyle=col+"25";ctx.lineWidth=1;ctx.setLineDash([3,6]);
+  ctx.beginPath();ctx.arc(tx,ty,34,0,Math.PI*2);ctx.stroke();ctx.restore();
+  if(sT>0.48&&sT<0.74){
+    const pts=[[tx,ty-85]];
+    for(let i=1;i<10;i++)pts.push([tx+(Math.random()-0.5)*20,ty-85+(85/10)*i]);
+    pts.push([tx,ty]);
+    const a=1-(sT-0.48)/0.26;
+    ctx.save();ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.globalAlpha=a;
+    ctx.beginPath();pts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));ctx.stroke();
+    ctx.globalAlpha=a*0.2;ctx.lineWidth=8;ctx.stroke();ctx.restore();
+    if(Math.floor(t*60)%2===0)addP(particles,tx,ty,6,col,4,0.4,3);
+    const hT=(sT-0.48)/0.26;
+    ctx.save();ctx.globalAlpha=1-hT;ctx.beginPath();ctx.arc(tx,ty,34*hT,0,Math.PI*2);
+    ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();
+    drawEnemy(ctx,tx,ty,Math.max(0,1-hT));
+  } else drawEnemy(ctx,tx,ty,1);
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+  label(ctx,"instant — 35 flat damage",W/2,H-10,col+"99");
+}
+
+function animateIceNova(ctx,W,H,t,particles){
+  const cx=W*0.5,cy=H*0.62,col="#5ab8e8",phase=t%2.5,nT=Math.min(1,phase/0.5),maxR=88;
+  if(nT>0){
+    ctx.save();ctx.globalAlpha=Math.max(0,1-nT*0.9);ctx.beginPath();ctx.arc(cx,cy,maxR*nT,0,Math.PI*2);
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    ctx.save();ctx.globalAlpha=Math.max(0,0.15-nT*0.15);ctx.beginPath();ctx.arc(cx,cy,maxR*nT,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();
+    if(nT<0.55&&Math.floor(t*60)%2===0)addP(particles,cx+Math.cos(Math.random()*Math.PI*2)*maxR*nT,cy+Math.sin(Math.random()*Math.PI*2)*maxR*nT,3,col,2,0.5,3);
+    for(let i=0;i<8;i++){
+      const a=(i/8)*Math.PI*2+nT*0.4,r=maxR*nT*0.78;
+      ctx.save();ctx.globalAlpha=Math.max(0,(1-nT)*0.65);ctx.fillStyle="#9ad8f5";
+      ctx.beginPath();const px2=cx+Math.cos(a)*r,py2=cy+Math.sin(a)*r;
+      ctx.moveTo(px2,py2-5);ctx.lineTo(px2+3,py2);ctx.lineTo(px2,py2+5);ctx.lineTo(px2-3,py2);ctx.closePath();ctx.fill();ctx.restore();
+    }
+  }
+  [{x:W*0.36,y:H*0.46},{x:W*0.63,y:H*0.43},{x:W*0.5,y:H*0.34}].forEach(e=>{
+    const dist=Math.hypot(e.x-cx,e.y-cy),hitT=nT>0&&dist<maxR*nT?Math.min(1,(nT-dist/maxR)*3):0;
+    drawEnemy(ctx,e.x,e.y,Math.max(0,1-hitT));
+  });
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+  label(ctx,"huge radius — must be close (range 5u)",W/2,H-10,col+"99");
+}
+
+function animateShield(ctx,W,H,t,particles){
+  const cx=W*0.5,cy=H*0.54,col=CAT_COL.Support,phase=t%3,pu=Math.sin(t*4)*0.5+0.5,sR=26+pu*5;
+  const active=phase<2;
+  if(active){
+    ctx.save();ctx.globalAlpha=0.08+pu*0.06;ctx.beginPath();ctx.arc(cx,cy,sR,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();
+    ctx.save();ctx.globalAlpha=0.5+pu*0.35;ctx.beginPath();ctx.arc(cx,cy,sR,0,Math.PI*2);ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke();ctx.restore();
+    for(let i=0;i<6;i++){const a=t*0.5+(i/6)*Math.PI*2;ctx.save();ctx.globalAlpha=0.25+pu*0.25;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*sR*0.6,cy+Math.sin(a)*sR*0.6);ctx.lineTo(cx+Math.cos(a)*sR*0.92,cy+Math.sin(a)*sR*0.92);ctx.stroke();ctx.restore();}
+    if(phase>1.15){
+      const iT=Math.min(1,(phase-1.15)/0.4);
+      ctx.save();ctx.globalAlpha=1-iT;ctx.beginPath();ctx.arc(cx+18,cy-10,8,0,Math.PI*2);ctx.fillStyle="#a0392b";ctx.fill();ctx.restore();
+      if(Math.floor(t*60)%3===0&&iT<0.6)addP(particles,cx+18,cy-10,4,col,4,0.4,3);
+      ctx.save();ctx.globalAlpha=Math.max(0,(1-iT*2)*0.9);ctx.fillStyle=col;ctx.font="600 11px sans-serif";ctx.textAlign="center";
+      ctx.fillText("absorbed",cx,cy-sR-12-iT*10);ctx.restore();
+    }
+  }
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,active?col:"#444");
+  label(ctx,active?"barrier active — 50 dmg absorbed":"expired",W/2,H-10,col+"99");
+}
+
+function animateKineticReversal(ctx,W,H,t,particles){
+  const cx=W*0.36,cy=H*0.74,col=CAT_COL.Support,ac="#7dd3fc",phase=t%4,absorbing=phase<2.4;
+  const aT=absorbing?phase/2.4:0,rT=!absorbing?(phase-2.4)/0.55:0;
+  const enemies=[{x:W*0.74,y:H*0.32},{x:W*0.62,y:H*0.44}];
+  if(absorbing){
+    for(let r=0;r<Math.floor(aT*5);r++){ctx.save();ctx.globalAlpha=0.12+r*0.07;ctx.beginPath();ctx.arc(cx,cy,16+r*8,0,Math.PI*2);ctx.strokeStyle=ac;ctx.lineWidth=1.5;ctx.stroke();ctx.restore();}
+    enemies.forEach(e=>{
+      drawEnemy(ctx,e.x,e.y,1);
+      if(Math.floor(t*60)%5===0)addP(particles,e.x,e.y,2,ac,2.5,0.5,2);
+      ctx.save();ctx.strokeStyle=ac;ctx.lineWidth=1;ctx.globalAlpha=0.2+aT*0.35;ctx.setLineDash([3,5]);
+      ctx.beginPath();ctx.moveTo(e.x,e.y);ctx.lineTo(cx,cy);ctx.stroke();ctx.restore();
+    });
+    label(ctx,`absorbing... ${Math.round(aT*60)} stored`,W/2,H-10,ac+"99");
+  } else {
+    const cA=70*Math.PI/180,aimA=-0.42,rng=115;
+    ctx.save();ctx.globalAlpha=Math.max(0,1-rT);ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,rng*(1+rT*0.3),aimA-cA/2,aimA+cA/2);ctx.closePath();ctx.fillStyle=ac;ctx.fill();ctx.restore();
+    if(Math.floor(t*60)%2===0&&rT<0.75){const a=aimA+(Math.random()-0.5)*cA;addP(particles,cx+Math.cos(a)*rng*Math.random(),cy+Math.sin(a)*rng*Math.random(),4,ac,4,0.4,4);}
+    enemies.forEach(e=>drawEnemy(ctx,e.x,e.y,Math.max(0,1-rT*2)));
+    label(ctx,"releasing stored damage as cone",W/2,H-10,ac+"99");
+  }
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+}
+
+function animateMagnetize(ctx,W,H,t,particles){
+  const col="#c084fc",tx=W*0.56,ty=H*0.47,phase=t%3.5,pullT=Math.min(1,phase/1.8);
+  const enemies=[{sx:W*0.82,sy:H*0.24},{sx:W*0.78,sy:H*0.7},{sx:W*0.28,sy:H*0.22},{sx:W*0.24,sy:H*0.72}];
+  ctx.save();ctx.strokeStyle=col+"28";ctx.lineWidth=1;ctx.setLineDash([3,6]);ctx.beginPath();ctx.arc(tx,ty,66,0,Math.PI*2);ctx.stroke();ctx.restore();
+  const spin=t*2.2;
+  for(let i=0;i<8;i++){const a=spin+(i/8)*Math.PI*2,r=16+Math.sin(t*3+i)*3;ctx.save();ctx.globalAlpha=0.35+Math.sin(t*4+i)*0.15;ctx.fillStyle=col;ctx.beginPath();ctx.arc(tx+Math.cos(a)*r,ty+Math.sin(a)*r,2,0,Math.PI*2);ctx.fill();ctx.restore();}
+  enemies.forEach(e=>{
+    const ex2=lerp(e.sx,tx,pullT),ey2=lerp(e.sy,ty,pullT);
+    drawEnemy(ctx,ex2,ey2,pullT<1?1:Math.max(0,1-(pullT-0.9)*8));
+    if(Math.floor(t*60)%4===0&&pullT<0.92)addP(particles,ex2,ey2,2,col,1.5,0.4,2);
+    if(pullT>0.08){ctx.save();ctx.strokeStyle=col;ctx.lineWidth=1;ctx.globalAlpha=pullT*0.3;ctx.setLineDash([2,4]);ctx.beginPath();ctx.moveTo(ex2,ey2);ctx.lineTo(tx,ty);ctx.stroke();ctx.restore();}
+  });
+  updateP(ctx,particles);
+  label(ctx,"0 damage — pulls all enemies to anchor point",W/2,H-10,col+"99");
+}
+
+function animateOverdrive(ctx,W,H,t,particles){
+  const col="#eab308",cx=W*0.5,cy=H*0.57,phase=t%3,active=phase<2.1,pu=Math.sin(t*5)*0.5+0.5,radius=72;
+  if(active){
+    ctx.save();ctx.globalAlpha=0.05+pu*0.05;ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();ctx.restore();
+    ctx.save();ctx.globalAlpha=0.28+pu*0.2;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(cx,cy,radius,0,Math.PI*2);ctx.stroke();ctx.restore();
+    for(let g=0;g<3;g++){const ga=(g/3)*Math.PI*2+t*(g%2===0?0.9:-0.9),gx2=cx+Math.cos(ga)*24*(g+1)*0.35,gy2=cy+Math.sin(ga)*24*(g+1)*0.35,teeth=6;
+      ctx.save();ctx.globalAlpha=0.4+pu*0.25;ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.beginPath();
+      for(let i=0;i<teeth*2;i++){const a2=(i/(teeth*2))*Math.PI*2+ga,r2=i%2===0?7+g*2:4+g;i===0?ctx.moveTo(gx2+Math.cos(a2)*r2,gy2+Math.sin(a2)*r2):ctx.lineTo(gx2+Math.cos(a2)*r2,gy2+Math.sin(a2)*r2);}
+      ctx.closePath();ctx.stroke();ctx.restore();
+    }
+    [{x:W*0.28,y:H*0.66},{x:W*0.72,y:H*0.63},{x:W*0.5,y:H*0.8}].forEach(a=>{
+      drawPlayer(ctx,a.x,a.y,col);
+      ctx.save();ctx.globalAlpha=0.55+pu*0.3;ctx.fillStyle=col;ctx.font="600 11px sans-serif";ctx.textAlign="center";
+      ctx.fillText("▲",a.x,a.y-14-pu*4);ctx.restore();
+      if(Math.floor(t*60)%6===0)addP(particles,a.x,a.y,2,col,2,0.5,2);
+    });
+  }
+  updateP(ctx,particles);drawPlayer(ctx,cx,cy,col);
+  label(ctx,active?"OVERDRIVE — team damage boosted":"cooldown",W/2,H-10,col+"99");
+}
+
+function animateShockMine(ctx,W,H,t,particles){
+  const col=CAT_COL.Damage,mx=W*0.62,my=H*0.44,ex2=W*0.63,ey2=H*0.45,pcx=W*0.22,pcy=H*0.8;
+  const phase=t%3.5,armed=phase>=0.45&&phase<2.1,det=phase>=2.1;
+  if(armed){
+    const pu2=Math.sin(t*8)*0.5+0.5;
+    ctx.save();ctx.globalAlpha=0.25+pu2*0.45;ctx.fillStyle=col;ctx.beginPath();ctx.arc(mx,my,5,0,Math.PI*2);ctx.fill();ctx.restore();
+    ctx.save();ctx.globalAlpha=0.1+pu2*0.08;ctx.strokeStyle=col;ctx.lineWidth=1;ctx.setLineDash([2,4]);ctx.beginPath();ctx.arc(mx,my,20,0,Math.PI*2);ctx.stroke();ctx.restore();
+    drawEnemy(ctx,ex2,ey2,1);
+  }
+  if(det){
+    const dT=Math.min(1,(phase-2.1)/0.5);
+    ctx.save();ctx.globalAlpha=1-dT;ctx.beginPath();ctx.arc(mx,my,18+dT*48,0,Math.PI*2);
+    ctx.strokeStyle=col;ctx.lineWidth=2.5;ctx.stroke();ctx.fillStyle=col+"22";ctx.fill();ctx.restore();
+    if(Math.floor(t*60)%2===0&&dT<0.65)addP(particles,mx,my,7,col,6,0.5,4);
+    drawEnemy(ctx,ex2,ey2,Math.max(0,1-dT*2));
+    ctx.save();ctx.globalAlpha=Math.max(0,(1-dT*1.5)*0.9);ctx.fillStyle=col;ctx.font="600 13px sans-serif";ctx.textAlign="center";
+    ctx.fillText("40",mx,my-28-dT*18);ctx.restore();
+  }
+  if(!armed&&!det){
+    ctx.save();ctx.globalAlpha=0.5;ctx.fillStyle=col;ctx.beginPath();ctx.arc(mx,my,5,0,Math.PI*2);ctx.fill();ctx.restore();
+    drawEnemy(ctx,ex2,ey2,1);
+  }
+  updateP(ctx,particles);drawPlayer(ctx,pcx,pcy,col);
+  label(ctx,armed?"armed — waiting for proximity":"deploying",W/2,H-10,col+"99");
+}
+
+function animateTransferProtocol(ctx,W,H,t,particles){
+  const col=CAT_COL.Heal,tether="#34d399",px=W*0.28,py=H*0.66,ax=W*0.64,ay=H*0.45,ex2=W*0.82,ey2=H*0.4;
+  const phase=t%4,active=phase<2.7,pu=Math.sin(t*4)*0.5+0.5;
+  if(active){
+    const mx=(px+ax)/2,my=(py+ay)/2-18;
+    ctx.save();ctx.strokeStyle=tether;ctx.lineWidth=1.5+pu*0.5;ctx.globalAlpha=0.4+pu*0.3;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(px,py);ctx.quadraticCurveTo(mx,my,ax,ay);ctx.stroke();ctx.restore();
+    if(Math.floor(t*60)%3===0){const p2=Math.random();addP(particles,lerp(ax,px,p2),lerp(ay,py,p2)-16*Math.sin(Math.PI*p2),2,tether,1.5,0.6,2);}
+    if(phase>1.1){
+      const hT=Math.min(1,(phase-1.1)/0.35);
+      ctx.save();ctx.globalAlpha=1-hT;ctx.beginPath();ctx.arc(ax+14,ay-8,8,0,Math.PI*2);ctx.fillStyle="#a03030";ctx.fill();ctx.restore();
+      if(Math.floor(t*60)%3===0&&hT<0.6)addP(particles,px,py,3,col,3,0.4,3);
+      ctx.save();ctx.globalAlpha=Math.max(0,(1-hT*2)*0.85);ctx.fillStyle=col;ctx.font="600 10px sans-serif";ctx.textAlign="center";
+      ctx.fillText("redirected",px,py-22-hT*12);ctx.restore();
+    }
+    drawEnemy(ctx,ex2,ey2,1);
+    ctx.save();ctx.globalAlpha=0.6+pu*0.2;ctx.fillStyle=col;ctx.font="10px sans-serif";ctx.textAlign="center";ctx.fillText("ally",ax,ay-15);ctx.restore();
+  }
+  updateP(ctx,particles);drawPlayer(ctx,px,py,active?col:"#555");drawPlayer(ctx,ax,ay,col);
+  label(ctx,active?"ally damage routed to you for 5s":"tether dropped",W/2,H-10,col+"99");
+}
+
+function animateNaniteSwarm(ctx,W,H,t,particles){
+  const col=CAT_COL.Heal,dmgCol="#e8622a";
+  const phase=t%4;
+  // cloud starts at caster, drifts toward ally, passes through enemy cluster
+  const casterX=W*0.18,casterY=H*0.75;
+  const allyX=W*0.72,allyY=H*0.38;
+  const enemy1={x:W*0.48,y:H*0.52},enemy2={x:W*0.52,y:H*0.44};
+  const travelDur=2.0;
+  const tT=Math.min(1,phase/travelDur);
+  // cloud center follows a gentle arc
+  const cloudX=lerp(casterX,allyX,tT);
+  const cloudY=lerp(casterY,allyY,tT)-Math.sin(Math.PI*tT)*22;
+  const cloudR=22;
+  const pu=Math.sin(t*3)*0.5+0.5;
+
+  // draw cloud body — layered soft circles
+  for(let i=3;i>=0;i--){
+    const off=i*5,rx=Math.sin(t*1.2+i)*6,ry=Math.cos(t*0.9+i)*5;
+    ctx.save();
+    ctx.globalAlpha=0.06+i*0.04;
+    ctx.beginPath();ctx.arc(cloudX+rx,cloudY+ry,cloudR-i*2,0,Math.PI*2);
+    ctx.fillStyle=col;ctx.fill();ctx.restore();
+  }
+  ctx.save();ctx.globalAlpha=0.35+pu*0.15;
+  ctx.strokeStyle=col;ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(cloudX,cloudY,cloudR,0,Math.PI*2);ctx.stroke();ctx.restore();
+
+  // particle trail
+  if(Math.floor(t*60)%2===0) addP(particles,cloudX+rand(-cloudR,cloudR)*0.5,cloudY+rand(-cloudR,cloudR)*0.5,2,col,0.8,0.8,2);
+
+  // enemy hit detection — when cloud overlaps
+  [enemy1,enemy2].forEach(e=>{
+    const dist=Math.hypot(e.x-cloudX,e.y-cloudY);
+    const hitting=dist<cloudR+8;
+    drawEnemy(ctx,e.x,e.y,hitting?0.5:1);
+    if(hitting&&Math.floor(t*60)%4===0){
+      addP(particles,e.x,e.y,3,dmgCol,2,0.4,2);
+      ctx.save();ctx.globalAlpha=0.7;ctx.fillStyle=dmgCol;ctx.font="600 10px sans-serif";ctx.textAlign="center";
+      ctx.fillText("-8",e.x,e.y-14);ctx.restore();
+    }
+  });
+
+  // ally heal when cloud arrives
+  drawPlayer(ctx,allyX,allyY,col);
+  if(tT>0.85){
+    const healT=Math.min(1,(tT-0.85)/0.15);
+    ctx.save();ctx.globalAlpha=healT*0.8;ctx.fillStyle=col;ctx.font="600 11px sans-serif";ctx.textAlign="center";
+    ctx.fillText("+HP",allyX,allyY-18-healT*10);ctx.restore();
+    if(Math.floor(t*60)%4===0) addP(particles,allyX,allyY,3,col,2,0.6,3);
+  }
+
+  updateP(ctx,particles);
+  drawPlayer(ctx,casterX,casterY,col);
+  label(ctx,"cloud drifts to target — heals ally, chips enemies it passes through",W/2,H-10,col+"99");
+}
+
+function animateDefibrillator(ctx,W,H,t,particles){
+  const col=CAT_COL.Heal,robotCol="#e8622a";
+  // two phases shown alternating: revive mode / anti-robot mode
+  const cycleDur=3.5;
+  const phase=t%cycleDur;
+  const showRevive=(Math.floor(t/cycleDur)%2===0);
+
+  if(showRevive){
+    // downed ally on the ground
+    const ax=W*0.55,ay=H*0.52;
+    const casterX=W*0.28,casterY=H*0.72;
+    const casting=phase<0.5;
+    const pulse=phase>0.5&&phase<1.2;
+    const revived=phase>=1.2;
+    const pu=Math.sin(t*6)*0.5+0.5;
+
+    // downed player — flat on ground
+    ctx.save();ctx.globalAlpha=revived?Math.min(1,(phase-1.2)/0.4):0.4;
+    ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=1.5;
+    ctx.beginPath();
+    if(!revived){
+      // lying down — ellipse
+      ctx.ellipse(ax,ay,14,5,0,0,Math.PI*2);
+    } else {
+      ctx.arc(ax,ay,7,0,Math.PI*2);
+    }
+    ctx.fill();ctx.restore();
+
+    // revival lightning burst
+    if(pulse){
+      const pT=(phase-0.5)/0.7;
+      for(let i=0;i<6;i++){
+        const a=(i/6)*Math.PI*2,r=18+pT*20;
+        ctx.save();ctx.globalAlpha=(1-pT)*0.8;ctx.strokeStyle=col;ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(ax+Math.cos(a)*8,ay+Math.sin(a)*8);ctx.lineTo(ax+Math.cos(a)*r,ay+Math.sin(a)*r);ctx.stroke();ctx.restore();
+      }
+      if(Math.floor(t*60)%2===0) addP(particles,ax,ay,5,col,4,0.4,3);
+    }
+    if(revived){
+      const rT=Math.min(1,(phase-1.2)/0.35);
+      ctx.save();ctx.globalAlpha=(1-rT)*0.85;ctx.fillStyle=col;ctx.font="600 12px sans-serif";ctx.textAlign="center";
+      ctx.fillText("revived — 30% HP",ax,ay-22-rT*12);ctx.restore();
+    }
+
+    drawPlayer(ctx,casterX,casterY,col);
+    ctx.save();ctx.fillStyle="#6b6b7a";ctx.font="11px sans-serif";ctx.textAlign="center";
+    ctx.fillText("MODE: REVIVE",W/2,22);ctx.restore();
+    label(ctx,revived?"ally back up":"charging defibrillator",W/2,H-10,col+"99");
+
+  } else {
+    // anti-robot mode
+    const rx=W*0.62,ry=H*0.4,casterX=W*0.28,casterY=H*0.72;
+    const firing=phase>0.4&&phase<0.8;
+    const hit=phase>=0.8&&phase<1.6;
+    const pu=Math.sin(t*8)*0.5+0.5;
+
+    // robotic enemy — hexagonal
+    const drawRobot=(x,y,alpha)=>{
+      ctx.save();ctx.globalAlpha=alpha;
+      for(let i=0;i<6;i++){
+        const a=(i/6)*Math.PI*2-Math.PI/6,r=12;
+        i===0?ctx.beginPath()&&ctx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r):null;
+        if(i===0){ctx.beginPath();ctx.moveTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}
+        else ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);
+      }
+      ctx.closePath();ctx.fillStyle="#1a1a10";ctx.fill();ctx.strokeStyle=robotCol;ctx.lineWidth=1.5;ctx.stroke();
+      // circuit lines
+      ctx.strokeStyle=robotCol+"60";ctx.lineWidth=0.8;
+      ctx.beginPath();ctx.moveTo(x-5,y);ctx.lineTo(x+5,y);ctx.moveTo(x,y-5);ctx.lineTo(x,y+5);ctx.stroke();
+      ctx.restore();
+    };
+
+    drawRobot(rx,ry,hit?Math.max(0.1,1-(phase-0.8)/0.8):1);
+
+    if(firing){
+      const fT=(phase-0.4)/0.4;
+      // arc from caster to robot
+      for(let i=0;i<3;i++){
+        const offset=i*0.1;
+        const bx=lerp(casterX,rx,fT+offset*0.2>1?1:fT),by=lerp(casterY,ry,fT);
+        ctx.save();ctx.globalAlpha=0.7-i*0.2;ctx.fillStyle=col;
+        ctx.beginPath();ctx.arc(bx+(Math.random()-0.5)*8,by+(Math.random()-0.5)*8,3,0,Math.PI*2);ctx.fill();ctx.restore();
+      }
+      addP(particles,lerp(casterX,rx,fT),lerp(casterY,ry,fT),3,col,2,0.3,2);
+    }
+
+    if(hit){
+      const hT=Math.min(1,(phase-0.8)/0.5);
+      if(Math.floor(t*60)%2===0&&hT<0.7) addP(particles,rx,ry,6,robotCol,5,0.45,4);
+      ctx.save();ctx.globalAlpha=Math.max(0,(1-hT*1.5)*0.9);ctx.fillStyle=robotCol;ctx.font="700 14px sans-serif";ctx.textAlign="center";
+      ctx.fillText("60",rx,ry-28-hT*16);ctx.restore();
+    }
+
+    drawPlayer(ctx,casterX,casterY,col);
+    ctx.save();ctx.fillStyle="#6b6b7a";ctx.font="11px sans-serif";ctx.textAlign="center";
+    ctx.fillText("MODE: ANTI-ROBOT",W/2,22);ctx.restore();
+    label(ctx,hit?"system shock — 60 dmg to mechanical":"targeting robotic systems",W/2,H-10,robotCol+"99");
+  }
+
+  updateP(ctx,particles);
+}
+
+const anims={};
+let activeFilter="all";
+
+function buildGrid(){
+  const grid=document.getElementById("grid");
+  grid.innerHTML="";
+  Object.values(anims).forEach(a=>a.stop());
+  const filtered=SPELLS.filter(s=>activeFilter==="all"||s.category===activeFilter);
+  filtered.forEach(spell=>{
+    const cat=spell.category.toLowerCase();
+    const col=CAT_COL[spell.category];
+    const card=document.createElement("div");
+    card.className="spell-card";
+
+    const chargeSlider=spell.chargeable?`
+      <div class="charge-section">
+        <div class="charge-header"><span>Charge</span><span id="cpct-${spell.id}">0%</span></div>
+        <input type="range" min="0" max="100" value="0" id="cslide-${spell.id}">
+        <div class="charge-dmg-out" id="cdmg-${spell.id}">${spell.damage}<span>dmg at 0% charge</span></div>
+      </div>`:""
+
+    const statsHtml=[
+      spell.damage>0?`<div class="stat"><div class="stat-val c-dmg">${spell.damage}${spell.maxDamage?` – ${spell.maxDamage}`:""}</div><div class="stat-lbl">Damage</div></div>`:"",
+      spell.shieldAbsorb>0?`<div class="stat"><div class="stat-val c-supp">${spell.shieldAbsorb}</div><div class="stat-lbl">Absorb</div></div>`:"",
+      spell.shieldDuration>0?`<div class="stat"><div class="stat-val c-supp">${spell.shieldDuration}s</div><div class="stat-lbl">Duration</div></div>`:"",
+      spell.range>0?`<div class="stat"><div class="stat-val c-neutral">${spell.range}u</div><div class="stat-lbl">Range</div></div>`:"",
+      spell.indicator>0?`<div class="stat"><div class="stat-val c-neutral">${spell.indicator}u</div><div class="stat-lbl">AoE radius</div></div>`:"",
+      spell.coneAngle>0?`<div class="stat"><div class="stat-val c-neutral">${spell.coneAngle}°</div><div class="stat-lbl">Cone</div></div>`:"",
+    ].filter(Boolean).join("");
+
+    card.innerHTML=`
+      <div class="card-top">
+        <div class="card-cat-bar" style="background:${col};"></div>
+        <div class="card-top-inner">
+          <div class="card-name-block">
+            <div class="card-name">${spell.name}</div>
+            <div class="card-role" style="color:${col}cc;">${spell.category} &nbsp;·&nbsp; ${spell.shape}</div>
+          </div>
+          <div class="card-slot-cd">
+            <div class="slot-pill">${spell.slot}</div>
+            <div class="cd-val">${spell.cooldown}s</div>
+            <div class="cd-lbl">cooldown</div>
+          </div>
+        </div>
+      </div>
+      <div class="canvas-wrap" id="wrap-${spell.id}">
+        <canvas class="preview" id="cvs-${spell.id}" width="680" height="210"></canvas>
+        <div class="replay-hint">click to replay</div>
+      </div>
+      <div class="card-body">
+        <p class="card-desc">${spell.desc}</p>
+        <div class="stat-row">${statsHtml}</div>
+        <div class="combat-note">${spell.combatNote}</div>
+        ${chargeSlider}
+        <div class="tag-row">${spell.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+
+    const canvas=card.querySelector(`#cvs-${spell.id}`);
+    canvas.style.background=CAT_DIM[spell.category];
+    const anim=new Anim(canvas,spell);
+    anims[spell.id]=anim;
+    anim.start();
+
+    card.querySelector(`#wrap-${spell.id}`).addEventListener("click",()=>anim.start());
+
+    if(spell.chargeable){
+      const slider=card.querySelector(`#cslide-${spell.id}`);
+      const pct=card.querySelector(`#cpct-${spell.id}`);
+      const dmgOut=card.querySelector(`#cdmg-${spell.id}`);
+      slider.addEventListener("input",()=>{
+        const v=parseInt(slider.value),ft=v/100;
+        const d=Math.round(spell.damage+(spell.maxDamage-spell.damage)*ft);
+        pct.textContent=v+"%";
+        dmgOut.innerHTML=`${d}<span>dmg at ${v}% charge</span>`;
+      });
+    }
+  });
+}
+
+document.querySelectorAll(".filt").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    activeFilter=btn.dataset.f;
+    document.querySelectorAll(".filt").forEach(b=>b.classList.remove("on"));
+    btn.classList.add("on");
+    buildGrid();
+  });
+});
+
+buildGrid();
+</script>
+</body>
+</html>

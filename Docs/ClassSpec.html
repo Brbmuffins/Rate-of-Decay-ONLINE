@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rate of Decay Online — Class Reference</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0c0c0e;
+  --surface: #111115;
+  --surface2: #17171d;
+  --surface3: #1e1e26;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text: #d4d4dc;
+  --muted: #64647a;
+  --faint: #2a2a36;
+  --engineer: #e8922a;
+  --guardian: #4d8fff;
+  --phaser: #c084fc;
+  --medic: #3fc26a;
+  --wraith: #94a3b8;
+}
+html { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; font-size: 15px; }
+body { max-width: 1060px; margin: 0 auto; padding: 0 1.5rem 6rem; }
+a { color: inherit; text-decoration: none; }
+
+/* ── MASTHEAD ────────────────────────────────────── */
+.masthead {
+  padding: 4rem 0 3rem;
+  border-bottom: 1px solid var(--border2);
+  margin-bottom: 0;
+}
+.game-label {
+  font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px;
+}
+.game-title { font-size: 42px; font-weight: 300; letter-spacing: -1.5px; line-height: 1; color: var(--text); margin-bottom: 6px; }
+.game-title strong { font-weight: 600; }
+.game-sub { font-size: 14px; color: var(--muted); margin-top: 14px; line-height: 1.65; max-width: 480px; }
+.game-meta { display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap; }
+.meta-item { }
+.meta-val { font-size: 20px; font-weight: 500; color: var(--text); }
+.meta-lbl { font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+/* ── CLASS TABS ──────────────────────────────────── */
+.class-nav {
+  display: flex; border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; background: var(--bg); z-index: 10;
+}
+.class-tab {
+  flex: 1; padding: 14px 10px; text-align: center; font-size: 12px;
+  font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent;
+  transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none;
+  white-space: nowrap;
+}
+.class-tab:hover { color: var(--text); }
+
+/* ── CLASS PANEL ─────────────────────────────────── */
+.class-panel { display: none; padding-top: 2.5rem; }
+.class-panel.active { display: block; }
+
+.class-hero { margin-bottom: 2.5rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border); }
+.hero-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 2rem; flex-wrap: wrap; }
+.hero-name { font-size: 36px; font-weight: 300; letter-spacing: -1px; margin-bottom: 5px; }
+.hero-tagline { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.hero-role-pills { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.role-pill { font-size: 11px; padding: 3px 10px; border-radius: 3px; border: 1px solid; letter-spacing: 0.04em; }
+.hero-quote {
+  margin-top: 1.5rem; padding-left: 1.25rem;
+  border-left: 2px solid var(--border2);
+  font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 620px;
+  font-style: italic;
+}
+
+/* ── STAT BARS ───────────────────────────────────── */
+.stat-block { display: flex; flex-direction: column; gap: 8px; min-width: 180px; }
+.stat-row2 { display: flex; align-items: center; gap: 10px; }
+.stat-name { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); width: 100px; flex-shrink: 0; }
+.stat-bar { flex: 1; height: 3px; background: var(--faint); border-radius: 2px; overflow: hidden; }
+.stat-fill { height: 100%; border-radius: 2px; }
+
+/* ── PASSIVE ─────────────────────────────────────── */
+.passive-block {
+  background: var(--surface2); border-radius: 10px; padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border2); margin-bottom: 2rem;
+  display: flex; gap: 1rem; align-items: flex-start;
+}
+.passive-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.passive-text {}
+.passive-tag { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.passive-name2 { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+.passive-desc2 { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── ABILITY GRID ────────────────────────────────── */
+.ability-section-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.ability-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 2rem; }
+@media (max-width: 600px) { .ability-grid { grid-template-columns: 1fr; } }
+
+.ability-card {
+  background: var(--surface); border-radius: 8px; padding: 14px 16px;
+  border: 1px solid var(--border); position: relative; overflow: hidden;
+}
+.ability-card.is-new { border-color: var(--border2); }
+.ability-card.is-ult { border-color: rgba(255,255,255,0.18); background: var(--surface2); }
+.ability-card-bar { position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+.ability-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.ability-card-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.ability-badges { display: flex; gap: 4px; }
+.badge-new { font-size: 9px; padding: 1px 6px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(186,117,23,0.15); color: #ef9f27; border: 1px solid rgba(186,117,23,0.3); }
+.badge-ult { font-size: 9px; padding: 1px 6px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(162,45,45,0.15); color: #f09595; border: 1px solid rgba(162,45,45,0.3); }
+.badge-existing { font-size: 9px; padding: 1px 6px; border-radius: 2px; letter-spacing: 0.06em; text-transform: uppercase; background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+.ability-card-cat { font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 6px; }
+.ability-card-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
+
+/* ── PLAY PATTERN ────────────────────────────────── */
+.pattern-block {
+  background: var(--surface2); border-radius: 10px; padding: 1.25rem 1.5rem;
+  border: 1px solid var(--border); margin-bottom: 2rem;
+}
+.pattern-title { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.pattern-steps { display: flex; flex-direction: column; gap: 0; }
+.pattern-step { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.pattern-step:last-child { border-bottom: none; }
+.step-num { font-size: 10px; font-weight: 500; width: 18px; height: 18px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--muted); margin-top: 1px; }
+.step-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.step-text em { color: var(--muted); font-style: normal; font-size: 12px; }
+
+/* ── DEPLOYABLE ──────────────────────────────────── */
+.deployable-block {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding: 1rem 1.25rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 2rem;
+}
+.dep-icon { width: 36px; height: 36px; border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 15px; }
+.dep-label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.dep-name2 { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.dep-desc2 { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+/* ── SYNERGY ─────────────────────────────────────── */
+.synergy-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 2rem; }
+.synergy-chip {
+  padding: 6px 14px; border-radius: 5px; border: 1px solid var(--border2);
+  background: var(--surface2); font-size: 12px; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+.syn-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── FOOTER ──────────────────────────────────────── */
+.site-footer {
+  margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;
+}
+.site-footer p { font-size: 12px; color: var(--muted); }
+
+/* ── SECTION DIVIDER ─────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 2rem 0; }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="game-label">Internal design reference — 2026</div>
+  <h1 class="game-title">Rate of Decay <strong>Online</strong></h1>
+  <p class="game-sub">A post-collapse co-op experience set in the ruins of a technologically utopian world, shattered after a political movement to liberate its robots failed. Five playable classes. No leveling. Combat defines how the environment responds to you.</p>
+  <div class="game-meta">
+    <div class="meta-item"><div class="meta-val">4–5</div><div class="meta-lbl">Players</div></div>
+    <div class="meta-item"><div class="meta-val">5</div><div class="meta-lbl">Classes</div></div>
+    <div class="meta-item"><div class="meta-val">4</div><div class="meta-lbl">Ability slots</div></div>
+    <div class="meta-item"><div class="meta-val">Co-op</div><div class="meta-lbl">Mode</div></div>
+  </div>
+</div>
+
+<nav class="class-nav" id="classNav">
+  <button class="class-tab active" data-class="engineer">Engineer</button>
+  <button class="class-tab" data-class="guardian">Guardian</button>
+  <button class="class-tab" data-class="phaser">Phaser</button>
+  <button class="class-tab" data-class="medic">Medic</button>
+  <button class="class-tab" data-class="wraith">Wraith</button>
+</nav>
+
+<!-- ══ ENGINEER ══════════════════════════════════════════════ -->
+<section class="class-panel active" id="panel-engineer">
+  <div class="class-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-name" style="color:var(--engineer)">Engineer</div>
+        <div class="hero-tagline">Builder · Controller · Sustained Damage</div>
+        <div class="hero-role-pills">
+          <span class="role-pill" style="color:var(--engineer);border-color:rgba(232,146,42,0.3);background:rgba(232,146,42,0.08)">Build</span>
+          <span class="role-pill" style="color:var(--engineer);border-color:rgba(232,146,42,0.3);background:rgba(232,146,42,0.08)">Deploy</span>
+          <span class="role-pill" style="color:var(--engineer);border-color:rgba(232,146,42,0.3);background:rgba(232,146,42,0.08)">Survive</span>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row2"><span class="stat-name">Damage</span><div class="stat-bar"><div class="stat-fill" style="width:55%;background:var(--engineer)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Survivability</span><div class="stat-bar"><div class="stat-fill" style="width:60%;background:var(--engineer)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Healing</span><div class="stat-bar"><div class="stat-fill" style="width:20%;background:var(--engineer)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Crowd control</span><div class="stat-bar"><div class="stat-fill" style="width:80%;background:var(--engineer)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Complexity</span><div class="stat-bar"><div class="stat-fill" style="width:65%;background:var(--engineer)"></div></div></div>
+      </div>
+    </div>
+    <p class="hero-quote">You think two fights ahead. Before the enemy arrives you've already placed the turret, mined the doorway, and charged the Arc Cannon. Your kit rewards preparation over reaction — the player who reads the map and sets the board wins before the first shot lands.</p>
+  </div>
+
+  <div class="passive-block">
+    <div class="passive-icon" style="background:rgba(232,146,42,0.1)">⚙</div>
+    <div class="passive-text">
+      <div class="passive-tag">Passive ability</div>
+      <div class="passive-name2">Overengineered</div>
+      <div class="passive-desc2">Your deployed objects accumulate output stacks every 4 seconds while you remain within 12 units. Each stack increases their damage or healing by 8%, up to 5 stacks. A turret at max stacks hits 40% harder. Staying near your work makes it stronger — and leaving lets it decay.</div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Abilities — equip any 4 of 7</div>
+  <div class="ability-grid">
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Sentinel Drop</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Circle · 6s cd</div>
+      <div class="ability-card-desc">Deploy a salvaged Liberation-era combat drone. Auto-targets enemies on sight. Gains output stacks from your passive while you're nearby.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Arc Cannon</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Beam · 4s cd</div>
+      <div class="ability-card-desc">Chargeable piercing beam. 15 to 50 damage depending on charge. Widens 1.8x at full — turns a surgical shot into a corridor of damage.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Shock Mine</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Trap · 5s cd</div>
+      <div class="ability-card-desc">Invisible proximity charge. 40 burst damage on trigger. Stack them on chokepoints and doorways. The map becomes a weapon.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Overdrive</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Aura · 12s cd</div>
+      <div class="ability-card-desc">Instant self-cast aura — boosts all nearby ally damage output for 4 seconds. Call it before the team pushes, not during.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Drone Command</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Target · 8s cd</div>
+      <div class="ability-card-desc">Redirect your active Sentinel to focus a specific target for 6 seconds. The drone stops roaming. Use it on elites or priority targets your team is already focusing.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--medic)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Field Repair</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--medic)">Heal · Targeted · 6s cd</div>
+      <div class="ability-card-desc">Instantly restores a single ally's HP and removes one active debuff. Short range, no AoE. The Engineer's only direct heal — use it on your most critical teammate.</div>
+    </div>
+    <div class="ability-card is-ult">
+      <div class="ability-card-bar" style="background:var(--engineer)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">System Overload</span><span class="badge-ult">ultimate</span></div>
+      <div class="ability-card-cat" style="color:var(--engineer)">Damage · Deploy · 45s cd</div>
+      <div class="ability-card-desc">All active deployables fire simultaneously at full output for 8 seconds. Instantly triggers max passive stacks on all of them. Best when you have 3+ objects on the field before casting.</div>
+    </div>
+  </div>
+
+  <div class="deployable-block">
+    <div class="dep-icon" style="background:rgba(232,146,42,0.1)">T</div>
+    <div>
+      <div class="dep-label">Signature deployable</div>
+      <div class="dep-name2">Engineer Turret</div>
+      <div class="dep-desc2">A reprogrammed Liberation-era combat drone. Targets enemies on sight, holds position until destroyed. Gains stacks from Overengineered passive. Engineer can have 3 active deployables simultaneously — all other classes are limited to 1.</div>
+    </div>
+  </div>
+
+  <div class="pattern-title">How a round plays</div>
+  <div class="pattern-block">
+    <div class="pattern-steps">
+      <div class="pattern-step"><div class="step-num">1</div><div class="step-text">Before combat — place Sentinel Drop at the chokepoint, Shock Mine on the secondary entrance. <em>You've already won two decisions before the fight starts.</em></div></div>
+      <div class="pattern-step"><div class="step-num">2</div><div class="step-text">When enemies arrive — activate Overdrive for your team, then hold Arc Cannon charge while they push through your mines. <em>High damage window with low personal risk.</em></div></div>
+      <div class="pattern-step"><div class="step-num">3</div><div class="step-text">If an elite emerges — Drone Command redirects your Sentinel onto it. Your turret and your beam are now focused on the same target. <em>Priority kill without repositioning.</em></div></div>
+      <div class="pattern-step"><div class="step-num">4</div><div class="step-text">If the push succeeds — System Overload detonates everything simultaneously. Maximum passive stacks, maximum output. <em>Clear the room and reset your board.</em></div></div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Best paired with</div>
+  <div class="synergy-row">
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--guardian)"></span>Guardian — Magnetize pulls enemies into your mine field</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--phaser)"></span>Phaser — Overdrive amplifies their burst window</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--medic)"></span>Medic — Field Repair covers for Triage Loop gaps</div>
+  </div>
+</section>
+
+<!-- ══ GUARDIAN ═══════════════════════════════════════════════ -->
+<section class="class-panel" id="panel-guardian">
+  <div class="class-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-name" style="color:var(--guardian)">Guardian</div>
+        <div class="hero-tagline">Tank · Frontline · Team Protector</div>
+        <div class="hero-role-pills">
+          <span class="role-pill" style="color:var(--guardian);border-color:rgba(77,143,255,0.3);background:rgba(77,143,255,0.08)">Absorb</span>
+          <span class="role-pill" style="color:var(--guardian);border-color:rgba(77,143,255,0.3);background:rgba(77,143,255,0.08)">Control</span>
+          <span class="role-pill" style="color:var(--guardian);border-color:rgba(77,143,255,0.3);background:rgba(77,143,255,0.08)">Protect</span>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row2"><span class="stat-name">Damage</span><div class="stat-bar"><div class="stat-fill" style="width:25%;background:var(--guardian)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Survivability</span><div class="stat-bar"><div class="stat-fill" style="width:95%;background:var(--guardian)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Healing</span><div class="stat-bar"><div class="stat-fill" style="width:0%;background:var(--guardian)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Crowd control</span><div class="stat-bar"><div class="stat-fill" style="width:90%;background:var(--guardian)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Complexity</span><div class="stat-bar"><div class="stat-fill" style="width:50%;background:var(--guardian)"></div></div></div>
+      </div>
+    </div>
+    <p class="hero-quote">You are the reason the run doesn't collapse. You're not there to deal damage — you're there to make the hardest fight survivable. Your decisions are about threat management: which enemy gets locked down first, when to absorb, when to call the push.</p>
+  </div>
+
+  <div class="passive-block">
+    <div class="passive-icon" style="background:rgba(77,143,255,0.1)">⬡</div>
+    <div class="passive-text">
+      <div class="passive-tag">Passive ability</div>
+      <div class="passive-name2">Threat Protocol</div>
+      <div class="passive-desc2">Taking damage generates Threat stacks. At 5 stacks, nearby enemies redirect aggro to you instead of allies for 6 seconds, and you gain 20% damage reduction for the duration. Dying clears all stacks. The Guardian who deliberately stands in fire keeps the run alive.</div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Abilities — equip any 4 of 7</div>
+  <div class="ability-grid">
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Kinetic Reversal</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Counter · Cone · 10s cd</div>
+      <div class="ability-card-desc">Absorb incoming hits for 3 seconds. Release stored kinetic energy as a 70° cone — up to 60 damage. The more you absorb during the window, the harder it hits.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Deflect Protocol</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Instant · 8s cd</div>
+      <div class="ability-card-desc">Hardlight barrier — absorbs 50 damage before HP is touched. In Guardian's hands this can be cast on an ally, not only self. Instant, no aim required.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Magnetize</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Control · Anchor · 7s cd</div>
+      <div class="ability-card-desc">Pulls all enemies in radius toward an anchor point. Zero damage. Pure setup — follow immediately with team AoE. Call it in voice before casting.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Breach Slam</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Charge · 6s cd</div>
+      <div class="ability-card-desc">Charge forward 6 units — 25 damage and staggers all enemies hit. Generates 3 Threat stacks instantly. Your gap closer and aggro pull combined.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Siege Mode</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Stance · 14s cd</div>
+      <div class="ability-card-desc">Go stationary for 6 seconds. Gain 40% damage reduction and 3x Threat generation rate. You cannot move or dodge. Maximum defense, maximum target priority.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Iron Tether</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Control · Leash · 9s cd</div>
+      <div class="ability-card-desc">Lock onto one enemy — they cannot move more than 8 units from you for 5 seconds. You absorb 15% of their attacks on allies during the tether. Counters flankers.</div>
+    </div>
+    <div class="ability-card is-ult">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Last Bastion</span><span class="badge-ult">ultimate</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Wall · 50s cd</div>
+      <div class="ability-card-desc">Deploy a full-width hardlight barrier wall. Blocks all incoming projectiles. Your team shelters behind it. Holds for 10 seconds. The entire map changes when this goes up.</div>
+    </div>
+  </div>
+
+  <div class="deployable-block">
+    <div class="dep-icon" style="background:rgba(77,143,255,0.1)">◈</div>
+    <div>
+      <div class="dep-label">Signature deployable</div>
+      <div class="dep-name2">Bastion Node</div>
+      <div class="dep-desc2">A stationary hardlight emitter. Projects a dome that absorbs 30 damage per ally inside before they take HP damage. Lasts 20 seconds or until destroyed. Guardian can anchor a position around it.</div>
+    </div>
+  </div>
+
+  <div class="pattern-title">How a round plays</div>
+  <div class="pattern-block">
+    <div class="pattern-steps">
+      <div class="pattern-step"><div class="step-num">1</div><div class="step-text">Breach Slam into the largest group — instant aggro, stagger, 3 Threat stacks. <em>You've pulled their attention before anyone else fires.</em></div></div>
+      <div class="pattern-step"><div class="step-num">2</div><div class="step-text">Activate Siege Mode in the middle of them — maximum Threat generation, damage reduction active. <em>You absorb everything. Teammates attack freely.</em></div></div>
+      <div class="pattern-step"><div class="step-num">3</div><div class="step-text">Iron Tether on the flanker who breaks off toward the Medic. <em>They're locked to you. The Medic lives.</em></div></div>
+      <div class="pattern-step"><div class="step-num">4</div><div class="step-text">If a boss ability fires — Last Bastion. <em>Ten seconds of cover. The run doesn't end here.</em></div></div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Best paired with</div>
+  <div class="synergy-row">
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--medic)"></span>Medic — Adaptive Shield on Guardian turns Siege Mode into almost unkillable</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--engineer)"></span>Engineer — Magnetize feeds Shock Mine detonations</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--phaser)"></span>Phaser — Magnetize clusters enemies for Event Horizon</div>
+  </div>
+</section>
+
+<!-- ══ PHASER ═════════════════════════════════════════════════ -->
+<section class="class-panel" id="panel-phaser">
+  <div class="class-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-name" style="color:var(--phaser)">Phaser</div>
+        <div class="hero-tagline">Ranged DPS · Burst · Mobility</div>
+        <div class="hero-role-pills">
+          <span class="role-pill" style="color:var(--phaser);border-color:rgba(192,132,252,0.3);background:rgba(192,132,252,0.08)">Burst</span>
+          <span class="role-pill" style="color:var(--phaser);border-color:rgba(192,132,252,0.3);background:rgba(192,132,252,0.08)">Mobile</span>
+          <span class="role-pill" style="color:var(--phaser);border-color:rgba(192,132,252,0.3);background:rgba(192,132,252,0.08)">Controller</span>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row2"><span class="stat-name">Damage</span><div class="stat-bar"><div class="stat-fill" style="width:95%;background:var(--phaser)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Survivability</span><div class="stat-bar"><div class="stat-fill" style="width:25%;background:var(--phaser)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Healing</span><div class="stat-bar"><div class="stat-fill" style="width:0%;background:var(--phaser)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Crowd control</span><div class="stat-bar"><div class="stat-fill" style="width:55%;background:var(--phaser)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Complexity</span><div class="stat-bar"><div class="stat-fill" style="width:90%;background:var(--phaser)"></div></div></div>
+      </div>
+    </div>
+    <p class="hero-quote">You hit harder than anyone and you're never where they expect. Your passive demands that you cycle through your entire kit constantly to build Phase Charge — a Phaser who sits on one spell is leaving damage on the floor. The highest skill ceiling in the roster.</p>
+  </div>
+
+  <div class="passive-block">
+    <div class="passive-icon" style="background:rgba(192,132,252,0.1)">◎</div>
+    <div class="passive-text">
+      <div class="passive-tag">Passive ability</div>
+      <div class="passive-name2">Phase Charge</div>
+      <div class="passive-desc2">Every ability use charges a Phase meter (6 charges to fill). At full charge, your next offensive ability deals 40% bonus damage and the meter resets. Rewards rapid cycling — you cannot sit on one spell. Phase Shift casts do not consume meter, letting you reposition freely between charges.</div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Abilities — equip any 4 of 7</div>
+  <div class="ability-grid">
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Dark Blast</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Cone · 3s cd</div>
+      <div class="ability-card-desc">Chargeable 60° cone — 10 to 30 damage. Fastest cooldown in the kit. Good Phase Charge filler between heavy hitters.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Thermal Charge</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Projectile · 4s cd</div>
+      <div class="ability-card-desc">Plasma slug that detonates on impact. Chargeable AoE — 20 to 45 damage. Longest range AoE in the kit. Best cast after Phase Charge is full.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Neural Spike</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Instant · 5s cd</div>
+      <div class="ability-card-desc">35 flat damage, no charge needed. Best used at full Phase Charge for the 40% bonus — turns 35 into 49. Your primary finisher.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--phaser)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Phase Shift</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--phaser)">Mobility · Teleport · 4s cd</div>
+      <div class="ability-card-desc">Teleport up to 10 units in the aimed direction instantly. Does not consume Phase Charge meter. Your escape, your reposition, your engage. Changes how you exist in space.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--phaser)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Singularity</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--phaser)">Control · Pull · 9s cd</div>
+      <div class="ability-card-desc">Deploy a micro black hole — pulls all enemies within 8 units toward center for 3 seconds, then collapses for 20 AoE damage. Sets up your own follow-up or a teammate's.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Arc Lance</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Chain · 7s cd</div>
+      <div class="ability-card-desc">Chain lightning that jumps between up to 4 enemies. First target takes 30 damage, each jump loses 5. At Phase Charge: 42 on first target. Best against grouped enemies.</div>
+    </div>
+    <div class="ability-card is-ult">
+      <div class="ability-card-bar" style="background:var(--phaser)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Event Horizon</span><span class="badge-ult">ultimate</span></div>
+      <div class="ability-card-cat" style="color:var(--phaser)">Damage · Singularity · 50s cd</div>
+      <div class="ability-card-desc">Massive singularity at target location. 12-unit pull radius, 3 second collapse, then 60 AoE burst. Survivors have exposed weakpoints for 8 seconds — all incoming damage increased by 25%.</div>
+    </div>
+  </div>
+
+  <div class="deployable-block">
+    <div class="dep-icon" style="background:rgba(192,132,252,0.1)">◈</div>
+    <div>
+      <div class="dep-label">Signature deployable</div>
+      <div class="dep-name2">Phase Relay</div>
+      <div class="dep-desc2">A phase-energy anchor that increases Phase Orb blast radius by 40% and extends Singularity pull duration by 2 seconds within a 10-unit area. Passive field — no activation needed. Enables larger AoE windows for the whole team while it's up.</div>
+    </div>
+  </div>
+
+  <div class="pattern-title">Phase Charge rotation</div>
+  <div class="pattern-block">
+    <div class="pattern-steps">
+      <div class="pattern-step"><div class="step-num">1</div><div class="step-text">Phase Shift into range — meter stays clean, you're in position. <em>Charge 0 of 6.</em></div></div>
+      <div class="pattern-step"><div class="step-num">2</div><div class="step-text">Singularity down — enemies pulled together, meter charges. Dark Blast as they cluster. Arc Lance across the group. <em>Charge 3 of 6.</em></div></div>
+      <div class="pattern-step"><div class="step-num">3</div><div class="step-text">Thermal Charge into the center as they collapse. Another Dark Blast fast. <em>Charge 5 of 6. One more ability fires the bonus.</em></div></div>
+      <div class="pattern-step"><div class="step-num">4</div><div class="step-text">Neural Spike at full Phase Charge — 49 damage on the elite survivor. Phase Shift out before the counter-push. <em>Full cycle, full reset.</em></div></div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Best paired with</div>
+  <div class="synergy-row">
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--guardian)"></span>Guardian — Magnetize clusters for Singularity, then Event Horizon finishes</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--engineer)"></span>Engineer — Overdrive active during Phase Charge burst doubles output</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--medic)"></span>Medic — Phaser needs someone to keep them alive at low survivability</div>
+  </div>
+</section>
+
+<!-- ══ MEDIC ══════════════════════════════════════════════════ -->
+<section class="class-panel" id="panel-medic">
+  <div class="class-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-name" style="color:var(--medic)">Medic</div>
+        <div class="hero-tagline">Healer · Sacrifice · Utility</div>
+        <div class="hero-role-pills">
+          <span class="role-pill" style="color:var(--medic);border-color:rgba(63,194,106,0.3);background:rgba(63,194,106,0.08)">Sustain</span>
+          <span class="role-pill" style="color:var(--medic);border-color:rgba(63,194,106,0.3);background:rgba(63,194,106,0.08)">Sacrifice</span>
+          <span class="role-pill" style="color:var(--medic);border-color:rgba(63,194,106,0.3);background:rgba(63,194,106,0.08)">Utility</span>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row2"><span class="stat-name">Damage</span><div class="stat-bar"><div class="stat-fill" style="width:10%;background:var(--medic)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Survivability</span><div class="stat-bar"><div class="stat-fill" style="width:55%;background:var(--medic)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Healing</span><div class="stat-bar"><div class="stat-fill" style="width:95%;background:var(--medic)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Crowd control</span><div class="stat-bar"><div class="stat-fill" style="width:20%;background:var(--medic)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Complexity</span><div class="stat-bar"><div class="stat-fill" style="width:75%;background:var(--medic)"></div></div></div>
+      </div>
+    </div>
+    <p class="hero-quote">Without you the run ends. You're not a passive healer — you make active decisions about who lives and what you're willing to spend to keep them there. Transfer Protocol and Defibrillator are both high-stakes calls that define whether this team makes it out.</p>
+  </div>
+
+  <div class="passive-block">
+    <div class="passive-icon" style="background:rgba(63,194,106,0.1)">+</div>
+    <div class="passive-text">
+      <div class="passive-tag">Passive ability</div>
+      <div class="passive-name2">Triage Loop</div>
+      <div class="passive-desc2">Each ally you successfully heal generates a small self-repair on you — 8% of the heal amount feeds back into your own HP. A Medic who stays active stays healthy. One who waits for the right moment to heal will find themselves low with nothing left to give.</div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Abilities — equip any 4 of 7</div>
+  <div class="ability-grid">
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--medic)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Repair Wave</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--medic)">Heal · AoE · 5s cd</div>
+      <div class="ability-card-desc">Nanite cloud burst at target location. Heals all allies in a 3-unit radius. Aim it where the team is retreating to, not where they currently are.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--medic)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Transfer Protocol</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--medic)">Heal · Tether · 9s cd</div>
+      <div class="ability-card-desc">Tether to an ally — their incoming damage routes to you for 5 seconds. They become untouchable. You take the hit. Use when an ally is too low to survive another strike.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--medic)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Nanite Swarm</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--medic)">Heal · Mobile · 7s cd</div>
+      <div class="ability-card-desc">Mobile heal cloud that drifts toward target ally. Heals on arrival, chips enemies it passes through. Aim it through enemy lines for dual value.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:var(--medic)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Defibrillator</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:var(--medic)">Heal · Context · 14s cd</div>
+      <div class="ability-card-desc">Revives a downed ally at 30% HP — or deals 60 burst damage to robotic enemies. Same button. Reading the situation is the skill. Highest cooldown in the kit.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Adaptive Shield</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Support · Shield · 10s cd</div>
+      <div class="ability-card-desc">Apply a shield to an ally that grows stronger as they take damage — scales from 20 to 80 absorb over 8 seconds of sustained fire. Best placed on the Guardian before they engage.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--guardian)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Purge Protocol</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--guardian)">Utility · Cleanse · 7s cd</div>
+      <div class="ability-card-desc">Remove all negative effects from an ally instantly. Clears slows, debuffs, damage-over-time effects. No damage, no heal — pure cleanse. The ability that makes some fights possible.</div>
+    </div>
+    <div class="ability-card is-ult">
+      <div class="ability-card-bar" style="background:var(--medic)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">System Rollback</span><span class="badge-ult">ultimate</span></div>
+      <div class="ability-card-cat" style="color:var(--medic)">Heal · Rewind · 60s cd</div>
+      <div class="ability-card-desc">Rewind the entire team 5 seconds. Restores HP and position, removes all debuffs. Effectively a team undo. The highest-cooldown ability in the game. When you use it, it should feel like a save.</div>
+    </div>
+  </div>
+
+  <div class="deployable-block">
+    <div class="dep-icon" style="background:rgba(63,194,106,0.1)">+</div>
+    <div>
+      <div class="dep-label">Signature deployable</div>
+      <div class="dep-name2">Restoration Beacon</div>
+      <div class="dep-desc2">A pulsing nanite emitter that passively heals all allies within 8 units every 3 seconds. Low output but persistent. Place it at the team's fallback point. Works with the Triage Loop passive — every pulse it triggers feeds back a small heal to the Medic.</div>
+    </div>
+  </div>
+
+  <div class="pattern-title">How a round plays</div>
+  <div class="pattern-block">
+    <div class="pattern-steps">
+      <div class="pattern-step"><div class="step-num">1</div><div class="step-text">Adaptive Shield on Guardian before they Breach Slam in. <em>Their Siege Mode is now nearly unkillable.</em></div></div>
+      <div class="pattern-step"><div class="step-num">2</div><div class="step-text">Deploy Restoration Beacon at the team's cover position. Repair Wave the cluster when HP drops. <em>Triage Loop keeps you topped off while you work.</em></div></div>
+      <div class="pattern-step"><div class="step-num">3</div><div class="step-text">Transfer Protocol on a low ally when they can't be healed in time. You take the hit. Purge Protocol on them immediately after if they're debuffed. <em>Two-ability save sequence.</em></div></div>
+      <div class="pattern-step"><div class="step-num">4</div><div class="step-text">If the fight turns — System Rollback. 5 seconds back. Everyone has HP. Everyone is out of the fire. <em>The run continues.</em></div></div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Best paired with</div>
+  <div class="synergy-row">
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--guardian)"></span>Guardian — Adaptive Shield on a Siege Mode Guardian is the strongest defensive combo</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--phaser)"></span>Phaser — keeps low-survivability burst damage alive</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--wraith)"></span>Wraith — Purge Protocol saves them from debuffs that break their stealth windows</div>
+  </div>
+</section>
+
+<!-- ══ WRAITH ══════════════════════════════════════════════════ -->
+<section class="class-panel" id="panel-wraith">
+  <div class="class-hero">
+    <div class="hero-top">
+      <div>
+        <div class="hero-name" style="color:var(--wraith)">Wraith</div>
+        <div class="hero-tagline">Assassin · Disruptor · Stealth</div>
+        <div class="hero-role-pills">
+          <span class="role-pill" style="color:var(--wraith);border-color:rgba(148,163,184,0.3);background:rgba(148,163,184,0.08)">Stealth</span>
+          <span class="role-pill" style="color:var(--wraith);border-color:rgba(148,163,184,0.3);background:rgba(148,163,184,0.08)">Burst</span>
+          <span class="role-pill" style="color:var(--wraith);border-color:rgba(148,163,184,0.3);background:rgba(148,163,184,0.08)">Disrupt</span>
+        </div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-row2"><span class="stat-name">Damage</span><div class="stat-bar"><div class="stat-fill" style="width:90%;background:var(--wraith)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Survivability</span><div class="stat-bar"><div class="stat-fill" style="width:25%;background:var(--wraith)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Healing</span><div class="stat-bar"><div class="stat-fill" style="width:0%;background:var(--wraith)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Crowd control</span><div class="stat-bar"><div class="stat-fill" style="width:50%;background:var(--wraith)"></div></div></div>
+        <div class="stat-row2"><span class="stat-name">Complexity</span><div class="stat-bar"><div class="stat-fill" style="width:85%;background:var(--wraith)"></div></div></div>
+      </div>
+    </div>
+    <p class="hero-quote">You don't fight the same battle the rest of your team fights. You find the most dangerous enemy on the map and you make them stop existing. Then you disappear. You're not a tank, not a healer — you're the reason the hard fight suddenly got easier for everyone else.</p>
+  </div>
+
+  <div class="passive-block">
+    <div class="passive-icon" style="background:rgba(148,163,184,0.08)">✦</div>
+    <div class="passive-text">
+      <div class="passive-tag">Passive ability</div>
+      <div class="passive-name2">Bounty System</div>
+      <div class="passive-desc2">Each kill reduces all your ability cooldowns by 2 seconds. Landing the killing blow on an elite or named enemy reduces cooldowns by 5 seconds. You thrive in sustained combat — the more you kill, the faster you can kill again. Going down costs you everything you built.</div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Abilities — equip any 4 of 7</div>
+  <div class="ability-grid">
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Neural Spike</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Instant · 5s cd</div>
+      <div class="ability-card-desc">35 instant damage. From Phase Cloak stealth, deals 50% bonus damage — 52 on opener. The standard assassin entry. Bounty System reset shortens the gap between engagements.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Stasis Wave</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · AoE · 6s cd</div>
+      <div class="ability-card-desc">Massive close-range cryo burst. 15 damage, huge radius. Your panic button when surrounded — or a finisher when cloaked and in close. High risk, high clear.</div>
+    </div>
+    <div class="ability-card">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Shock Mine</span><span class="badge-existing">existing</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Trap · 5s cd</div>
+      <div class="ability-card-desc">Proximity charge — 40 burst. Wraith can place them while Phase Cloaked. Set the trap, let the enemy walk into it, Bounty System fires on the kill.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--wraith)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Phase Cloak</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--wraith)">Stealth · Utility · 10s cd</div>
+      <div class="ability-card-desc">Go fully invisible for 4 seconds. Cannot attack while cloaked but can reposition, place mines, and fully reset enemy targeting. Breaking cloak with Neural Spike triggers the 50% bonus damage.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:var(--wraith)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Null Field</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:var(--wraith)">Control · Suppress · 12s cd</div>
+      <div class="ability-card-desc">Drop a field that suppresses all enemy abilities for 5 seconds. Enemies inside cannot cast. Charge enemies become dangerous the second this expires — plan your exit or your Collapse timing.</div>
+    </div>
+    <div class="ability-card is-new">
+      <div class="ability-card-bar" style="background:#e8622a"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Arc Lance</span><span class="badge-new">new</span></div>
+      <div class="ability-card-cat" style="color:#e8622a">Damage · Chain · 7s cd</div>
+      <div class="ability-card-desc">Chain lightning — jumps between up to 4 enemies. 30 damage on first, -5 per jump. Good follow-up after Stasis Wave groups them or Null Field clusters a pack of suppressed enemies.</div>
+    </div>
+    <div class="ability-card is-ult">
+      <div class="ability-card-bar" style="background:var(--wraith)"></div>
+      <div class="ability-card-head"><span class="ability-card-name">Collapse</span><span class="badge-ult">ultimate</span></div>
+      <div class="ability-card-cat" style="color:var(--wraith)">Damage · Detonate · 40s cd</div>
+      <div class="ability-card-desc">Consume all active debuffs on every enemy in range — each debuff consumed deals 20 damage. After a full Null Field window, this can hit a single enemy for 100+ damage. The highest single-target burst in the game with setup.</div>
+    </div>
+  </div>
+
+  <div class="deployable-block">
+    <div class="dep-icon" style="background:rgba(148,163,184,0.08)">◆</div>
+    <div>
+      <div class="dep-label">Signature deployable</div>
+      <div class="dep-name2">Shadow Relay</div>
+      <div class="dep-desc2">A stealth anchor that extends Phase Cloak duration by 3 seconds while within 6 units, and reduces the Phase Cloak cooldown by 4 seconds per kill made while the relay is active. Turns the Wraith into a persistent stealth threat across an extended engagement.</div>
+    </div>
+  </div>
+
+  <div class="pattern-title">The standard assassination combo</div>
+  <div class="pattern-block">
+    <div class="pattern-steps">
+      <div class="pattern-step"><div class="step-num">1</div><div class="step-text">Phase Cloak — reposition behind the elite target. Place a Shock Mine between you and the group. <em>You're invisible, they don't know what's coming.</em></div></div>
+      <div class="pattern-step"><div class="step-num">2</div><div class="step-text">Null Field on the group — all abilities suppressed for 5 seconds. <em>They can't respond. The window is open.</em></div></div>
+      <div class="pattern-step"><div class="step-num">3</div><div class="step-text">Break cloak with Neural Spike — 52 damage on the elite (50% cloak bonus). Bounty System fires on the kill. <em>Cooldowns drop. You can keep going.</em></div></div>
+      <div class="pattern-step"><div class="step-num">4</div><div class="step-text">Collapse while debuffs are still active. Arc Lance across survivors. Stasis Wave if they surround you. <em>By the time they respond, the fight is already over.</em></div></div>
+    </div>
+  </div>
+
+  <div class="ability-section-label">Best paired with</div>
+  <div class="synergy-row">
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--medic)"></span>Medic — Purge Protocol removes debuffs that break Phase Cloak windows</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--guardian)"></span>Guardian — Last Bastion covers the Wraith's retreat window</div>
+    <div class="synergy-chip"><span class="syn-dot" style="background:var(--engineer)"></span>Engineer — Shock Mines placed by both classes stack for devastating chokepoints</div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <p>Rate of Decay Online &mdash; class design reference</p>
+  <p>5 classes &mdash; 35 total abilities &mdash; build: 2026</p>
+</footer>
+
+<script>
+// ── TAB NAV ────────────────────────────────────────────────────
+const nav = document.getElementById("classNav");
+const COLORS = { engineer:"#e8922a", guardian:"#4d8fff", phaser:"#c084fc", medic:"#3fc26a", wraith:"#94a3b8" };
+
+nav.addEventListener("click", e => {
+  const tab = e.target.closest(".class-tab");
+  if (!tab) return;
+  const cls = tab.dataset.class;
+  document.querySelectorAll(".class-tab").forEach(t => {
+    t.style.borderBottomColor = "transparent"; t.style.color = ""; t.classList.remove("active");
+  });
+  tab.style.borderBottomColor = COLORS[cls];
+  tab.style.color = COLORS[cls];
+  tab.classList.add("active");
+  document.querySelectorAll(".class-panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-" + cls).classList.add("active");
+  window.scrollTo({ top: nav.offsetTop - 1, behavior: "smooth" });
+});
+document.querySelector(".class-tab[data-class='engineer']").style.borderBottomColor = COLORS.engineer;
+document.querySelector(".class-tab[data-class='engineer']").style.color = COLORS.engineer;
+
+// ── ANIMATION ENGINE ────────────────────────────────────────────
+const lerp = (a,b,t) => a + (b-a)*t;
+const clamp = (v,a,b) => Math.max(a, Math.min(b,v));
+const ease = t => t<.5 ? 2*t*t : -1+(4-2*t)*t;
+const pi = Math.PI, tau = pi*2;
+
+function dot(ctx, x, y, r, col, alpha=1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.beginPath(); ctx.arc(x,y,r,0,tau);
+  ctx.fillStyle = col; ctx.fill(); ctx.restore();
+}
+function ring(ctx, x, y, r, col, lw=1.5, alpha=1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.beginPath(); ctx.arc(x,y,r,0,tau);
+  ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.stroke(); ctx.restore();
+}
+function player(ctx, x, y, col, alpha=1) {
+  dot(ctx,x,y,5,col,alpha); ring(ctx,x,y,8,col,1.5,alpha*.5);
+}
+function enemy(ctx, x, y, col='#e85050', alpha=1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.beginPath(); ctx.rect(x-4,y-4,8,8);
+  ctx.fillStyle = col; ctx.fill(); ctx.restore();
+}
+function line(ctx, x1,y1,x2,y2,col,lw=1.5,alpha=1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.strokeStyle = col; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); ctx.restore();
+}
+function zigzag(ctx, x1,y1,x2,y2,col,segs=6,amp=8,lw=1.5,alpha=1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.strokeStyle = col; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(x1,y1);
+  for(let i=1;i<=segs;i++){
+    const px=lerp(x1,x2,i/segs), py=lerp(y1,y2,i/segs)+(i%2?amp:-amp);
+    ctx.lineTo(px,py);
+  }
+  ctx.stroke(); ctx.restore();
+}
+function cone(ctx, ox,oy, angle, spread, col, alpha=0.18) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.beginPath();
+  ctx.moveTo(ox,oy);
+  ctx.arc(ox,oy,angle,-spread/2,spread/2);
+  ctx.closePath();
+  ctx.fillStyle=col; ctx.fill(); ctx.restore();
+}
+
+// ── ANIMATION FUNCTIONS ─────────────────────────────────────────
+// Each: fn(ctx, W, H, t, col)  — t in [0,1) cyclic
+
+function animTurret(ctx,W,H,t,col) {
+  const tx=W*.2, ty=H*.6, ex=W*.78, ey=H*.45;
+  // turret body
+  ctx.save();
+  ctx.fillStyle='#2a2a36'; ctx.beginPath(); ctx.rect(tx-8,ty-10,16,16); ctx.fill();
+  ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+  // barrel aim
+  const ang = Math.atan2(ey-ty, ex-tx);
+  line(ctx, tx,ty, tx+Math.cos(ang)*16, ty+Math.sin(ang)*16, col, 2);
+  // projectile
+  if(t>0.1){
+    const pt = ((t-0.1)/0.5) % 1;
+    const px = lerp(tx,ex,ease(pt)), py = lerp(ty,ey,ease(pt));
+    dot(ctx,px,py,3,col, 1-pt*.5);
+    dot(ctx,px,py,6,col, (1-pt)*.3);
+  }
+  // enemy
+  enemy(ctx,ex,ey,'#e85050', t>0.65 ? lerp(1,0.4,((t-0.65)/0.2)) : 1);
+  if(t>0.65 && t<0.85){
+    const ft=(t-0.65)/0.2;
+    ring(ctx,ex,ey,lerp(0,18,ft),col,1.5,1-ft);
+  }
+  player(ctx,tx+6,ty,col);
+}
+
+function animBeam(ctx,W,H,t,col) {
+  const ox=W*.1, oy=H*.5;
+  const charge = Math.min(1, t*2.2);
+  const len = lerp(0, W*.8, ease(charge));
+  const w = lerp(3, 8, charge);
+  // beam
+  ctx.save(); ctx.globalAlpha = charge*.9;
+  const g = ctx.createLinearGradient(ox,0,ox+len,0);
+  g.addColorStop(0,col); g.addColorStop(1,'transparent');
+  ctx.fillStyle=g; ctx.fillRect(ox, oy-w/2, len, w);
+  ctx.restore();
+  // charge glow at origin
+  dot(ctx,ox,oy,lerp(3,10,charge)*0.7,col,charge*.6);
+  ring(ctx,ox,oy,lerp(4,16,charge),col,1,charge*.4);
+  player(ctx,ox,oy,col);
+  // enemies at end
+  const eBase=ox+W*.75;
+  enemy(ctx,eBase,oy,'#e85050');
+  enemy(ctx,eBase+10,oy+8,'#e85050');
+}
+
+function animMine(ctx,W,H,t,col) {
+  const mx=W*.5, my=H*.65;
+  if(t<0.7) {
+    // idle pulse
+    const p=(Math.sin(t*tau*3)+1)/2;
+    dot(ctx,mx,my,5,col,0.9);
+    ring(ctx,mx,my,lerp(8,14,p),col,1,lerp(0.5,0.1,p));
+    ring(ctx,mx,my,lerp(14,22,p),col,1,lerp(0.25,0,p));
+  } else {
+    // explosion
+    const et=(t-0.7)/0.3;
+    const er=lerp(0,W*.4,ease(et));
+    ring(ctx,mx,my,er,col,2,1-et);
+    for(let i=0;i<8;i++){
+      const a=i/8*tau, r=lerp(0,er*.8,ease(et));
+      dot(ctx,mx+Math.cos(a)*r,my+Math.sin(a)*r,lerp(5,1,et),col,1-et);
+    }
+    dot(ctx,mx,my,lerp(14,0,et),col,1-et*.8);
+  }
+}
+
+function animAura(ctx,W,H,t,col) {
+  const px=W*.5, py=H*.5;
+  const phase = [0, 0.33, 0.66];
+  phase.forEach((off,i)=>{
+    const tt=(t+off)%1;
+    const r=lerp(0,W*.42,ease(tt));
+    ring(ctx,px,py,r,col,1.5,lerp(0.7,0,tt));
+  });
+  // nearby allies
+  player(ctx,px,py,col);
+  player(ctx,px-36,py+12,'#4d8fff',0.6);
+  player(ctx,px+36,py-8,'#3fc26a',0.6);
+}
+
+function animDroneCmd(ctx,W,H,t,col) {
+  const startX=W*.15, startY=H*.7, ex=W*.75, ey=H*.4;
+  const hoverT=clamp((t-0.1)/0.7,0,1);
+  const dx=lerp(startX,ex,ease(hoverT)), dy=lerp(startY,ey,ease(hoverT));
+  // target enemy
+  enemy(ctx,ex,ey,'#e85050');
+  // lock ring if arrived
+  if(hoverT>0.85){
+    const lt=(hoverT-0.85)/0.15;
+    ring(ctx,ex,ey,lerp(18,12,lt),col,1.5,lt);
+    ring(ctx,ex,ey,12,col,1.5,lt*.8);
+  }
+  // drone triangle
+  ctx.save(); ctx.translate(dx,dy);
+  const ang = Math.atan2(ey-startY, ex-startX);
+  ctx.rotate(ang-pi/2);
+  ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(6,6); ctx.lineTo(-6,6); ctx.closePath();
+  ctx.fillStyle=col; ctx.globalAlpha=0.9; ctx.fill(); ctx.restore();
+  player(ctx,startX,startY,col);
+}
+
+function animFieldRepair(ctx,W,H,t,col) {
+  const px=W*.2, py=H*.55, ax=W*.75, ay=H*.45;
+  const beam=clamp(t*3,0,1);
+  // beam player→ally
+  if(beam>0) {
+    ctx.save(); ctx.globalAlpha=beam*.7;
+    const g=ctx.createLinearGradient(px,py,ax,ay);
+    g.addColorStop(0,'transparent'); g.addColorStop(1,col);
+    ctx.strokeStyle=g; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(lerp(px,ax,beam),lerp(py,ay,beam));
+    ctx.stroke(); ctx.restore();
+  }
+  // ally heal glow
+  if(t>0.4){
+    const gt=(t-0.4)/0.6;
+    ring(ctx,ax,ay,lerp(0,18,ease(gt)),col,1.5,1-gt);
+    dot(ctx,ax,ay,7,col,lerp(0,0.5,gt));
+  }
+  player(ctx,px,py,col); player(ctx,ax,ay,'#4d8fff');
+}
+
+function animSystemOverload(ctx,W,H,t,col) {
+  const turrets=[{x:W*.18,y:H*.6},{x:W*.5,y:H*.7},{x:W*.78,y:H*.55}];
+  const enemies=[{x:W*.5,y:H*.2},{x:W*.65,y:H*.3},{x:W*.35,y:H*.25}];
+  const burst=t<0.5?ease(t*2):1;
+  turrets.forEach((tr,ti)=>{
+    ctx.save(); ctx.fillStyle='#2a2a36';
+    ctx.beginPath(); ctx.rect(tr.x-7,tr.y-8,14,14); ctx.fill();
+    ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.stroke(); ctx.restore();
+    // fires at all enemies simultaneously
+    enemies.forEach(en=>{
+      const lt=((t + ti*0.1) % 0.6)/0.6;
+      if(burst>0.5) {
+        const px=lerp(tr.x,en.x,ease(lt)), py=lerp(tr.y,en.y,ease(lt));
+        dot(ctx,px,py,2.5,col,burst*(1-lt*.4));
+      }
+    });
+  });
+  enemies.forEach(en=>{ enemy(ctx,en.x,en.y,'#e85050'); });
+  // glow overlay
+  ctx.save(); ctx.globalAlpha=burst*.12;
+  ctx.fillStyle=col; ctx.fillRect(0,0,W,H); ctx.restore();
+}
+
+function animKineticReversal(ctx,W,H,t,col) {
+  const px=W*.5, py=H*.55;
+  if(t<0.45) {
+    // absorb phase — arrows coming at player
+    const n=3;
+    for(let i=0;i<n;i++){
+      const off=i/n;
+      const at=((t+off)%0.45)/0.45;
+      const ax=lerp(px-W*.35 + i*18, px, at);
+      const ay=lerp(py-10+i*12, py, at);
+      dot(ctx,ax,ay,4,'#e85050',1-at*.7);
+    }
+    dot(ctx,px,py,lerp(6,10,t*2),col,0.5);
+  } else {
+    // release — cone burst
+    const rt=(t-0.45)/0.55;
+    cone(ctx,px,py,lerp(0,W*.38,ease(rt)), 1.2, col, lerp(0.3,0.05,rt));
+    for(let i=0;i<8;i++){
+      const a=-0.6+i/7*1.2;
+      const r=lerp(0,W*.36,ease(rt));
+      dot(ctx,px+Math.cos(a)*r,py+Math.sin(a)*r-2, lerp(5,1,rt), col, 1-rt*.7);
+    }
+  }
+  player(ctx,px,py,col);
+}
+
+function animShield(ctx,W,H,t,col) {
+  const px=W*.45, py=H*.5;
+  const sides=6;
+  // hexagonal ring
+  const shield=(Math.sin(t*tau)+1)/2;
+  ctx.save(); ctx.globalAlpha=0.25+shield*.15;
+  ctx.strokeStyle=col; ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let i=0;i<=sides;i++){
+    const a=i/sides*tau-pi/6;
+    const r=22+shield*3;
+    i===0?ctx.moveTo(px+Math.cos(a)*r,py+Math.sin(a)*r):ctx.lineTo(px+Math.cos(a)*r,py+Math.sin(a)*r);
+  }
+  ctx.stroke(); ctx.restore();
+  // incoming projectile
+  const pt=((t*1.8)%1);
+  const sx=W*.85+pt*0, sy=py;
+  const projX=lerp(W*.88,px+26,ease(pt));
+  dot(ctx,projX,sy,3,'#e85050', pt<0.85?1:lerp(1,0,(pt-0.85)/0.15));
+  if(pt>0.8){ const f=(pt-0.8)/0.2; ring(ctx,px+24,py,lerp(0,10,f),col,1.5,1-f); }
+  player(ctx,px,py,col);
+}
+
+function animMagnetize(ctx,W,H,t,col) {
+  const cx=W*.5, cy=H*.5;
+  const pull=ease(t);
+  const starts=[{x:W*.12,y:H*.25},{x:W*.85,y:H*.2},{x:W*.8,y:H*.75},{x:W*.15,y:H*.72},{x:W*.9,y:H*.48}];
+  starts.forEach(s=>{
+    const ex=lerp(s.x,cx,pull*0.85), ey=lerp(s.y,cy,pull*0.85);
+    enemy(ctx,ex,ey,'#e85050');
+    // arc line to center
+    ctx.save(); ctx.globalAlpha=pull*.4; ctx.strokeStyle=col; ctx.lineWidth=1;
+    ctx.setLineDash([3,4]);
+    ctx.beginPath(); ctx.moveTo(ex,ey); ctx.lineTo(cx,cy);
+    ctx.stroke(); ctx.restore();
+  });
+  // magnet pulse at center
+  ring(ctx,cx,cy,10,col,2,0.7);
+  ring(ctx,cx,cy,10+pull*8,col,1,0.3);
+}
+
+function animBreachSlam(ctx,W,H,t,col) {
+  const speed=ease(Math.min(t*3,1));
+  const px=lerp(W*.12, W*.55, speed), py=H*.55;
+  const e1x=W*.58, e2x=W*.68;
+  // motion trail
+  if(speed>0.1){
+    for(let i=0;i<5;i++){
+      const tx=lerp(W*.12,px,i/5);
+      dot(ctx,tx,py,4*(1-i/5),col,(1-i/5)*0.3*speed);
+    }
+  }
+  player(ctx,px,py,col);
+  // enemies knocked back if slammed
+  if(t>0.35){
+    const kb=ease((t-0.35)/0.4);
+    enemy(ctx,e1x+lerp(0,22,kb),py-lerp(0,8,kb),'#e85050');
+    enemy(ctx,e2x+lerp(0,18,kb),py+lerp(0,6,kb),'#e85050');
+    if(kb>0.05) ring(ctx,e1x-10+kb*5,py,lerp(0,20,kb),col,2,1-kb);
+  } else {
+    enemy(ctx,e1x,py,'#e85050'); enemy(ctx,e2x,py,'#e85050');
+  }
+}
+
+function animSiegeMode(ctx,W,H,t,col) {
+  const px=W*.5, py=H*.5;
+  const anchor=ease(Math.min(t*2.5,1));
+  // anchors in ground
+  const pts=[{dx:-22,dy:14},{dx:22,dy:14}];
+  pts.forEach(p=>{
+    line(ctx,px,py,px+p.dx*anchor,py+p.dy*anchor,col,2,anchor);
+    dot(ctx,px+p.dx*anchor,py+p.dy*anchor,4,col,anchor);
+  });
+  // defense ring pulse
+  const r=28+Math.sin(t*tau*2)*4;
+  ring(ctx,px,py,r,col,1.5,0.5);
+  // threat arrows aimed in
+  if(anchor>0.5){
+    for(let i=0;i<4;i++){
+      const a=i/4*tau+t*.5;
+      const ar=lerp(50,32,ease(((t+i/4)%1)));
+      dot(ctx,px+Math.cos(a)*ar,py+Math.sin(a)*ar,3,'#e85050',0.6);
+      line(ctx,px+Math.cos(a)*ar,py+Math.sin(a)*ar,px+Math.cos(a)*(ar-10),py+Math.sin(a)*(ar-10),'#e85050',1.5,0.4);
+    }
+  }
+  player(ctx,px,py,col,1);
+}
+
+function animIronTether(ctx,W,H,t,col) {
+  const px=W*.2, py=H*.5, ex=W*.72, ey=H*.5;
+  const stretch=Math.sin(t*pi*2)*0.15;
+  const curEx=ex+stretch*W*.12;
+  // tether chain
+  zigzag(ctx,px+12,py,curEx-8,ey,col,8,5,2,0.7);
+  // pull-back ripple
+  const bounce=Math.abs(stretch);
+  if(bounce>0.05) ring(ctx,ex,ey,bounce*30,col,1.5,bounce*2);
+  player(ctx,px,py,col);
+  enemy(ctx,curEx,ey,'#e85050');
+  // 15% absorb label glow
+  dot(ctx,lerp(px,curEx,.5),py-4,3,col,0.5+Math.sin(t*tau)*0.3);
+}
+
+function animLastBastion(ctx,W,H,t,col) {
+  const rise=ease(Math.min(t*2,1));
+  const wallH=H*0.72*rise;
+  const wallX=W*.35;
+  // wall
+  ctx.save();
+  const g=ctx.createLinearGradient(wallX,H*.8,wallX,H*.8-wallH);
+  g.addColorStop(0,col+'44'); g.addColorStop(1,col+'cc');
+  ctx.fillStyle=g; ctx.fillRect(wallX,H*.8-wallH,W*.3,wallH); ctx.restore();
+  ctx.save(); ctx.strokeStyle=col; ctx.lineWidth=2;
+  ctx.strokeRect(wallX,H*.8-wallH,W*.3,wallH); ctx.restore();
+  // team behind wall
+  if(rise>0.5){
+    player(ctx,wallX-22,H*.6,'#4d8fff',0.7);
+    player(ctx,wallX-38,H*.65,'#3fc26a',0.7);
+  }
+  // projectiles bouncing off
+  if(t>0.55){
+    const ft=(t-0.55)/0.45;
+    const py=H*.45;
+    const projX=lerp(W*.88,wallX+W*.3,ease(ft));
+    dot(ctx,projX,py,4,'#e85050', ft<0.9?1:0);
+    if(ft>0.85){
+      const ef=(ft-0.85)/0.15;
+      ring(ctx,wallX+W*.3,py,lerp(0,14,ef),col,2,1-ef);
+    }
+  }
+}
+
+function animCone(ctx,W,H,t,col) {
+  const ox=W*.12, oy=H*.5;
+  const charge=(t%1)*1.4;
+  const spread=0.95+Math.min(charge,1)*0.4;
+  const range=lerp(30,W*.76,Math.min(charge,1));
+  cone(ctx,ox,oy,range,spread,col,0.22);
+  // particles in cone
+  for(let i=0;i<10;i++){
+    const a=(-spread/2)+Math.random()*spread;
+    const r=Math.random()*range*(0.4+Math.min(charge,1)*.5);
+    dot(ctx,ox+Math.cos(a)*r,oy+Math.sin(a)*r,2+Math.random()*3,col,(1-r/range)*.6);
+  }
+  player(ctx,ox,oy,col);
+  dot(ctx,ox,oy,lerp(6,12,Math.min(charge,1)),col,0.3);
+}
+
+function animThermal(ctx,W,H,t,col) {
+  const ox=W*.12, oy=H*.5, ex=W*.72, ey=H*.5;
+  if(t<0.55){
+    const pt=ease(t/0.55);
+    dot(ctx,lerp(ox,ex,pt),lerp(oy,ey,pt)-Math.sin(pt*pi)*18,5,col,1);
+    dot(ctx,lerp(ox,ex,pt),lerp(oy,ey,pt)-Math.sin(pt*pi)*18,10,col,0.3);
+  } else {
+    const et=(t-0.55)/0.45;
+    ring(ctx,ex,ey,lerp(0,W*.3,ease(et)),col,2,1-et);
+    ring(ctx,ex,ey,lerp(0,W*.18,ease(et)),col,1,lerp(0.6,0,et));
+    for(let i=0;i<8;i++){
+      const a=i/8*tau, r=lerp(0,W*.25,ease(et));
+      dot(ctx,ex+Math.cos(a)*r,ey+Math.sin(a)*r,lerp(4,1,et),col,1-et*.8);
+    }
+  }
+  player(ctx,ox,oy,col); enemy(ctx,ex,ey,'#e85050',t<0.65?1:lerp(1,0.3,(t-0.65)/0.25));
+}
+
+function animNeuralSpike(ctx,W,H,t,col) {
+  const ex=W*.62, ey=H*.48;
+  // impact lines
+  if(t<0.35){
+    const ft=ease(t/0.35);
+    for(let i=0;i<8;i++){
+      const a=i/8*tau, r=lerp(0,20,ft);
+      line(ctx,ex+Math.cos(a)*4,ey+Math.sin(a)*4,ex+Math.cos(a)*r,ey+Math.sin(a)*r,col,2,ft*(1-ft*1.5));
+    }
+    dot(ctx,ex,ey,lerp(12,0,ft),col,lerp(0.8,0,ft));
+  }
+  const flash=(Math.sin(t*tau*2)+1)/2*(1-t);
+  dot(ctx,ex,ey,5,'#e85050',0.85+flash*.15);
+  ring(ctx,ex,ey,12+(Math.sin(t*tau*3)+1)*4,'#e85050',1,0.25);
+  player(ctx,W*.22,H*.52,col);
+  // projectile
+  const pt=((t+0.5)%1);
+  if(pt<0.5){ dot(ctx,lerp(W*.22,ex,ease(pt*2)),H*.52,3,col,1-pt*1.5); }
+}
+
+function animPhaseShift(ctx,W,H,t,col) {
+  const ax=W*.22, ay=H*.55, bx=W*.72, by=H*.45;
+  const phase=(t*1.5)%1;
+  const fadeOut=phase<0.35?ease(phase/0.35):phase>0.65?ease((phase-0.65)/0.35):1;
+  const atA=phase<0.5;
+  // ghost at A
+  player(ctx,ax,ay,col, atA?1-ease((phase/0.35)):ease(clamp((phase-0.65)/0.35,0,1)));
+  // afterimage trail
+  if(!atA && phase<0.65){
+    const tp=(phase-0.35)/0.3;
+    dot(ctx,lerp(ax,bx,tp),lerp(ay,by,tp),5,col,0.35*(1-tp));
+  }
+  // appear at B
+  player(ctx,bx,by,col, atA?0:ease(clamp((phase-0.4)/0.3,0,1)));
+  // energy ring on arrival
+  if(!atA){
+    const ar=clamp((phase-0.4)/0.35,0,1);
+    ring(ctx,bx,by,lerp(0,22,ar),col,1.5,1-ar);
+  }
+}
+
+function animSingularity(ctx,W,H,t,col) {
+  const cx=W*.5, cy=H*.52;
+  const pull=t<0.75?ease(t/0.75):1;
+  // swirling particles
+  const n=16;
+  for(let i=0;i<n;i++){
+    const base=i/n*tau;
+    const r=lerp(W*.38,6,pull)+Math.sin(base*3)*4;
+    const a=base+t*tau*2;
+    const px=cx+Math.cos(a)*r, py=cy+Math.sin(a)*r*0.6;
+    dot(ctx,px,py,2,col,lerp(0.3,0.85,pull));
+  }
+  // core
+  const coreR=lerp(2,7,pull);
+  dot(ctx,cx,cy,coreR,col,0.9);
+  dot(ctx,cx,cy,coreR+6,col,0.2);
+  // collapse burst
+  if(t>0.8){
+    const bt=(t-0.8)/0.2;
+    ring(ctx,cx,cy,lerp(0,W*.42,ease(bt)),col,2,1-bt);
+    dot(ctx,cx,cy,lerp(7,0,bt)*2,col,1-bt);
+  }
+}
+
+function animArcLance(ctx,W,H,t,col) {
+  const enemies=[{x:W*.55,y:H*.35},{x:W*.72,y:H*.55},{x:W*.62,y:H*.72},{x:W*.8,y:H*.35}];
+  const speed=t*3;
+  enemies.forEach((en,i)=>{
+    enemy(ctx,en.x,en.y,'#e85050');
+    if(i<3 && speed>i*0.6+0.3){
+      const lt=clamp((speed-i*0.6-0.3)/0.6,0,1);
+      zigzag(ctx,i===0?W*.18:enemies[i-1].x, i===0?H*.5:enemies[i-1].y, en.x,en.y, col,5,8,2,lt*0.85);
+      if(lt>0.4){ const f=(lt-0.4)/0.6; ring(ctx,en.x,en.y,lerp(0,14,f),col,1.5,1-f); }
+    }
+  });
+  player(ctx,W*.18,H*.5,col);
+}
+
+function animEventHorizon(ctx,W,H,t,col) {
+  const cx=W*.5, cy=H*.5;
+  const pull=t<0.7?ease(t/0.7):1;
+  // large swirl
+  const n=24;
+  for(let i=0;i<n;i++){
+    const base=i/n*tau;
+    const r=lerp(W*.45,4,pull);
+    const a=base+t*tau*2.5;
+    const px=cx+Math.cos(a)*r, py=cy+Math.sin(a)*r*0.55;
+    dot(ctx,px,py,lerp(1,3,pull),col,lerp(0.2,1,pull));
+  }
+  // enemies pulled
+  const eStarts=[{x:W*.08,y:H*.25},{x:W*.9,y:H*.2},{x:W*.85,y:H*.8},{x:W*.1,y:H*.75}];
+  eStarts.forEach(e=>{
+    const ex=lerp(e.x,cx,pull*0.9), ey=lerp(e.y,cy,pull*0.9);
+    enemy(ctx,ex,ey,'#e85050',1-pull*.5);
+  });
+  // collapse burst
+  if(t>0.75){
+    const bt=(t-0.75)/0.25;
+    ring(ctx,cx,cy,lerp(0,W*.48,ease(bt)),col,3,1-bt);
+    ring(ctx,cx,cy,lerp(0,W*.34,ease(bt)),col,1.5,lerp(0.7,0,bt));
+    ctx.save(); ctx.globalAlpha=lerp(0.18,0,bt); ctx.fillStyle=col;
+    ctx.beginPath(); ctx.arc(cx,cy,W*.48*ease(bt),0,tau); ctx.fill(); ctx.restore();
+  }
+  dot(cx,cy,col,0.9); ring(ctx,cx,cy,6,col,2,0.9);
+}
+
+function animRepairWave(ctx,W,H,t,col) {
+  const cx=W*.5, cy=H*.5;
+  const phase=[0, 0.4];
+  phase.forEach(off=>{
+    const tt=(t+off)%1;
+    const r=lerp(0,W*.38,ease(tt));
+    ring(ctx,cx,cy,r,col,1.5,lerp(0.75,0,tt));
+  });
+  player(ctx,W*.25,H*.52,col);
+  player(ctx,W*.7,H*.5,'#4d8fff',0.7);
+  player(ctx,cx,H*.65,'#94a3b8',0.7);
+  dot(ctx,cx,cy,3,col,0.6);
+}
+
+function animTransferProtocol(ctx,W,H,t,col) {
+  const mx=W*.22, my=H*.55, ax=W*.65, ay=H*.48;
+  // tether line
+  const pulse=(Math.sin(t*tau*2)+1)/2;
+  ctx.save(); ctx.setLineDash([6,5]); ctx.globalAlpha=0.6+pulse*.3;
+  ctx.strokeStyle=col; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(mx,my); ctx.lineTo(ax,ay); ctx.stroke(); ctx.restore();
+  // damage arrows going toward medic instead of ally
+  const at=(t*2.5)%1;
+  const rx=lerp(W*.88,mx,ease(at)), ry=lerp(ay-5,my,ease(at));
+  dot(ctx,rx,ry,3,'#e85050',at<0.9?1:0);
+  player(ctx,mx,my,col); player(ctx,ax,ay,'#4d8fff');
+}
+
+function animNaniteSwarm(ctx,W,H,t,col) {
+  const tx=W*.75, ty=H*.45;
+  const n=18;
+  for(let i=0;i<n;i++){
+    const off=i/n;
+    const tt=(t+off)%1;
+    const cx=lerp(W*.1,tx,ease(tt));
+    const cy=lerp(H*.5,ty,ease(tt))+Math.sin((t+off)*tau*3)*12;
+    const inRange=i<n/2;
+    dot(ctx,cx,cy,lerp(4,1,tt),col,lerp(0.8,0.3,tt));
+  }
+  player(ctx,W*.18,H*.52,'#3fc26a');
+  player(ctx,tx,ty,'#4d8fff');
+  dot(ctx,tx,ty,lerp(0,14,(Math.sin(t*tau)+1)/2*.4),col,0.15);
+}
+
+function animDefibrillator(ctx,W,H,t,col) {
+  const dx=W*.55, dy=H*.55;
+  // downed player flat
+  ctx.save(); ctx.globalAlpha=t<0.5?1:lerp(1,0,(t-0.5)/0.1);
+  ctx.fillStyle='#4d8fff44'; ctx.fillRect(dx-14,dy-3,28,6);
+  ctx.strokeStyle='#4d8fff'; ctx.lineWidth=1; ctx.strokeRect(dx-14,dy-3,28,6); ctx.restore();
+  // lightning bolt
+  if(t>0.2 && t<0.65){
+    const lt=(t-0.2)/0.4;
+    ctx.save(); ctx.globalAlpha=1-lt*.4;
+    zigzag(ctx,dx,H*.1,dx,dy-4,col,6,12,2.5,1);
+    ring(ctx,dx,dy,lerp(0,22,ease(lt)),col,2,1-lt);
+    ctx.restore();
+  }
+  // revived player
+  if(t>0.6){
+    const rt=(t-0.6)/0.4;
+    player(ctx,dx,lerp(dy,dy-8,ease(rt)),'#4d8fff',rt);
+    ring(ctx,dx,dy-8,lerp(0,18,rt),col,1.5,1-rt);
+  }
+  player(ctx,W*.2,H*.5,col);
+}
+
+function animAdaptiveShield(ctx,W,H,t,col) {
+  const ax=W*.62, ay=H*.5;
+  // shield grows thicker and brighter with t
+  const strength=ease(t);
+  const layers=3;
+  for(let i=0;i<layers;i++){
+    const off=i/layers*0.3;
+    const layerT=clamp(strength-(i*0.2),0,1);
+    ring(ctx,ax,ay,20+i*7,col,lerp(0.5,2.5,layerT),lerp(0,0.7,layerT));
+  }
+  // incoming damage arrow
+  const at=((t*2)%1);
+  dot(ctx,lerp(W*.92,ax+30,ease(at)),ay,3,'#e85050',at<0.85?1:0);
+  if(at>0.8){ const f=(at-0.8)/0.2; ring(ctx,ax+28,ay,lerp(0,10,f),col,1.5,1-f); }
+  player(ctx,ax,ay,'#4d8fff');
+  player(ctx,W*.22,H*.5,col);
+}
+
+function animPurgeProtocol(ctx,W,H,t,col) {
+  const px=W*.6, py=H*.5;
+  // debuff orbs burst off
+  const n=6;
+  const burst=ease(t);
+  for(let i=0;i<n;i++){
+    const a=i/n*tau, r=lerp(0,W*.3,burst);
+    const dCol=['#e85050','#c084fc','#f59e0b','#e85050','#94a3b8','#c084fc'][i];
+    dot(ctx,px+Math.cos(a)*r,py+Math.sin(a)*r,lerp(5,1,burst),dCol,1-burst*.8);
+  }
+  dot(ctx,px,py,lerp(10,0,burst),col,lerp(0.4,0,burst));
+  player(ctx,px,py,'#4d8fff',1);
+  player(ctx,W*.22,H*.52,col);
+}
+
+function animSystemRollback(ctx,W,H,t,col) {
+  // everything moves in reverse
+  const n=4;
+  const positions=[
+    {sx:W*.3,sy:H*.4,ex:W*.7,ey:H*.55},
+    {sx:W*.55,sy:H*.65,ex:W*.2,ey:H*.42},
+    {sx:W*.75,sy:H*.35,ex:W*.5,ey:H*.6},
+    {sx:W*.4,sy:H*.7,ex:W*.8,ey:H*.4}
+  ];
+  positions.forEach((p,i)=>{
+    const off=i/n*0.25;
+    const rt=(t+off)%1;
+    // ghost trail showing past position
+    dot(ctx,p.sx,p.sy,4,'#4d8fff',lerp(0,0.5,t));
+    // current position moving backward
+    const cx=lerp(p.ex,p.sx,ease(rt)), cy=lerp(p.ey,p.sy,ease(rt));
+    player(ctx,cx,cy,'#4d8fff',0.8-i*.1);
+  });
+  // green timeline sweep
+  const sweep=lerp(W,0,ease(t));
+  ctx.save(); ctx.globalAlpha=0.12;
+  ctx.fillStyle=col; ctx.fillRect(0,0,sweep,H); ctx.restore();
+  line(ctx,sweep,0,sweep,H,col,2,0.5);
+  player(ctx,W*.18,H*.5,col);
+}
+
+function animPhaseCloak(ctx,W,H,t,col) {
+  const px=W*.5, py=H*.5;
+  const vis=t<0.3?lerp(1,0,t/0.3):t>0.8?lerp(0,1,(t-0.8)/0.2):0;
+  // solid player fading
+  player(ctx,px,py,'#94a3b8',vis);
+  // ghost/dotted outline while cloaked
+  if(t>0.25 && t<0.85){
+    const gt=clamp((t-0.25)/0.2,0,1);
+    ctx.save(); ctx.globalAlpha=0.25*gt; ctx.setLineDash([3,4]);
+    ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(px,py,8,0,tau); ctx.stroke(); ctx.restore();
+    // shimmer
+    const sh=(Math.sin(t*tau*4)+1)/2;
+    dot(ctx,px,py,2,'#94a3b8',sh*.4*gt);
+  }
+}
+
+function animNullField(ctx,W,H,t,col) {
+  const fx=W*.5, fy=H*.5, fr=W*.35;
+  // suppression dome
+  ctx.save(); ctx.globalAlpha=0.12;
+  ctx.fillStyle=col; ctx.beginPath(); ctx.ellipse(fx,fy,fr,fr*0.6,0,0,tau); ctx.fill(); ctx.restore();
+  ring(ctx,fx,fy,fr,'#94a3b8',1.5,0.35);
+  ctx.save(); ctx.globalAlpha=0.25;
+  ctx.strokeStyle='#94a3b8'; ctx.lineWidth=1; ctx.setLineDash([4,6]);
+  ctx.beginPath(); ctx.ellipse(fx,fy,fr,fr*0.6,0,0,tau); ctx.stroke(); ctx.restore();
+  // suppressed enemies — glow dims
+  const enemies2=[{x:W*.38,y:H*.45},{x:W*.58,y:H*.55},{x:W*.65,y:H*.4}];
+  enemies2.forEach(e=>{
+    enemy(ctx,e.x,e.y,'#e8505044');
+    // crossed-out ability circle
+    const s=(Math.sin(t*tau*2)+1)/2*.3;
+    ring(ctx,e.x,e.y,9,'#94a3b8',1,0.4+s);
+    line(ctx,e.x-7,e.y-7,e.x+7,e.y+7,'#94a3b8',1,0.4);
+  });
+  player(ctx,W*.18,H*.52,col);
+}
+
+function animCollapse(ctx,W,H,t,col) {
+  const enemies3=[{x:W*.38,y:H*.4},{x:W*.62,y:H*.55},{x:W*.55,y:H*.75}];
+  const dCols=['#e85050','#c084fc','#f59e0b'];
+  const implode=ease(t);
+  enemies3.forEach((e,ei)=>{
+    enemy(ctx,e.x,e.y,'#e85050',1-implode*.5);
+    // debuff orbs imploding
+    const n=3;
+    for(let i=0;i<n;i++){
+      const a=(i/n*tau)+(ei/3*tau)+t*tau;
+      const r=lerp(18,0,implode);
+      const dc=dCols[(i+ei)%3];
+      dot(ctx,e.x+Math.cos(a)*r,e.y+Math.sin(a)*r,lerp(5,0,implode),dc,1-implode*.3);
+    }
+    if(implode>0.7){
+      const bt=(implode-0.7)/0.3;
+      ring(ctx,e.x,e.y,lerp(0,20,bt),col,2,1-bt);
+    }
+  });
+  player(ctx,W*.18,H*.52,col);
+}
+
+// ── SHARED ANIMATION LOOP ───────────────────────────────────────
+// One RAF loop total; each Anim registers itself. Only draws anims
+// whose canvas is inside the currently-active .class-panel.
+const _allAnims = [];
+let _rafRunning = false;
+let _lastRaf = null;
+
+function _rafTick(now) {
+  const dt = _lastRaf ? Math.min((now - _lastRaf) / 1000, 0.05) : 0;
+  _lastRaf = now;
+  for (const a of _allAnims) {
+    // skip if parent panel is not active
+    const panel = a.cv.closest('.class-panel');
+    if (panel && !panel.classList.contains('active')) continue;
+    a.t = (a.t + dt / a.dur) % 1;
+    const {ctx,W,H} = a;
+    ctx.clearRect(0,0,W,H);
+    try { a.fn(ctx,W,H,a.t,a.col); } catch(e){}
+  }
+  requestAnimationFrame(_rafTick);
+}
+
+class Anim {
+  constructor(canvas, fn, col, W, H) {
+    this.cv=canvas; this.ctx=canvas.getContext('2d');
+    this.fn=fn; this.col=col; this.W=W; this.H=H;
+    this.t=0; this.dur=3.6;
+  }
+  start() {
+    _allAnims.push(this);
+    if (!_rafRunning) { _rafRunning=true; requestAnimationFrame(_rafTick); }
+  }
+}
+
+// ── ABILITY → ANIMATION MAP ─────────────────────────────────────
+const ABILITY_ANIMS = {
+  "Sentinel Drop":    { col:"#4d8fff", fn:animTurret },
+  "Arc Cannon":       { col:"#e8622a", fn:animBeam },
+  "Shock Mine":       { col:"#e8622a", fn:animMine },
+  "Overdrive":        { col:"#e8922a", fn:animAura },
+  "Drone Command":    { col:"#4d8fff", fn:animDroneCmd },
+  "Field Repair":     { col:"#3fc26a", fn:animFieldRepair },
+  "System Overload":  { col:"#e8922a", fn:animSystemOverload },
+  "Kinetic Reversal": { col:"#4d8fff", fn:animKineticReversal },
+  "Deflect Protocol": { col:"#4d8fff", fn:animShield },
+  "Magnetize":        { col:"#4d8fff", fn:animMagnetize },
+  "Breach Slam":      { col:"#e8622a", fn:animBreachSlam },
+  "Siege Mode":       { col:"#4d8fff", fn:animSiegeMode },
+  "Iron Tether":      { col:"#4d8fff", fn:animIronTether },
+  "Last Bastion":     { col:"#4d8fff", fn:animLastBastion },
+  "Dark Blast":       { col:"#c084fc", fn:animCone },
+  "Thermal Charge":   { col:"#e8622a", fn:animThermal },
+  "Neural Spike":     { col:"#e8622a", fn:animNeuralSpike },
+  "Phase Shift":      { col:"#c084fc", fn:animPhaseShift },
+  "Singularity":      { col:"#c084fc", fn:animSingularity },
+  "Arc Lance":        { col:"#c084fc", fn:animArcLance },
+  "Event Horizon":    { col:"#c084fc", fn:animEventHorizon },
+  "Repair Wave":      { col:"#3fc26a", fn:animRepairWave },
+  "Transfer Protocol":{ col:"#3fc26a", fn:animTransferProtocol },
+  "Nanite Swarm":     { col:"#3fc26a", fn:animNaniteSwarm },
+  "Defibrillator":    { col:"#3fc26a", fn:animDefibrillator },
+  "Adaptive Shield":  { col:"#4d8fff", fn:animAdaptiveShield },
+  "Purge Protocol":   { col:"#3fc26a", fn:animPurgeProtocol },
+  "System Rollback":  { col:"#3fc26a", fn:animSystemRollback },
+  "Phase Cloak":      { col:"#94a3b8", fn:animPhaseCloak },
+  "Null Field":       { col:"#94a3b8", fn:animNullField },
+  "Collapse":         { col:"#94a3b8", fn:animCollapse },
+};
+
+// ── INJECT CANVASES ─────────────────────────────────────────────
+function initAnims() {
+  const DPR=window.devicePixelRatio||1;
+  const LH=78; const LW=260; // fixed logical size — works on hidden panels too
+  document.querySelectorAll('.ability-card').forEach(card=>{
+    const nameEl=card.querySelector('.ability-card-name');
+    if(!nameEl) return;
+    const name=nameEl.textContent.trim();
+    const spec=ABILITY_ANIMS[name];
+    if(!spec) return;
+    const cv=document.createElement('canvas');
+    cv.width=Math.round(LW*DPR); cv.height=Math.round(LH*DPR);
+    cv.style.width='100%'; cv.style.height=LH+'px';
+    cv.style.display='block'; cv.style.borderRadius='4px'; cv.style.marginBottom='10px';
+    const ctx=cv.getContext('2d'); ctx.scale(DPR,DPR);
+    card.insertBefore(cv,card.firstChild);
+    new Anim(cv,spec.fn,spec.col,LW,LH).start();
+  });
+}
+window.addEventListener('load',initAnims);
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+══════════════════════════════════════════════════════════════════════════════
+  RATE OF DECAY — CLASS ABILITY POOL SETUP
+  Create one ClassAbilityPool asset per class. Each restricts which spells
+  that class can equip and sets its default 4-slot loadout.
+══════════════════════════════════════════════════════════════════════════════
+
+HOW TO CREATE
+─────────────
+  Right-click Assets/Characters/<ClassName>/
+  → Create → RoD → Class Ability Pool
+  Name it exactly as listed below.
+
+SPELLBOOK INDEX REFERENCE
+──────────────────────────
+   0  Sentinel Drop
+   1  Dark Blast
+   2  Repair Wave
+   3  Arc Cannon
+   4  Thermal Charge
+   5  Neural Spike
+   6  Stasis Wave
+   7  Deflect Protocol
+   8  Shock Mine
+   9  Overdrive
+  10  Drone Command
+  11  Field Repair
+  12  System Overload       ← Engineer Ultimate
+  13  Kinetic Reversal
+  14  Magnetize
+  15  Breach Slam
+  16  Siege Mode
+  17  Iron Tether
+  18  Last Bastion          ← Guardian Ultimate
+  19  Phase Shift
+  20  Singularity
+  21  Arc Lance
+  22  Event Horizon         ← Phaser Ultimate
+  23  Transfer Protocol
+  24  Nanite Swarm
+  25  Defibrillator
+  26  Adaptive Shield
+  27  Purge Protocol
+  28  System Rollback       ← Medic Ultimate
+  29  Phase Cloak
+  30  Null Field
+  31  Collapse              ← Wraith Ultimate
+
+══════════════════════════════════════════════════════════════════════════════
+  ENGINEER
+  File: Assets/Characters/Engineer/EngineerPool
+══════════════════════════════════════════════════════════════════════════════
+  Class Name:         Engineer
+  Available Indices:  0, 3, 8, 9, 10, 11, 12
+  Default Equipped:   0, 3, 8, 9
+                      (Sentinel Drop / Arc Cannon / Shock Mine / Overdrive)
+
+══════════════════════════════════════════════════════════════════════════════
+  GUARDIAN
+  File: Assets/Characters/Guardian/GuardianPool
+══════════════════════════════════════════════════════════════════════════════
+  Class Name:         Guardian
+  Available Indices:  7, 13, 14, 15, 16, 17, 18
+  Default Equipped:   13, 14, 15, 7
+                      (Kinetic Reversal / Magnetize / Breach Slam / Deflect Protocol)
+
+══════════════════════════════════════════════════════════════════════════════
+  PHASER
+  File: Assets/Characters/Phaser/PhaserPool
+══════════════════════════════════════════════════════════════════════════════
+  Class Name:         Phaser
+  Available Indices:  1, 4, 5, 19, 20, 21, 22
+  Default Equipped:   1, 5, 20, 19
+                      (Dark Blast / Neural Spike / Singularity / Phase Shift)
+
+══════════════════════════════════════════════════════════════════════════════
+  MEDIC
+  File: Assets/Characters/Medic/MedicPool
+══════════════════════════════════════════════════════════════════════════════
+  Class Name:         Medic
+  Available Indices:  2, 23, 24, 25, 26, 27, 28
+  Default Equipped:   2, 24, 23, 26
+                      (Repair Wave / Nanite Swarm / Transfer Protocol / Adaptive Shield)
+
+══════════════════════════════════════════════════════════════════════════════
+  WRAITH
+  File: Assets/Characters/Wraith/WraithPool
+══════════════════════════════════════════════════════════════════════════════
+  Class Name:         Wraith
+  Available Indices:  5, 6, 8, 21, 29, 30, 31
+  Default Equipped:   29, 5, 30, 8
+                      (Phase Cloak / Neural Spike / Null Field / Shock Mine)
+
+══════════════════════════════════════════════════════════════════════════════
+  WIRING IN UNITY
+══════════════════════════════════════════════════════════════════════════════
+  On your player prefab's AbilityCaster component:
+    Class Pool → drag in the appropriate ClassAbilityPool asset
+
+  At runtime (e.g. from CharacterSelectUI.cs after the player picks a class):
+    caster.ApplyClass(selectedPool);
+
+══════════════════════════════════════════════════════════════════════════════

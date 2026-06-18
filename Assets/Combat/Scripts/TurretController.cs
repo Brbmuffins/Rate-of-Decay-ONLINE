@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class TurretController : MonoBehaviour
@@ -14,7 +15,13 @@ public class TurretController : MonoBehaviour
     public float recoilDistance = 0.15f;
     public float recoilRecoverySpeed = 8f;
 
+    // Runtime state
     private Transform currentTarget;
+    private Transform _focusTarget;       // Drone Command override
+    private float     _focusExpiry;
+    private float     _outputMultiplier = 1f; // Overengineered / System Overload bonus
+    private bool      _overloaded;
+    private float     _baseFireRate;
     private float fireTimer = 0f;
     private LineRenderer tracer;
     private float tracerTimer = 0f;
@@ -22,6 +29,7 @@ public class TurretController : MonoBehaviour
 
     void Awake()
     {
+        _baseFireRate = fireRate;
         if (barrel == null) barrel = transform;
         barrelRestLocalPos = barrel.localPosition;
 
@@ -37,8 +45,43 @@ public class TurretController : MonoBehaviour
         tracer.enabled = false;
     }
 
+    // ── Public API ────────────────────────────────────────────────
+
+    // Drone Command: pin this turret to a specific enemy for duration seconds.
+    public void SetFocusTarget(Transform target, float duration)
+    {
+        _focusTarget = target;
+        _focusExpiry = Time.time + duration;
+    }
+
+    // System Overload: triple fire rate and max output multiplier for duration seconds.
+    public void SetOverloadMode(float duration)
+    {
+        if (!_overloaded) StartCoroutine(OverloadRoutine(duration));
+    }
+
+    // Called by DeployableManager to sync the Overengineered multiplier.
+    public void SetOutputMultiplier(float mult) => _outputMultiplier = mult;
+
+    // ── Internal ──────────────────────────────────────────────────
+
+    private IEnumerator OverloadRoutine(float duration)
+    {
+        _overloaded   = true;
+        fireRate      = _baseFireRate * 3f;
+        _outputMultiplier = DeployableManager.Instance != null
+            ? DeployableManager.Instance.GetMultiplier(gameObject)
+            : 1f;
+        yield return new WaitForSeconds(duration);
+        fireRate      = _baseFireRate;
+        _overloaded   = false;
+    }
+
     void Update()
     {
+        // Drone Command focus expires?
+        if (_focusTarget != null && Time.time >= _focusExpiry) _focusTarget = null;
+
         FindTarget();
 
         barrel.localPosition = Vector3.Lerp(barrel.localPosition, barrelRestLocalPos, recoilRecoverySpeed * Time.deltaTime);
@@ -65,6 +108,14 @@ public class TurretController : MonoBehaviour
 
     void FindTarget()
     {
+        // Drone Command focus takes priority when valid and in range.
+        if (_focusTarget != null)
+        {
+            float dist = Vector3.Distance(transform.position, _focusTarget.position);
+            currentTarget = dist <= range * 1.5f ? _focusTarget : null;
+            if (currentTarget != null) return;
+        }
+
         if (currentTarget != null)
         {
             float dist = Vector3.Distance(transform.position, currentTarget.position);
@@ -91,7 +142,11 @@ public class TurretController : MonoBehaviour
         Health targetHealth = currentTarget.GetComponent<Health>();
         if (targetHealth != null)
         {
-            targetHealth.TakeDamage(damage);
+            // Apply Overengineered output multiplier (stacks from DeployableManager)
+            float mult = _outputMultiplier;
+            if (!_overloaded && DeployableManager.Instance != null)
+                mult = DeployableManager.Instance.GetMultiplier(gameObject);
+            targetHealth.TakeDamage(damage * mult);
         }
 
         barrel.localPosition = barrelRestLocalPos - Vector3.forward * recoilDistance;
