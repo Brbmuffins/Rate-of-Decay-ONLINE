@@ -148,8 +148,9 @@ public class CharacterSelectUI : MonoBehaviour
         if (prefab != null && previewSpawnPoint != null)
         {
             previewInstance = Instantiate(prefab, previewSpawnPoint.position, previewSpawnPoint.rotation);
+            Animator animator = previewInstance.GetComponentInChildren<Animator>();
             foreach (var mb in previewInstance.GetComponentsInChildren<MonoBehaviour>())
-                if (!(mb is Animator)) mb.enabled = false;
+                if (mb != animator) mb.enabled = false;
             SetLayer(previewInstance, LayerMask.NameToLayer("CharacterPreview"));
         }
     }
@@ -421,7 +422,7 @@ public class CharacterSelectUI : MonoBehaviour
         descT.text            = ability.description;
         descT.fontSize        = 9f;
         descT.color           = TextDim;
-        descT.alignment       = TextAlignmentOptions.TopCenter;
+        descT.alignment       = TextAlignmentOptions.Top;
         descT.textWrappingMode = TextWrappingModes.Normal;
         descGO.GetComponent<LayoutElement>().preferredHeight = 36f;
     }
