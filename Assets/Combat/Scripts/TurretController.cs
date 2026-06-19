@@ -7,6 +7,8 @@ public class TurretController : MonoBehaviour
     public float fireRate = 1f;
     public float damage = 10f;
     public string targetTag = "Enemy";
+    [Tooltip("How often (s) the turret rescans for a new target when it has none. Cheap perf win — keeps the per-frame tag scan from running every frame.")]
+    public float retargetInterval = 0.2f;
 
     [Header("Visuals (optional - auto-created if left empty)")]
     public Transform barrel;
@@ -23,6 +25,7 @@ public class TurretController : MonoBehaviour
     private bool      _overloaded;
     private float     _baseFireRate;
     private float fireTimer = 0f;
+    private float _retargetTimer = 0f;
     private LineRenderer tracer;
     private float tracerTimer = 0f;
     private Vector3 barrelRestLocalPos;
@@ -122,6 +125,12 @@ public class TurretController : MonoBehaviour
             if (dist <= range) return;
             currentTarget = null;
         }
+
+        // Throttle the expensive scene-wide tag scan — only runs when we have
+        // no target, and at most once per retargetInterval.
+        _retargetTimer -= Time.deltaTime;
+        if (_retargetTimer > 0f) return;
+        _retargetTimer = retargetInterval;
 
         GameObject[] candidates = GameObject.FindGameObjectsWithTag(targetTag);
         float closestDist = Mathf.Infinity;

@@ -4,7 +4,8 @@ using UnityEngine;
 // ENGINEER passive — Overengineered
 // Every 4 seconds, for each active deployable within 12 units:
 // add 1 output stack (max 5). Each stack = +8% damage/healing from that deployable.
-// Stacks decay back to 0 if the Engineer moves out of range.
+// Stacks persist on the deployable and are only ADDED while the Engineer is in
+// range (no decay). A deployable's stacks are cleared when it is destroyed.
 public class PassiveOverengineered : ClassPassive
 {
     public float stackInterval  = 4f;

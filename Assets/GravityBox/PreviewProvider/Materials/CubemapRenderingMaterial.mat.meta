@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d57122cfb639b3842a40ecb9cac653b2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Materials/CubemapRenderingMaterial.mat
+  uploadId: 636290

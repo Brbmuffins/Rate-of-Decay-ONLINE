@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 9e2bf066666863245b3b09b14364969d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 8400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/PreviewRenderTexture.renderTexture
+  uploadId: 636290

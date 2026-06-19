@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: e3b5f6b238006aa48b9d13bbe1bd191e
+timeCreated: 1596238526
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Materials/MeshRenderingMaterial.mat
+  uploadId: 636290

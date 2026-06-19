@@ -196,6 +196,7 @@ public class AbilityCaster : MonoBehaviour
     private PassivePhaseCharge   _phaseCharge;
     private PassiveBountySystem  _bounty;
     private Health               _health;
+    private CharacterStats       _characterStats;  // gear/attunement bonuses
 
     public int HeldAbilityIndex => heldAbilityIndex;
 
@@ -203,10 +204,11 @@ public class AbilityCaster : MonoBehaviour
     {
         SyncEquippedFromSpellbook();
 
-        _passive     = GetComponent<ClassPassive>();
-        _phaseCharge = GetComponent<PassivePhaseCharge>();
-        _bounty      = GetComponent<PassiveBountySystem>();
-        _health      = GetComponent<Health>();
+        _passive        = GetComponent<ClassPassive>();
+        _phaseCharge    = GetComponent<PassivePhaseCharge>();
+        _bounty         = GetComponent<PassiveBountySystem>();
+        _health         = GetComponent<Health>();
+        _characterStats = GetComponent<CharacterStats>();
 
         // Register this player with SnapshotSystem
         SnapshotSystem.Instance?.Track(gameObject);
@@ -318,7 +320,7 @@ public class AbilityCaster : MonoBehaviour
                 {
                     if (heldAbilityIndex != -1) CancelAim();
                     FinalizeCast(abilities[i], null, 0f);
-                    cooldownTimers[i] = abilities[i].cooldown;
+                    cooldownTimers[i] = CooldownFor(abilities[i]);
                 }
                 else if (heldAbilityIndex == i)
                 {
@@ -354,7 +356,7 @@ public class AbilityCaster : MonoBehaviour
             {
                 FinalizeCast(abilities[heldAbilityIndex], activeIndicator, aimTimer);
 
-                cooldownTimers[heldAbilityIndex] = abilities[heldAbilityIndex].cooldown;
+                cooldownTimers[heldAbilityIndex] = CooldownFor(abilities[heldAbilityIndex]);
 
                 heldAbilityIndex = -1;
                 activeIndicator = null;
@@ -541,6 +543,15 @@ public class AbilityCaster : MonoBehaviour
             cooldownTimers[i] = Mathf.Max(0f, cooldownTimers[i] - seconds);
     }
 
+    // Cooldown after gear/attunement Cooldown Reduction is applied.
+    float CooldownFor(AbilityDef ability)
+    {
+        float cd = ability.cooldown;
+        if (_characterStats != null)
+            cd *= (1f - _characterStats.CooldownReduction);
+        return cd;
+    }
+
     void FinalizeCast(AbilityDef ability, GameObject indicator, float aimTime)
     {
         Debug.Log("Cast ability: " + ability.abilityName);
@@ -552,6 +563,11 @@ public class AbilityCaster : MonoBehaviour
         float damageMultiplier = _phaseCharge != null
             ? _phaseCharge.ConsumeBonusIfCharged(ability)
             : 1f;
+
+        // Gear + attunement damage bonus (CharacterStats) — applies to every
+        // shape and every dispatched ability since they all read this value.
+        if (_characterStats != null)
+            damageMultiplier *= _characterStats.DamageMultiplier;
 
         castAnimator?.PlayCast(ability.category);
 

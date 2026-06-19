@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f5013f08694aca24c822ae2379148cf0
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Materials/Texture.shader
+  uploadId: 636290

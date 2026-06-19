@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a14ce0af8b2efa248b0e2440696f335a
+timeCreated: 1596238526
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Materials/TextureRenderingMaterial.mat
+  uploadId: 636290

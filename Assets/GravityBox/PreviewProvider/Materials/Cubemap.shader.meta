@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: 2c2507b3b7d90244cab60f59ed29949a
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Materials/Cubemap.shader
+  uploadId: 636290

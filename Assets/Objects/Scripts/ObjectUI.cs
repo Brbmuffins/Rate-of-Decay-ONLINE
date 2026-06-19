@@ -8,17 +8,21 @@ public class ObjectUI : MonoBehaviour
     public TMP_Text nameText;
     public Image healthFill;
 
-    private Stats stats;
+    private Health health;
 
     void Start()
     {
-        stats = GetComponentInParent<Stats>();
+        health = GetComponentInParent<Health>();
 
         if (nameText == null && uiRoot != null)
             nameText = uiRoot.GetComponentInChildren<TMP_Text>(true);
 
-        if (stats != null && nameText != null)
-            nameText.text = stats.characterName;
+        if (health != null && nameText != null)
+            nameText.text = health.gameObject.name;
+
+        // Event-driven instead of polling every frame.
+        if (health != null)
+            health.onHealthChanged.AddListener(OnHealthChanged);
 
         UpdateHealthBar();
 
@@ -26,17 +30,20 @@ public class ObjectUI : MonoBehaviour
             uiRoot.SetActive(false);
     }
 
-    void Update()
+    void OnDestroy()
     {
-        UpdateHealthBar();
+        if (health != null)
+            health.onHealthChanged.RemoveListener(OnHealthChanged);
     }
+
+    void OnHealthChanged(float current, float max) => UpdateHealthBar();
 
     void UpdateHealthBar()
     {
-        if (stats == null || healthFill == null)
+        if (health == null || healthFill == null)
             return;
 
-        healthFill.fillAmount = (float)stats.currentHealth / stats.maxHealth;
+        healthFill.fillAmount = health.Fraction;
     }
 
     public void ShowUI()

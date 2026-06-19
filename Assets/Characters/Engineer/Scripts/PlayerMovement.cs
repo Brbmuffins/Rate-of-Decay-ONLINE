@@ -11,6 +11,7 @@ public class PlayerMovement : MonoBehaviour
 
     private Animator anim;
     private Rigidbody rb;
+    private CharacterStats stats;   // gear/attunement move-speed bonus
 
     private bool isGrounded = true;
     private bool inWater = false;
@@ -25,6 +26,7 @@ public class PlayerMovement : MonoBehaviour
     {
         anim = GetComponentInChildren<Animator>();
         rb = GetComponent<Rigidbody>();
+        stats = GetComponent<CharacterStats>();
 
         targetRotation = transform.rotation;
         currentSpeed = moveSpeed;
@@ -69,6 +71,7 @@ public class PlayerMovement : MonoBehaviour
 
         wantsMove = isMoving;
         currentSpeed = isSprinting ? sprintSpeed : moveSpeed;
+        if (stats != null) currentSpeed *= stats.MoveSpeedMultiplier;   // gear/attunement bonus
 
         if (isMoving)
         {

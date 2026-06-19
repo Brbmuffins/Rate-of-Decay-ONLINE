@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4c797c0a208ea7b4ba0b1c76956be101
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Renderers/Materials.asset
+  uploadId: 636290

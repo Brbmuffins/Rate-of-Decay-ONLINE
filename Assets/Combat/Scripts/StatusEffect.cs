@@ -5,11 +5,10 @@ public enum StatusEffectType
 {
     Slow,           // reduces move speed
     Stagger,        // brief interrupt (Breach Slam)
-    Suppress,       // cannot use abilities (Null Field)
-    DamageOverTime,
+    Suppress,       // cannot attack (Null Field)
+    DamageOverTime, // decay damage per second (Null Field) — Collapse fuel
     Exposed,        // incoming damage +25% (Event Horizon)
-    Tethered,       // cannot move beyond max range (Iron Tether)
-    Debuffed        // generic stack — consumed by Collapse for burst damage
+    Tethered        // cannot move beyond max range (Iron Tether)
 }
 
 [Serializable]

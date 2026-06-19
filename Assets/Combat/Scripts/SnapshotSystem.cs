@@ -17,10 +17,11 @@ public class SnapshotSystem : MonoBehaviour
     [System.Serializable]
     private struct CharSnap
     {
-        public Vector3              position;
-        public Quaternion           rotation;
-        public float                hp;
-        public List<StatusEffect>   effects;
+        public Vector3      position;
+        public Quaternion   rotation;
+        public float        hp;
+        // NOTE: status effects are intentionally NOT snapshotted — Rollback
+        // clears all debuffs (see ApplyRollback), so there's nothing to restore.
     }
 
     // Each entry in the ring buffer is one point-in-time for ALL tracked characters.
@@ -117,15 +118,13 @@ public class SnapshotSystem : MonoBehaviour
         foreach (GameObject go in _tracked)
         {
             if (go == null) continue;
-            Health h  = go.GetComponent<Health>();
-            var    sm = go.GetComponent<StatusEffectManager>();
+            Health h = go.GetComponent<Health>();
 
             frame.chars[go.GetInstanceID()] = new CharSnap
             {
                 position = go.transform.position,
                 rotation = go.transform.rotation,
-                hp       = h != null ? h.currentHealth : 0f,
-                effects  = sm != null ? sm.GetAll() : new List<StatusEffect>()
+                hp       = h != null ? h.currentHealth : 0f
             };
         }
 

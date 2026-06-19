@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: ed993aca0eed451449ed592f505b230b
+timeCreated: 1596144388
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/PreviewRenderingScene.prefab
+  uploadId: 636290

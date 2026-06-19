@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 89317d2a5fbfc1a469dd9988d8648c87
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Demo/GameObjectAsset.prefab
+  uploadId: 636290

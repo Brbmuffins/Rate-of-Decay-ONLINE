@@ -7,15 +7,25 @@ public class StatusEffectManager : MonoBehaviour
 {
     private readonly List<StatusEffect> _effects = new List<StatusEffect>();
 
+    [Tooltip("How often (s) damage-over-time effects deal their damage.")]
+    public float dotTickInterval = 0.5f;
+    private float  _dotTimer = 0f;
+    private Health _health;
+
     // Quick state queries used by other systems
     public bool IsSuppressed => HasEffect(StatusEffectType.Suppress);
     public bool IsExposed    => HasEffect(StatusEffectType.Exposed);
     public bool IsTethered   => HasEffect(StatusEffectType.Tethered);
-    public bool IsSlowed     => HasEffect(StatusEffectType.Slow);
+    public bool IsStaggered  => HasEffect(StatusEffectType.Stagger);
 
     public UnityEvent<StatusEffectType> onEffectAdded;
     public UnityEvent<StatusEffectType> onEffectRemoved;
     public UnityEvent                   onAllEffectsCleared;
+
+    void Awake()
+    {
+        _health = GetComponent<Health>();
+    }
 
     void Update()
     {
@@ -29,6 +39,31 @@ public class StatusEffectManager : MonoBehaviour
                 onEffectRemoved?.Invoke(t);
             }
         }
+
+        TickDamageOverTime();
+    }
+
+    // Applies all active DamageOverTime effects on a fixed tick. Summing first
+    // and dealing damage once per tick keeps onDamageTaken from firing every
+    // frame (which would, e.g., spam Threat Protocol stacks).
+    void TickDamageOverTime()
+    {
+        float dps = 0f;
+        GameObject src = null;
+        foreach (var e in _effects)
+        {
+            if (e.type != StatusEffectType.DamageOverTime) continue;
+            dps += e.value;
+            if (src == null) src = e.source;
+        }
+
+        if (dps <= 0f) { _dotTimer = 0f; return; }
+
+        _dotTimer += Time.deltaTime;
+        if (_dotTimer < dotTickInterval) return;
+        _dotTimer = 0f;
+
+        _health?.TakeDamage(dps * dotTickInterval, src);
     }
 
     // Adds effect; refreshes duration if same type already present.
@@ -60,22 +95,40 @@ public class StatusEffectManager : MonoBehaviour
         return false;
     }
 
-    // Returns how many Debuffed stacks exist (consumed by Collapse).
+    // Effect types Collapse can detonate. Tethered (the Guardian's leash) is
+    // positional control rather than detonatable decay, so it's excluded — a
+    // Wraith Collapse shouldn't break the Guardian's tether.
+    public static bool IsDebuff(StatusEffectType t)
+    {
+        switch (t)
+        {
+            case StatusEffectType.Slow:
+            case StatusEffectType.Stagger:
+            case StatusEffectType.Suppress:
+            case StatusEffectType.DamageOverTime:
+            case StatusEffectType.Exposed:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    // Returns how many detonatable debuffs are active (consumed by Collapse).
     public int CountDebuffStacks()
     {
         int n = 0;
         foreach (var e in _effects)
-            if (e.type == StatusEffectType.Debuffed) n++;
+            if (IsDebuff(e.type)) n++;
         return n;
     }
 
-    // Collapse consumes all Debuffed stacks for damage — removes them and returns count.
+    // Collapse consumes all detonatable debuffs for damage — removes them and returns count.
     public int ConsumeDebuffStacks()
     {
         int count = 0;
         for (int i = _effects.Count - 1; i >= 0; i--)
         {
-            if (_effects[i].type == StatusEffectType.Debuffed)
+            if (IsDebuff(_effects[i].type))
             {
                 count++;
                 _effects.RemoveAt(i);

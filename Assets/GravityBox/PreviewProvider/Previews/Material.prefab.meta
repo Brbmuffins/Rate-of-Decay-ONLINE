@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 9f015d6c7059db14d93813bc72531f55
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Previews/Material.prefab
+  uploadId: 636290

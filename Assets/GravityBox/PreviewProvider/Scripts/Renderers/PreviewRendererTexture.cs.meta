@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: f432321dfefd7a04a9491722da0d0c06
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Scripts/Renderers/PreviewRendererTexture.cs
+  uploadId: 636290

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 994640cf4d1fe4a4baa0e2afc5bb401a
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Renderers/Cubemaps.asset
+  uploadId: 636290

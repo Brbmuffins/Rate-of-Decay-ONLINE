@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: fa2a8696914d5a246baeeccd523e1e90
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Demo/DemoScene.unity
+  uploadId: 636290

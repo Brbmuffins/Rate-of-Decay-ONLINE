@@ -1,0 +1,161 @@
+===========================================================
+  RATE OF DECAY — ASSET SHOPPING LIST
+  Fills the gaps found in the asset audit. Theme = HARD TECH /
+  post-apocalyptic. Ordered by impact on the game.
+===========================================================
+
+Legend:  [P0] do first   [P1] important   [P2] nice-to-have
+License shorthand: CC0 = free, no attribution; CCBY = free, credit
+required; $ = paid.
+
+
+-----------------------------------------------------------
+[P0]  AUDIO  — partially filled; music + impacts still needed
+-----------------------------------------------------------
+STATUS (updated): NOW IN PROJECT —
+  • Retro Sci-Fi Pack  → energy/shield/machine/industrial loops,
+    swells, 3 notifications (great for ability hums, shields, UI,
+    deployable + ambient machine beds)
+  • Nature Sounds Pack → ambient storm/rain/wind, grass footsteps,
+    foliage, streams (exploration ambience)
+  • brbmuffins Trails  → elemental trail SFX (electric/fire/ice...)
+STILL MISSING (get these):
+  • Melodic MUSIC tracks — combat loop, exploration loop, menu,
+    wave/boss sting. (Current loops are ambient texture, not music.)
+  • Punchy one-shots — explosions, weapon/turret fire, melee/energy
+    IMPACTS, hit reactions. The sci-fi pack hums; it doesn't bang.
+  Sources: Sonniss GameAudioGDC (free), Kenney "Impact Sounds" +
+  music loops (CC0), freesound.org for specific bangs.
+
+BEST SINGLE SOURCE (free, pro quality):
+  • Sonniss "GameAudioGDC" bundle — sonniss.com/gameaudiogdc
+      Huge royalty-free pro SFX packs, released yearly. CC-friendly.
+  • Kenney.nl audio packs (CC0): "Sci-Fi Sounds", "Interface Sounds",
+      "Impact Sounds", "Music Loops". Drop-in, no attribution.
+  • freesound.org (CCBY/CC0) for one-off specifics.
+
+WHAT TO GRAB, mapped to the game:
+
+  Ability cast SFX (tie to the 3 CastAnimator categories):
+    • CastDamage  → energy/electrical "zap, charge, fire" whooshes
+    • CastHeal    → soft tech "chime, restore, power-up" tones
+    • CastSupport → "deploy, activate, lock-on, shield-up" clicks
+  Impacts / hits:
+    • explosion (Shock Mine, Collapse), electric crackle (Arc Lance,
+      Defib), energy burst (Singularity), metal/flesh impacts
+  Weapon / turret:
+    • muzzle fire loop (TurretController), reload/whir
+  Deployables:
+    • drone hum, beacon pulse, field hum (Null Field decay loop)
+  Player feedback (high value, cheap):
+    • shield break, downed, revive, low-health heartbeat, ability-ready
+      ping, cooldown-blocked buzz, item pickup, equip click
+  Ambient + music:
+    • post-apoc wind, machinery drone, toxic-zone hiss
+    • combat loop, exploration loop, wave-incoming sting (WaveChest)
+
+  Wire-up: add an AudioSource to players/turrets; play one-shots in
+  AbilityCaster.FinalizeCast (per category) and on hit VFX spawns.
+  WaveChest already has onWaveStart / onPrepTick events to hang
+  stings on.
+
+
+-----------------------------------------------------------
+[P0]  UI ICONS  — PLACEHOLDERS SOLVED (500FreeSkillIcons)
+-----------------------------------------------------------
+STATUS (updated): use 500FreeSkillIcons/ — 521 numbered icons
+  (skill_001..523), enough unique icons for every ability, status,
+  resource, and attunement. Placeholder mapping is in
+  BackendSetup.txt Part 10. This unblocks the UI now.
+SHIP POLISH (optional, later): the icon packs are generic/fantasy,
+  not tech. For final art, source a sci-fi set (game-icons.net has
+  electric/drone/turret/nanite/radiation). Not blocking anymore.
+
+BEST SOURCE (free, has the EXACT missing icons):
+  • game-icons.net  (CC BY 3.0)
+      4000+ icons incl. tech/sci-fi: lightning-bolt, drone, turret,
+      radiation, gears, syringe/nanite, energy-shield, magnet,
+      crosshair, explosion, teleport, recycle (rollback), gas-cloud.
+      Recolor to your palette; export at 128x128.
+
+  Alt: Kenney "Game Icons" (CC0); Unity Asset Store sci-fi icon packs.
+
+  NEED: ~32 ability icons + 6 status icons (Slow/Stagger/Suppress/
+  DoT/Exposed/Tethered) + resource icons (ore, scrap, bio, component,
+  Animus Core). game-icons.net covers ALL of these.
+
+  Direct fixes this unlocks (currently faked with Fire):
+    Shock Mine / Arc Lance / Defibrillator → real lightning/shock
+    Drone Command → drone/crosshair, System Rollback → rewind/recycle
+
+
+-----------------------------------------------------------
+[P1]  CLASS BODY MODELS  — base now available (needs reskin)
+-----------------------------------------------------------
+STATUS (updated): the "Blink" pack added a rigged Free Stylized
+Human Male + StarterArmor + a FULL animation set (SpellCast, Buff,
+GetHit, StunnedLoop, Death, melee, full locomotion, AND Mining/
+Gathering for professions). Use this as the base for all classes;
+make 4 material/armor variants. StunnedLoop = Stagger, GetHit/Death
+= combat feedback, MiningLoop/Gathering = profession anims.
+REMAINING: a hard-tech reskin (tech armor materials, drop the bow/
+fantasy bits). Optionally distinct silhouettes per class later.
+
+(Original note — alt source if you want more bodies:)
+You already use Mixamo-style anims (Firing Rifle, etc.), so:
+
+  • Mixamo.com (free, Adobe) — pick 4 humanoid bodies for
+      Guardian / Phaser / Medic / Wraith. Auto-rigged; your existing
+      spellcasting + rifle anims retarget straight onto them.
+  • Reskin with materials to read tech: Guardian = heavy armor,
+      Phaser = sleek/visor, Medic = hazmat/medical, Wraith = stealth.
+
+  Cheap path: ONE base body + 4 material/gear variants is enough to
+  ship a vertical slice. Distinct models later.
+
+  Cohesive option ($): Synty "POLYGON Sci-Fi" — consistent stylized
+  sci-fi characters + props if you want one unified art pass.
+
+
+-----------------------------------------------------------
+[DONE]  MINING ORE NODE MESH  — FILLED
+-----------------------------------------------------------
+STATUS (updated): the "Metal Ore" pack added 7 ore meshes + prefabs:
+Bronze, Copper, Iron, Silver, Gold, Hell, Moon. Use directly as
+Mining nodes — drop ResourceNode.cs on each prefab and set yieldItem
+to a matching ore ItemData. Natural rarity ladder for the profession:
+  common  = Copper / Iron
+  uncommon= Silver / Gold / Bronze
+  rare    = Hell / Moon (event / high-value veins)
+Profession trio is now complete: Salvage (ScrapNode), Cultivation
+(Tree + Vegetation pack), Mining (Metal Ore).
+
+
+-----------------------------------------------------------
+[P2]  WORLD THEME UNIFY  — optional, removes fantasy stragglers
+-----------------------------------------------------------
+World/ mixes post-apoc (nuclear, radiation, scrap, shanty, toxic =
+keep) with fantasy (tavern.obj, fantasy cottage, roundhouse = off-
+theme for hard-tech). To unify:
+  • Retire/replace the medieval buildings, OR
+  • Kenney "Brutalist / Industrial" kits (CC0) or Synty "POLYGON
+    Apocalypse" ($) for cohesive ruined-tech structures.
+  The 51 fantasy Swords + Wand icons are also off-theme — keep only
+  if you want scavenged melee; otherwise shelve.
+
+
+-----------------------------------------------------------
+MINIMUM TO MAKE COMBAT FEEL 10/10 (remaining, post-asset-drop)
+-----------------------------------------------------------
+Energy/ambient/UI audio is now covered. What's left:
+  1. IMPACT one-shots — Kenney "Impact Sounds" (CC0) / Sonniss:
+     explosions, weapon/turret fire, hit reactions. Wire into
+     AbilityCaster hit + TurretController fire.
+  2. game-icons.net ability + status + resource icons → real tech
+     iconography (the one gap two fantasy packs didn't solve).
+  3. One combat MUSIC loop + a wave/boss sting (WaveChest events).
+That trio closes the largest remaining perceived-quality gap.
+
+===========================================================
+END
+===========================================================

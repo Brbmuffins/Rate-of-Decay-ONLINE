@@ -2,7 +2,6 @@ using UnityEngine;
 
 // Guardian — Iron Tether
 // Locks an enemy within maxDistance of the Guardian for duration seconds.
-// Also routes 15% of the enemy's attacks on any ally back to the Guardian.
 // VFX: brbmuffins Dark Arts/Fantasy Pack/Prefabs/Leaves shield.prefab
 //      (drop it on the enemy's feet for the tether anchor visual)
 //      Uses a LineRenderer for the chain line.
@@ -12,9 +11,6 @@ public class IronTetherHandler : MonoBehaviour
     [Header("Settings")]
     public float maxDistance       = 8f;
     public float duration          = 5f;
-    public float absorbFraction    = 0.15f; // 15% of enemy's damage on allies reroutes here
-    public string allyTag          = "Player";
-    public string enemyTag         = "Enemy";
 
     [Header("VFX")]
     // Assign: brbmuffins Dark Arts/.../Leaves shield.prefab (tint blue/grey)
@@ -95,18 +91,5 @@ public class IronTetherHandler : MonoBehaviour
         // Draw chain
         _line.SetPosition(0, transform.position + Vector3.up * 1f);
         _line.SetPosition(1, _target.position    + Vector3.up * 0.5f);
-    }
-
-    // Call this from your enemy attack logic to check if 15% should reroute.
-    // Returns the fraction of the enemy's attack to subtract and send to Guardian.
-    public static float GetGuardianAbsorbFraction(GameObject attacker, string allyTag)
-    {
-        IronTetherHandler[] tethers = FindObjectsByType<IronTetherHandler>(FindObjectsSortMode.None);
-        foreach (var t in tethers)
-        {
-            if (t._target == attacker.transform && t._active)
-                return t.absorbFraction;
-        }
-        return 0f;
     }
 }

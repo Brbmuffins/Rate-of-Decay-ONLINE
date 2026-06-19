@@ -33,19 +33,27 @@ public class WaveChest : MonoBehaviour
     public UnityEvent             onAllWavesCleared;
 
     private bool   _opened     = false;
-    private bool   _interacting = false;
     private float  _holdProgress = 0f;
     private int    _aliveCount   = 0;
+
+    private GameObject _cachedNearest;   // refreshed on a timer, not every frame
+    private float      _scanTimer  = 0f;
 
     void Update()
     {
         if (_opened) return;
 
-        // Simple proximity check — swap for InputSystem.InputAction if your players use it
-        GameObject nearest = FindNearestPlayer();
-        if (nearest == null) return;
+        // Simple proximity check — swap for InputSystem.InputAction if your players use it.
+        // Nearest-player lookup is throttled (proximity barely changes frame-to-frame).
+        _scanTimer -= Time.deltaTime;
+        if (_scanTimer <= 0f)
+        {
+            _cachedNearest = FindNearestPlayer();
+            _scanTimer = 0.25f;
+        }
+        if (_cachedNearest == null) return;
 
-        float dist = Vector3.Distance(transform.position, nearest.transform.position);
+        float dist = Vector3.Distance(transform.position, _cachedNearest.transform.position);
         bool inRange = dist <= 2.5f;
 
         // NOTE: Uses old Input.GetKey — if your game uses InputSystem, wire an InputAction here instead

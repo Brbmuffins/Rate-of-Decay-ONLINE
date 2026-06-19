@@ -11,6 +11,7 @@ Rate of Decay ONLINE is a fast-paced co-op shooter where four elite operators fi
 ## Core Gameplay
 
 - **32 Abilities** across 5 specialized classes
+- **Gear + Attunements** — the *only* progression. No XP, no levels: power comes from equipped gear and the attunements socketed into it
 - **Deployable System** — turrets, shields, relays, and traps with output stacking
 - **Wave Chests** — escalating enemy waves with prep windows for team coordination
 - **Status Effects** — Slow, Stagger, Suppress, Exposed, Tethered, DoT, Debuffed
@@ -34,9 +35,19 @@ Each class has a passive that rewards playstyle:
 - **Triage Loop** (Medic) — Heal allies, gain 8% self-heal per ally heal
 - **Bounty System** (Wraith) — Elite kills reset ability cooldowns
 
+## Progression — Gear & Attunements
+
+No leveling by design. A character's power is entirely gear-driven:
+
+- **Gear** (`ItemData`) carries innate stat bonuses and a number of attunement sockets.
+- **Attunements** (`Attunement`, ScriptableObjects) are tiered upgrades you socket into gear.
+- **`CharacterStats`** aggregates everything equipped and feeds it into combat: bonus Max Health and Damage Reduction (via `Health`), plus Damage, Cooldown Reduction, and Move Speed multipliers consumed by `AbilityCaster` and `PlayerMovement`.
+
+See `Docs/BackendSetup.txt` Part 11 for the full system and authoring steps.
+
 ## Current State
 
-**Backend:** Complete. All 5 classes, 32 abilities, combat systems, and passive logic fully implemented in C#.
+**Backend:** Complete. All 5 classes, 32 abilities, combat systems, passive logic, and the gear/attunement progression are implemented in C#. `Health.cs` is the single source of truth for HP (the old `Stats.cs` was retired).
 
 **Frontend:** Ready for Unity wiring. Full setup documentation provided with:
 - VFX asset mapping (brbmuffins Technologies & Dark Arts packs)
@@ -81,6 +92,8 @@ See `Docs/BackendSetup.txt` for complete wiring guide (11 parts):
 5. Test class abilities in gameplay
 6. Balance numbers based on playtesting
 
+**Assets to source:** see `Docs/AssetShoppingList.txt` — prioritized list of the gaps (audio, sci-fi icons, class models, ore-node mesh) with free sources. Audio + tech icons are the highest-impact for combat feel.
+
 ---
 
-Built with Claude Code. Backend by Haiku 4.5.
+"It's called the ocean, you idiot — the big blue wet thing. Don't drink it. For your health!" —Dr. Steve Brule

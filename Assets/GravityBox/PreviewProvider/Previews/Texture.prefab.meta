@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a3f427534f5d3c242927720e8606fd1a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 273920
+  packageName: Preview Provider
+  packageVersion: 1.0
+  assetPath: Assets/GravityBox/PreviewProvider/Previews/Texture.prefab
+  uploadId: 636290

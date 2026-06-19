@@ -39,6 +39,9 @@ public class EnemyAI : MonoBehaviour
     {
         if (_health == null || !_health.IsAlive) return;
 
+        // Staggered: briefly interrupted (Breach Slam) — no move, no attack
+        if (_status.IsStaggered) return;
+
         // Tethered: movement handled externally by IronTetherHandler
         if (_status.IsTethered) return;
 
@@ -61,6 +64,9 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
+            // Suppressed (Null Field): cannot attack — the zone is real CC now
+            if (_status.IsSuppressed) return;
+
             // Attack
             _attackTimer += Time.deltaTime;
             if (_attackTimer >= 1f / attackRate)
@@ -75,7 +81,7 @@ public class EnemyAI : MonoBehaviour
 
     void Attack()
     {
-        // Suppressed enemies cannot perform special abilities but still basic-attack
+        // (Suppress / Stagger are checked in Update before this runs.)
         if (aggroTarget == null) return;
         Health targetHealth = aggroTarget.GetComponent<Health>();
         targetHealth?.TakeDamage(attackDamage, gameObject);

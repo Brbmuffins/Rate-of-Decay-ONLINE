@@ -44,6 +44,28 @@ public class ItemData : ScriptableObject
 
     public float healAmount = 0f;
 
+    [Header("Gear Stats (attunement system)")]
+    [Tooltip("Innate stat bonuses granted while this gear is equipped.")]
+    public StatModifier[] baseModifiers;
+
+    [Tooltip("How many attunements can be socketed into this gear.")]
+    public int attunementSlots = 0;
+
+    [Tooltip("Attunements currently socketed. Should not exceed attunementSlots.")]
+    public Attunement[] installedAttunements;
+
+    // Every active modifier: innate gear stats + all socketed attunements.
+    public System.Collections.Generic.IEnumerable<StatModifier> AllModifiers()
+    {
+        if (baseModifiers != null)
+            foreach (var m in baseModifiers) yield return m;
+
+        if (installedAttunements != null)
+            foreach (var att in installedAttunements)
+                if (att != null && att.modifiers != null)
+                    foreach (var m in att.modifiers) yield return m;
+    }
+
     public Color RarityColor
     {
         get

@@ -209,7 +209,7 @@ a { color: inherit; text-decoration: none; }
     <div class="passive-text">
       <div class="passive-tag">Passive ability</div>
       <div class="passive-name2">Overengineered</div>
-      <div class="passive-desc2">Your deployed objects accumulate output stacks every 4 seconds while you remain within 12 units. Each stack increases their damage or healing by 8%, up to 5 stacks. A turret at max stacks hits 40% harder. Staying near your work makes it stronger — and leaving lets it decay.</div>
+      <div class="passive-desc2">Your deployed objects accumulate output stacks every 4 seconds while you remain within 12 units. Each stack increases their damage or healing by 8%, up to 5 stacks. A turret at max stacks hits 40% harder. Staying near your work builds it up; earned stacks hold for the deployable's lifetime.</div>
     </div>
   </div>
 
@@ -355,7 +355,7 @@ a { color: inherit; text-decoration: none; }
       <div class="ability-card-bar" style="background:var(--guardian)"></div>
       <div class="ability-card-head"><span class="ability-card-name">Iron Tether</span><span class="badge-new">new</span></div>
       <div class="ability-card-cat" style="color:var(--guardian)">Control · Leash · 9s cd</div>
-      <div class="ability-card-desc">Lock onto one enemy — they cannot move more than 8 units from you for 5 seconds. You absorb 15% of their attacks on allies during the tether. Counters flankers.</div>
+      <div class="ability-card-desc">Lock onto one enemy — they cannot move more than 8 units from you for 5 seconds. Counters flankers.</div>
     </div>
     <div class="ability-card is-ult">
       <div class="ability-card-bar" style="background:var(--guardian)"></div>
@@ -413,7 +413,7 @@ a { color: inherit; text-decoration: none; }
         <div class="stat-row2"><span class="stat-name">Complexity</span><div class="stat-bar"><div class="stat-fill" style="width:90%;background:var(--phaser)"></div></div></div>
       </div>
     </div>
-    <p class="hero-quote">You hit harder than anyone and you're never where they expect. Your passive demands that you cycle through your entire kit constantly to build Phase Charge — a Phaser who sits on one spell is leaving damage on the floor. The highest skill ceiling in the roster.</p>
+    <p class="hero-quote">You hit harder than anyone and you're never where they expect. Your passive demands that you cycle through your entire kit constantly to build Phase Charge — a Phaser who sits on one ability is leaving damage on the floor. The highest skill ceiling in the roster.</p>
   </div>
 
   <div class="passive-block">
@@ -421,7 +421,7 @@ a { color: inherit; text-decoration: none; }
     <div class="passive-text">
       <div class="passive-tag">Passive ability</div>
       <div class="passive-name2">Phase Charge</div>
-      <div class="passive-desc2">Every ability use charges a Phase meter (6 charges to fill). At full charge, your next offensive ability deals 40% bonus damage and the meter resets. Rewards rapid cycling — you cannot sit on one spell. Phase Shift casts do not consume meter, letting you reposition freely between charges.</div>
+      <div class="passive-desc2">Every ability use charges a Phase meter (6 charges to fill). At full charge, your next offensive ability deals 40% bonus damage and the meter resets. Rewards rapid cycling — you cannot sit on one ability. Phase Shift casts do not consume meter, letting you reposition freely between charges.</div>
     </div>
   </div>
 
@@ -667,7 +667,7 @@ a { color: inherit; text-decoration: none; }
       <div class="ability-card-bar" style="background:var(--wraith)"></div>
       <div class="ability-card-head"><span class="ability-card-name">Null Field</span><span class="badge-new">new</span></div>
       <div class="ability-card-cat" style="color:var(--wraith)">Control · Suppress · 12s cd</div>
-      <div class="ability-card-desc">Drop a field that suppresses all enemy abilities for 5 seconds. Enemies inside cannot cast. Charge enemies become dangerous the second this expires — plan your exit or your Collapse timing.</div>
+      <div class="ability-card-desc">Drop a decay field for 5 seconds — enemies inside cannot attack and steadily lose health to decay damage. Charge enemies become dangerous the second this expires — plan your exit or your Collapse timing.</div>
     </div>
     <div class="ability-card is-new">
       <div class="ability-card-bar" style="background:#e8622a"></div>
@@ -679,7 +679,7 @@ a { color: inherit; text-decoration: none; }
       <div class="ability-card-bar" style="background:var(--wraith)"></div>
       <div class="ability-card-head"><span class="ability-card-name">Collapse</span><span class="badge-ult">ultimate</span></div>
       <div class="ability-card-cat" style="color:var(--wraith)">Damage · Detonate · 40s cd</div>
-      <div class="ability-card-desc">Consume all active debuffs on every enemy in range — each debuff consumed deals 20 damage. After a full Null Field window, this can hit a single enemy for 100+ damage. The highest single-target burst in the game with setup.</div>
+      <div class="ability-card-desc">Consume every active debuff on each enemy in range — each one detonates for 20 damage. Fuel it by layering debuffs first: Null Field (suppress + decay), Event Horizon (exposed), Breach Slam (stagger). The more your team stacks on, the bigger the blast — the highest setup-burst in the game.</div>
     </div>
   </div>
 
@@ -1059,7 +1059,7 @@ function animIronTether(ctx,W,H,t,col) {
   if(bounce>0.05) ring(ctx,ex,ey,bounce*30,col,1.5,bounce*2);
   player(ctx,px,py,col);
   enemy(ctx,curEx,ey,'#e85050');
-  // 15% absorb label glow
+  // tether midpoint glow
   dot(ctx,lerp(px,curEx,.5),py-4,3,col,0.5+Math.sin(t*tau)*0.3);
 }
 

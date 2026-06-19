@@ -47,6 +47,12 @@ public class Health : MonoBehaviour
     private float _damageReductionBonus = 0f; // 0.4 = 40% reduction
     public  float DamageReductionBonus  => _damageReductionBonus;
 
+    // ── Gear / Attunement channels (driven by CharacterStats) ─────
+    private float _baseMaxHealth       = 0f;   // captured at Awake, before gear
+    private float _gearMaxHealthBonus  = 0f;
+    private float _gearDamageReduction = 0f;   // stacks with ability DR
+    public  float BaseMaxHealth        => _baseMaxHealth;
+
     public float Fraction => maxHealth > 0f ? currentHealth / maxHealth : 0f;
 
     // ── StatusEffect integration ───────────────────────────────────
@@ -54,6 +60,7 @@ public class Health : MonoBehaviour
 
     void Awake()
     {
+        _baseMaxHealth = maxHealth;
         currentHealth  = maxHealth;
         _statusEffects = GetComponent<StatusEffectManager>();
     }
@@ -87,6 +94,9 @@ public class Health : MonoBehaviour
 
         // Damage reduction (Siege Mode, Threat Protocol)
         amount *= (1f - Mathf.Clamp01(_damageReductionBonus));
+
+        // Gear damage reduction (attunement system) — stacks multiplicatively
+        amount *= (1f - _gearDamageReduction);
 
         // Damage redirect (Transfer Protocol) — redirect sends a portion to the medic
         if (_redirectTarget != null && _redirectTarget.IsAlive && Time.time < _redirectExpiry)
@@ -173,6 +183,22 @@ public class Health : MonoBehaviour
     // ── Siege Mode / Threat Protocol ─────────────────────────────
     public void SetDamageReduction(float fraction) => _damageReductionBonus = Mathf.Clamp01(fraction);
     public void ClearDamageReduction()             => _damageReductionBonus = 0f;
+
+    // ── Gear / Attunement channels (called by CharacterStats) ─────
+    // Adjusts max HP by the gear bonus, preserving current HP (and granting
+    // the added HP on equip; clamping on unequip).
+    public void SetGearMaxHealthBonus(float bonus)
+    {
+        if (_baseMaxHealth <= 0f) _baseMaxHealth = maxHealth; // safety if called pre-Awake
+        float delta = bonus - _gearMaxHealthBonus;
+        _gearMaxHealthBonus = bonus;
+        maxHealth = _baseMaxHealth + _gearMaxHealthBonus;
+        currentHealth = Mathf.Clamp(currentHealth + Mathf.Max(0f, delta), 0f, maxHealth);
+        onHealthChanged?.Invoke(currentHealth, maxHealth);
+    }
+
+    public void SetGearDamageReduction(float fraction)
+        => _gearDamageReduction = Mathf.Clamp01(fraction);
 
     // ── Adaptive Shield ───────────────────────────────────────────
     // Called by AdaptiveShieldHandler each time the target takes a hit.

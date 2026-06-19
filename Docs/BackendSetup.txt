@@ -17,6 +17,10 @@ PART 1 — COMBAT SYSTEMS
     • isRobotic       — tick for robotic enemies
                         (Defibrillator deals 60 extra dmg)
 
+  *** Health.cs is now the SINGLE source of truth for HP. ***
+  The old Stats.cs has been REMOVED. See the migration note in
+  Part 1.6 — any scene object that used Stats now needs Health.
+
 1.2  StatusEffectManager.cs  (Combat/Scripts/StatusEffectManager.cs)
   Place on: same GameObjects as Health.cs.
   No inspector setup needed — all code-driven.
@@ -52,6 +56,30 @@ PART 1 — COMBAT SYSTEMS
   Singleton. AbilityCaster calls Track() on Start for each
   player. System Rollback calls Rollback(5f).
 
+1.6  CharacterStats.cs  (Items/Scripts/CharacterStats.cs)
+  Place on: every PLAYER prefab (needs Health + Equipment too).
+  This is the gear/attunement aggregator — the game's ONLY
+  source of character power (no leveling). It reads Equipment,
+  sums all stat modifiers, and applies them. See Part 11 for
+  the full gear/attunement system.
+
+  *** MIGRATION: Stats.cs was removed ***
+  Stats.cs (old int-based HP) is deleted. In SampleScene.unity
+  these GameObjects used it and now show a MISSING SCRIPT you
+  must replace:
+      Kodiac Crane, Dravos Darkwater (several copies),
+      BrbMuffins (x2), Zompy Dravos, Bob
+  For EACH of them:
+    1. Remove the missing-script component.
+    2. Add Health.cs            (maxHealth = 100, isPlayer off
+                                  for enemies)
+    3. Add StatusEffectManager.cs
+    4. Add EnemyAI.cs           (enemies only — it auto-requires
+                                  Health + StatusEffectManager)
+    5. If it had an ObjectUI health bar, it now reads Health
+       automatically (already migrated in code) — no change
+       needed beyond having Health present.
+
 
 -----------------------------------------------------------
 PART 2 — PLAYER PREFAB SETUP
@@ -64,9 +92,15 @@ Create one prefab per class. All share this component stack:
   • StatusEffectManager.cs
   • AbilityCaster.cs
   • CastAnimator.cs
+  • Equipment.cs         (gear slots — see Part 11)
+  • CharacterStats.cs    (gear/attunement aggregator — see Part 11)
   • LineRenderer         (required by Tether handlers)
   • Rigidbody            (isKinematic for non-physics, or
                           not kinematic for dash physics)
+
+  NOTE: CharacterStats requires Health AND Equipment on the same
+  object. Add all three. AbilityCaster + PlayerMovement auto-detect
+  CharacterStats and apply Damage / Cooldown / Move Speed bonuses.
 
 Then add the CLASS-SPECIFIC components below.
 
@@ -326,131 +360,106 @@ In your GameManager.Start() (or NetworkManager equivalent):
 
 
 -----------------------------------------------------------
-PART 8 — VFX ASSET REFERENCE (COMPLETE ABILITY MAPPING)
+PART 8 — VFX ASSET REFERENCE (HARD-TECH MAPPING)
 -----------------------------------------------------------
 
-brbmuffins Technologies Particle Pack
+THEME: hard tech / post-apocalyptic. Ability VFX are routed onto
+the sci-fi + industrial packs (Technologies + Studio). The Dark
+Arts FANTASY pack is intentionally NOT used for abilities — no
+magic circles, mana walls, or leaf shields. A couple of its
+non-fantasy prefabs (Plazma sphere, the Lightning* prefabs) are
+fine because they read as energy/tech.
+
+brbmuffins Technologies Particle Pack   (industrial / electrical)
   Path: Assets/brbmuffins Technologies Particle Pack/
 
-  ElectricalSparks.prefab
-    → Shock Mine idle (looping)
-    → Arc Lance chain bolts between targets
-    → Overdrive cast aura (tint yellow/orange)
-    → System Overload turret boost (heavy loop effect)
-    → Defibrillator revive shock effect
+  ElectricalSparks / ElectricalSparksEffect
+    → Shock Mine idle (loop), System Overload turret boost,
+      Defibrillator shock, Overdrive surge
+  SmallExplosion.prefab        → Shock Mine detonation
+  EnergyExplosion.prefab       → Kinetic Reversal release; Purge cleanse
+  SparksEffect.prefab          → Breach Slam impact; Nanite Swarm cloud
+  EarthShatter.prefab          → Breach Slam ground rupture
+  Steam / PressurisedSteam     → Siege Mode anchor vent
+  PlasmaExplosionEffect.prefab → Singularity / Event Horizon burst; Collapse
+  Dissolve.prefab              → Phase Shift depart; System Rollback rewind
+  DissolveSolidHorizontal      → Phase Cloak enter / exit
+  GroundFog.prefab             → Null Field zone; Shadow Relay aura
+  PoisonGas.prefab             → Null Field DECAY haze (on-theme for the
+                                 decay field; pairs with the DOT)
+  MuzzleFlash.prefab           → turret / weapon muzzle
 
-  SmallExplosion.prefab
-    → Shock Mine detonation blast
+brbmuffins Studio   (stylized sci-fi combat — best-fit pack, was
+  previously unreferenced)
+  Path: Assets/brbmuffins Studio/
 
-  EnergyExplosion.prefab
-    → Kinetic Reversal release burst (tint blue)
-    → Purge Protocol cleanse explosion (tint white/bright)
+  Electro hit / Electro slash  → Shock Mine pop; Arc Lance arcs; Defib shock
+  Lightning aura               → Overdrive (self); System Overload (turret)
+  Plexus / Plexus AoE          → Drone Command target lock; Magnetize field;
+                                 Singularity / Event Horizon pull field;
+                                 Iron Tether anchor
+  Magic shield (blue/yellow)   → ENERGY shells, recolored (read as hard-light,
+                                 NOT fantasy): Kinetic Reversal, Siege Mode,
+                                 Adaptive Shield, Bastion Node, Last Bastion
+  Healing / Healing circle     → Field Repair, Nanite Swarm, Defibrillator,
+                                 Restoration Beacon (replaces Dark Arts heals)
+  Sparks flashing green        → Transfer Protocol link
+  Portal blue                  → Phase Relay node
+  Red energy explosion         → Collapse detonation
+  Teleport                     → Phase Shift / System Rollback flourish
+  Ground AOE explosion         → Breach Slam shockwave
 
-  SparksEffect.prefab
-    → Breach Slam impact sparks
-    → Nanite Swarm trail effect (tint green)
-
-  EarthShatter.prefab
-    → Breach Slam ground rupture
-
-  Steam.prefab
-    → Siege Mode anchor point (idle steam)
-
-  PlasmaExplosionEffect.prefab
-    → Singularity burst at pull conclusion
-    → Collapse debuff explosion (dark plasma variant)
-
-  Dissolve.prefab
-    → Phase Shift departure fade
-
-  DissolveSolidHorizontal.prefab
-    → Phase Cloak stealth enter (forward)
-    → Phase Cloak stealth exit (reverse)
-
-  Plazma sphere.prefab
-    → Phase Shift arrival impact
-    → Magnetize pull vortex center (tint cyan)
-
-  GroundFog.prefab
-    → Null Field containment zone (tint purple, looping)
-    → Shadow Relay placement aura (dark variant)
-
-
-brbmuffins Dark Arts Fantasy Pack
+brbmuffins Dark Arts   (fantasy — RETIRED for abilities)
   Path: Assets/brbmuffins Dark Arts/Fantasy Pack/Prefabs/
-
-  Healing buff.prefab
-    → Restoration Beacon pulse heal (looping)
-    → Nanite Swarm healing trail (tint green)
-    → Field Repair deployable heal flash
-    → Defibrillator revival heal burst
-    → Adaptive Shield active growth (tint blue overlay)
-
-  Shield buff.prefab
-    → Kinetic Reversal absorb gain (tint blue)
-    → Siege Mode aura around Guardian (tint cyan)
-    → Bastion Node placement shield aura (tint blue)
-    → Adaptive Shield initial shield grant + growth
-
-  Magic circle.prefab
-    → Restoration Beacon idle circle (looping)
-    → Magnetize pull vortex circle (tint cyan, looping)
-
-  Magic buff.prefab
-    → Phase Relay placement buff aura (tint purple)
-    → Drone Command target lock indicator (tint cyan, on enemy)
-
-  Death magic circle.prefab
-    → Singularity pull phase (idle pull aura)
-    → Collapse dark circle (debuff consumption visual)
-
-  Glowing orbs.prefab
-    → Transfer Protocol tether orbs (tint green, floating on ally)
-
-  Leaves shield.prefab
-    → Iron Tether anchor on enemy (tint blue/grey, child of target)
-
-  Mana wall.prefab
-    → Last Bastion wall structure (child of ability GameObject)
+  Use ONLY these (they read as tech):
+    Plazma sphere.prefab       → Phase Shift arrival; Magnetize core
+    Lightning attack / Lightning strike skill → optional Arc Lance bolts
+  Do NOT use for abilities: Magic circle, Death magic circle, Mana wall,
+  Leaves shield, Magic buff, Healing buff, Shield buff, Glowing orbs.
 
 
-------- QUICK REFERENCE BY ABILITY -------
+------- QUICK REFERENCE BY ABILITY (hard-tech) -------
 
 ENGINEER
-  Shock Mine        → SmallExplosion (blast) + ElectricalSparks (idle)
-  Overdrive         → ElectricalSparks (yellow/orange tint on caster)
-  Drone Command     → Magic buff.prefab (cyan, on target enemy)
-  Field Repair      → Healing buff.prefab (green tint on deployable)
-  System Overload   → ElectricalSparks (heavy loop on turret)
+  Shock Mine        → SmallExplosion + ElectricalSparks (idle) + Electro hit
+  Overdrive         → Lightning aura (self) + ElectricalSparksEffect
+  Drone Command     → Plexus (target-lock scan on enemy, cyan)
+  Field Repair      → Healing circle (on deployable)
+  System Overload   → ElectricalSparks (heavy) + Lightning aura (turret)
 
 GUARDIAN
-  Kinetic Reversal  → Shield buff (absorb) + EnergyExplosion (release)
-  Magnetize         → Magic circle + Plazma sphere (cyan pull vortex)
-  Breach Slam       → SparksEffect (trail) + EarthShatter (ground)
-  Siege Mode        → Steam (anchor) + Shield buff (aura, cyan)
-  Iron Tether       → Leaves shield.prefab (on enemy, blue/grey)
-  Last Bastion      → Mana wall.prefab (wall structure)
+  Kinetic Reversal  → Magic shield blue (energy shell) + EnergyExplosion (release)
+  Magnetize         → Plexus AoE (field) + Plazma sphere (core)
+  Breach Slam       → SparksEffect + EarthShatter + Ground AOE explosion
+  Siege Mode        → Steam (vent) + Magic shield yellow (bunker aura)
+  Iron Tether       → Plexus (anchor on enemy) + LineRenderer chain
+  Last Bastion      → Magic shield blue (hard-light barrier, scaled wide)
 
 PHASER
-  Phase Shift       → Dissolve (depart) + Plazma sphere (arrive)
-  Singularity       → Death magic circle (pull) + PlasmaExplosionEffect (burst)
-  Arc Lance         → ElectricalSparks (chain bolts between targets)
-  Event Horizon     → Death magic circle (pull) + PlasmaExplosionEffect (burst, Exposed debuff)
+  Phase Shift       → Dissolve (depart) + Plazma sphere (arrive) + Teleport
+  Singularity       → Plexus AoE (pull field) + PlasmaExplosionEffect (burst)
+  Arc Lance         → Electro slash arcs + ElectricalSparks
+  Event Horizon     → Plexus AoE (larger pull) + PlasmaExplosionEffect (Exposed)
 
 MEDIC
-  Transfer Protocol → Glowing orbs.prefab (green tint, on allies)
-  Nanite Swarm      → Healing buff (trail, green) + SparksEffect (swarm)
-  Defibrillator     → ElectricalSparks (shock) + Healing buff (revival)
-  Adaptive Shield   → Shield buff (initial + growth aura, blue)
+  Transfer Protocol → Sparks flashing green (on ally) + LineRenderer
+  Nanite Swarm      → Healing (trail) + SparksEffect (cloud)
+  Defibrillator     → ElectricalSparks + Electro hit (shock) + Healing (revive)
+  Adaptive Shield   → Magic shield blue (grows on hit)
   Purge Protocol    → EnergyExplosion (white/bright cleanse burst)
-  System Rollback   → Dissolve (reversed temporal rewind effect)
-  Restoration Beacon → Magic circle (idle) + Healing buff (pulse, green)
+  System Rollback   → Dissolve + Teleport (temporal rewind)
+  Restoration Beacon → Healing circle (idle) + Healing (pulse)
 
 WRAITH
   Phase Cloak       → DissolveSolidHorizontal (enter + exit reverse)
-  Null Field        → GroundFog.prefab (purple tint, looping zone)
-  Collapse          → PlasmaExplosionEffect + Death magic circle (dark plasma)
-  Shadow Relay      → GroundFog.prefab (dark variant aura)
+  Null Field        → GroundFog + PoisonGas (decay field, pairs with DOT)
+  Collapse          → PlasmaExplosionEffect + Red energy explosion
+  Shadow Relay      → GroundFog (dark)
+
+DEPLOYABLES
+  Bastion Node      → Magic shield blue (energy dome)
+  Phase Relay       → Portal blue / Plexus (energy node)
+  Shadow Relay      → GroundFog (dark)
 
 
 -----------------------------------------------------------
@@ -469,7 +478,9 @@ Animation clips available from brbmuffins Moves - Human Spellcasting Pack:
 
   MALE and FEMALE variants available in:
     Idles/
-      • CastingIdle01.fbx          — idle with wand/staff raised
+      • CastingIdle01.fbx          — idle with arm/device raised
+                                     (reads as gadget/device activation,
+                                      not a wand, under hard-tech)
     Combat/Spellcasting/
       • CastingEnter01.fbx         — enter casting stance
       • CastingExit01.fbx          — exit casting stance
@@ -522,59 +533,64 @@ different animation clips per class.
 PART 10 — ABILITY ICON SETUP
 -----------------------------------------------------------
 
-Icon Asset Pack: brbmuffins Free RPG Icons
-  Path: Assets/brbmuffins Icons/
+Icon Asset Pack: 500FreeSkillIcons   (PLACEHOLDER SET — best option)
+  Path: Assets/500FreeSkillIcons/Icons/
 
-Available icon categories (5 variants each):
-  • Fire_1 through Fire_5          → damage/offensive spells
-  • Cold_1 through Cold_5          → slow/freeze abilities
-  • Holy_1 through Holy_5          → healing/protection spells
-  • Dark_1 through Dark_5          → debuffs/single-target damage
-  • Nature_1 through Nature_5      → area effects/swarms
-  • Wind_1 through Wind_5          → speed/movement abilities
-  • Water_1 through Water_5        → shields/defense
-  • Earth_1 through Earth_5        → crowd control/terrain
-  • Buff_1 through Buff_5          → temporary stat boosts
-  • Debuff_1 through Debuff_5      → negative status effects
-  • Lightning_1 through Lightning_5 → electric/shock abilities
+  521 numbered icons (skill_001.png .. skill_523.png). This is the
+  placeholder set: enough unique icons for every ability, status
+  effect, resource, and attunement with none repeated. Numbered (not
+  themed), so this is a deterministic stand-in — open the folder, pick
+  the closest-looking ones, and swap for a real sci-fi/tech set later.
+  (The fantasy packs — brbmuffins Icons, CaptainCatSparrow — are NOT
+  used for hard-tech ability icons.)
 
-Recommended Icon Assignments by Ability
+  Suggested block layout (keeps assignments tidy + swappable):
+    skill_001–026  abilities (see below)
+    skill_040–045  status effects (Slow, Stagger, Suppress,
+                   DamageOverTime, Exposed, Tethered)
+    skill_050–060  resources (ores, scrap, bio, components)
+    skill_070+     attunements (one per StatType)
 
-ENGINEER (Tech/Electrical theme → Fire, Lightning, Buff categories)
-  • Shock Mine         → Lightning_1 (explosive shock)
-  • Overdrive          → Fire_3 (power surge) or Buff_1 (buff)
-  • Drone Command      → Buff_2 (targeting buff)
-  • Field Repair       → Holy_2 (healing)
-  • System Overload    → Fire_4 (overload)
+Placeholder Ability Icons (sequential — re-pick by eye in the folder)
 
-GUARDIAN (Defense/Control theme → Water, Earth, Buff categories)
-  • Kinetic Reversal   → Water_2 (shield reflect)
-  • Magnetize          → Earth_3 (magnetism/pull)
-  • Breach Slam        → Earth_4 (ground slam)
-  • Siege Mode         → Water_4 (defensive stance)
-  • Iron Tether        → Earth_2 (restraint)
-  • Last Bastion       → Water_5 (last stand/wall)
+ENGINEER
+  • Shock Mine         → skill_001
+  • Overdrive          → skill_002
+  • Drone Command      → skill_003
+  • Field Repair       → skill_004
+  • System Overload    → skill_005
 
-PHASER (Spatial/Damage theme → Lightning, Dark, Wind categories)
-  • Phase Shift        → Wind_3 (teleport/movement)
-  • Singularity        → Dark_3 (gravity pull)
-  • Arc Lance          → Lightning_3 (electric chain)
-  • Event Horizon      → Dark_4 (void/exposed debuff)
+GUARDIAN
+  • Kinetic Reversal   → skill_006
+  • Magnetize          → skill_007
+  • Breach Slam        → skill_008
+  • Siege Mode         → skill_009
+  • Iron Tether        → skill_010
+  • Last Bastion       → skill_011
 
-MEDIC (Healing/Support theme → Holy, Nature, Buff categories)
-  • Transfer Protocol  → Holy_3 (ally buff transfer)
-  • Nanite Swarm       → Nature_2 (healing swarm)
-  • Defibrillator      → Lightning_4 (revive shock)
-  • Adaptive Shield    → Water_3 (growing shield)
-  • Purge Protocol     → Debuff_1 (cleanse)
-  • System Rollback    → Wind_5 (temporal rewind)
-  • Restoration Beacon → Holy_4 (healing aura)
+PHASER
+  • Phase Shift        → skill_012
+  • Singularity        → skill_013
+  • Arc Lance          → skill_014
+  • Event Horizon      → skill_015
 
-WRAITH (Stealth/Damage theme → Dark, Wind, Debuff categories)
-  • Phase Cloak        → Wind_1 (stealth/invisible)
-  • Null Field         → Dark_1 (void zone)
-  • Collapse           → Debuff_5 (debuff explosion)
-  • Shadow Relay       → Dark_2 (shadow anchor)
+MEDIC
+  • Transfer Protocol  → skill_016
+  • Nanite Swarm       → skill_017
+  • Defibrillator      → skill_018
+  • Adaptive Shield    → skill_019
+  • Purge Protocol     → skill_020
+  • System Rollback    → skill_021
+  • Restoration Beacon → skill_022
+
+WRAITH
+  • Phase Cloak        → skill_023
+  • Null Field         → skill_024
+  • Collapse           → skill_025
+  • Shadow Relay       → skill_026
+
+  (Continue skill_027+ for the base ability pool — Dark Blast,
+  Arc Cannon, Neural Spike, etc.)
 
 UI Implementation Notes
 
@@ -588,12 +604,95 @@ In AbilityBar.cs, map each ability to its icon:
 
 
 -----------------------------------------------------------
-PART 11 — COMPILER / DEPENDENCY NOTES
+PART 11 — GEAR & ATTUNEMENT SYSTEM
+-----------------------------------------------------------
+
+DESIGN PILLAR: there is NO leveling. All character power comes
+from equipped gear and the attunements socketed into that gear.
+
+Scripts (all in Items/Scripts/):
+  • StatModifier.cs   — defines StatType + ModifierKind + the
+                        serializable StatModifier struct. No
+                        component; used by data assets.
+  • Attunement.cs     — ScriptableObject. A socketable upgrade.
+  • ItemData.cs       — extended: gear now carries baseModifiers,
+                        attunementSlots, installedAttunements[].
+  • CharacterStats.cs — MonoBehaviour aggregator on each player.
+
+── Stat channels (StatType) ──────────────────────────────────
+  MaxHealth          flat HP   → applied to Health
+  Damage             percent   → AbilityCaster outgoing damage
+  DamageReduction    percent   → applied to Health (caps 80%)
+  MoveSpeed          percent   → PlayerMovement
+  CooldownReduction  percent   → AbilityCaster cooldowns (caps 60%)
+  HealPower          percent   → exposed; apply at heal sites
+                                 (see note below)
+
+  ModifierKind: Flat (use for MaxHealth, e.g. +25) or
+                Percent (use for the rest, 0.10 = +10%).
+
+── How power flows (already wired in code) ───────────────────
+  1. CharacterStats.Recalculate() runs on Start and every time
+     Equipment equips/unequips an item.
+  2. It walks every equipped ItemData, calling AllModifiers()
+     (innate gear stats + each socketed attunement's modifiers).
+  3. Totals are pushed:
+       Health.SetGearMaxHealthBonus()   (max HP, preserves %)
+       Health.SetGearDamageReduction()  (stacks w/ ability DR)
+     and exposed as properties:
+       CharacterStats.DamageMultiplier
+       CharacterStats.CooldownReduction
+       CharacterStats.MoveSpeedMultiplier
+       CharacterStats.HealMultiplier
+  4. AbilityCaster multiplies all ability damage by
+     DamageMultiplier and shortens cooldowns by CooldownReduction.
+  5. PlayerMovement multiplies move speed by MoveSpeedMultiplier.
+
+  HealPower NOTE: HealMultiplier is computed and exposed but not
+  yet auto-applied (heals are resolved on the TARGET's Health,
+  which doesn't know the healer's gear). To use it, multiply heal
+  amounts by the healer's CharacterStats.HealMultiplier at the
+  cast sites in AbilityCaster (Field Repair, Nanite Swarm,
+  Restoration Beacon, Defibrillator). Left as a deliberate,
+  clearly-marked follow-up so it isn't half-wired silently.
+
+── Authoring content in Unity ────────────────────────────────
+  Create an attunement:
+    Assets > Create > Inventory > Attunement
+      • set tier (1-3, controls UI color)
+      • add modifiers (e.g. Damage / Percent / 0.08 = +8% dmg)
+
+  Make a piece of gear grant stats:
+    Select an ItemData asset (Inventory/Item):
+      • equippable = true, set equipSlot
+      • baseModifiers: innate stats (e.g. +25 MaxHealth Flat)
+      • attunementSlots: how many upgrades it can hold
+      • installedAttunements: drag Attunement assets in
+        (length should not exceed attunementSlots)
+
+  v1 SCOPE NOTE: attunements live on the ItemData asset itself,
+  so all copies of an item share its sockets. Per-instance
+  sockets (each looted item upgraded separately) would need a
+  runtime item-instance wrapper — a clean future upgrade, left
+  out to keep this buildable now.
+
+── Theme tie-in ──────────────────────────────────────────────
+  Attunement icons: use the 500FreeSkillIcons placeholder set
+  (skill_070+ block — see Part 10), one icon per StatType. Swap
+  for a themed sci-fi set at ship.
+
+
+-----------------------------------------------------------
+PART 12 — COMPILER / DEPENDENCY NOTES
 -----------------------------------------------------------
 
 Scripts that require other scripts on the same GameObject:
   AbilityCaster      → Health, (optional) PassivePhaseCharge,
-                       PassiveBountySystem, CastAnimator
+                       PassiveBountySystem, CastAnimator,
+                       CharacterStats
+  CharacterStats     → Health (required), Equipment (reads)
+  Equipment          → CharacterStats (notifies on change)
+  PlayerMovement     → (optional) CharacterStats for move speed
   SiegeModeHandler   → Health, PlayerMovement,
                        PassiveThreatProtocol
   KineticReversalHandler → Health
