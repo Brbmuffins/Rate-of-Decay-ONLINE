@@ -483,20 +483,15 @@ public class LoginManager : MonoBehaviour
     public void OnHostClicked()
     {
         if (_busy) return;
-        if (NetworkManager.singleton == null)
-        {
-            SetStatus(_statusText, "No NetworkManager in scene.", false);
-            return;
-        }
 
-        // Set dev credentials so the authenticator has something to work with
+        // Set dev credentials — CharacterSelectManager reads these to call StartHost()
         PlayerPrefs.SetString("username", "DevPlayer");
         PlayerPrefs.SetString("jwt_token", "dev");
         PlayerPrefs.SetInt("SelectedCharacter", 0);
         PlayerPrefs.Save();
 
-        SetStatus(_statusText, "Starting local host...", true);
-        NetworkManager.singleton.StartHost();
+        SetStatus(_statusText, "Opening character select...", true);
+        SceneManager.LoadScene("CharacterSelect");
     }
 #endif
 
@@ -564,21 +559,13 @@ public class LoginManager : MonoBehaviour
         PlayerPrefs.SetString("username",  username);
         PlayerPrefs.Save();
 
-        SetStatus(_statusText, "Authenticated. Connecting...", true);
+        SetStatus(_statusText, "Authenticated. Loading character select...", true);
         if (sceneVFX != null) sceneVFX.OnLoginSuccess();
         yield return new WaitForSeconds(0.6f);
 
-        // If Mirror NetworkManager exists, use it to connect.
-        // It will automatically load the Online Scene (GameWorld).
-        if (NetworkManager.singleton != null)
-        {
-            NetworkManager.singleton.StartClient();
-        }
-        else
-        {
-            // Fallback: just load the scene directly
-            SceneManager.LoadScene(gameScene);
-        }
+        // Route through CharacterSelect so the player can pick their class.
+        // CharacterSelectManager will call NetworkManager.StartClient() after selection.
+        SceneManager.LoadScene("CharacterSelect");
     }
 
     IEnumerator RegisterRoutine(string username, string email, string password)

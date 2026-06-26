@@ -45,9 +45,10 @@ Full design rationale and system breakdown: [`DESIGN_DOCUMENT.md`](DESIGN_DOCUME
 **Networking** — Mirror host/client working end-to-end. Login → GameWorld with player spawn and camera follow confirmed.
 
 **Editor automation** — Everything is wired via `RoD →` Unity menu items. No manual drag-and-drop required:
+- `RoD/Setup/0` — builds CharacterSelect.unity (3D model preview, class list, abilities panel, VFX per class)
 - `RoD/Setup/1` — builds LoginScene from scratch (NetworkManager, auth, transport, EventSystem, UI)
 - `RoD/Setup/2` — cleans GameWorld of stray NetworkManager components
-- `RoD/Setup/3` — fixes build settings scene order
+- `RoD/Setup/3` — fixes build settings scene order (Login → CharacterSelect → GameWorld)
 - `RoD/Setup/4` — creates Engineer/Guardian/Wraith/Medic prefabs, auto-assigns to NetworkManager
 - `RoD/Setup/5` — assigns AnimatorController to all class prefabs
 - `RoD/World/Populate GameWorld with NPCs` — places Zompy, Bob, Kodiac, Turret with VFX and ground plane
@@ -90,11 +91,12 @@ Docs/                    — Setup guides for backend, abilities, inventory, and
 
 **First-time scene setup (run in order):**
 1. Open the project in Unity
-2. `RoD → Setup → 1 ▶ Create Login Scene`
-3. `RoD → Setup → 4 ▶ Create Class Prefabs`
-4. `RoD → Setup → 5 ▶ Fix Animator Controllers`
-5. `RoD → World → Populate GameWorld with NPCs`
-6. Press Play in LoginScene → click **HOST (DEV)** to test locally
+2. `RoD → Setup → 0 ▶ Create Character Select Scene`
+3. `RoD → Setup → 1 ▶ Create Login Scene`
+4. `RoD → Setup → 4 ▶ Create Class Prefabs`
+5. `RoD → Setup → 5 ▶ Fix Animator Controllers`
+6. `RoD → World → Populate GameWorld with NPCs`
+7. Press Play in LoginScene → click **HOST (DEV)** → pick class → **ENTER WORLD**
 
 For the auth server and MySQL backend, see `Docs/BackendSetup.txt`.
 

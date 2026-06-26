@@ -28,11 +28,85 @@ using UnityEngine.Rendering;
 
 public static class RodEditorSetup
 {
-    const string LOGIN_SCENE_PATH  = "Assets/Game/Scenes/LoginScene.unity";
-    const string GAME_WORLD_PATH   = "Assets/brbmuffins Skybox/Scenes/GameWorld.unity";
-    const string SERVER_ADDRESS    = "15.204.243.36";
-    const string ENGINEER_FBX_PATH = "Assets/Game/Characters/Engineer/Model/Idle.fbx";
-    const string PREFABS_DIR       = "Assets/Game/Prefabs";
+    const string LOGIN_SCENE_PATH       = "Assets/Game/Scenes/LoginScene.unity";
+    const string CHAR_SELECT_SCENE_PATH = "Assets/Game/Scenes/CharacterSelect.unity";
+    const string GAME_WORLD_PATH        = "Assets/brbmuffins Skybox/Scenes/GameWorld.unity";
+    const string SERVER_ADDRESS         = "15.204.243.36";
+    const string ENGINEER_FBX_PATH      = "Assets/Game/Characters/Engineer/Model/Idle.fbx";
+    const string PREFABS_DIR            = "Assets/Game/Prefabs";
+
+    // ─────────────────────────────────────────────────────────────────────────
+    //  0. Create Character Select Scene
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [MenuItem("RoD/Setup/0 ▶ Create Character Select Scene", priority = 0)]
+    static void CreateCharacterSelectScene()
+    {
+        if (File.Exists(CHAR_SELECT_SCENE_PATH))
+        {
+            bool overwrite = EditorUtility.DisplayDialog(
+                "Scene Exists",
+                $"CharacterSelect already exists at:\n{CHAR_SELECT_SCENE_PATH}\n\nOverwrite it?",
+                "Yes, rebuild it", "Cancel");
+            if (!overwrite) return;
+        }
+
+        Directory.CreateDirectory(Path.GetDirectoryName(CHAR_SELECT_SCENE_PATH)!);
+
+        // ── New empty scene ──────────────────────────────────────────────────
+        var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
+        // ── Camera — dark background, URP post-processing ────────────────────
+        var camGO = new GameObject("Main Camera");
+        camGO.tag = "MainCamera";
+        var cam = camGO.AddComponent<Camera>();
+        cam.clearFlags      = CameraClearFlags.SolidColor;
+        cam.backgroundColor = new Color(0.025f, 0.018f, 0.06f, 1f);
+        cam.farClipPlane    = 100f;
+        // Exclude layer 31 — the 3D preview uses that layer with its own camera
+        cam.cullingMask &= ~(1 << 31);
+        cam.transform.SetPositionAndRotation(new Vector3(0f, 0f, -10f), Quaternion.identity);
+        camGO.AddComponent<AudioListener>();
+
+        var urpData = camGO.GetComponent<UnityEngine.Rendering.Universal.UniversalAdditionalCameraData>();
+        if (urpData != null) urpData.renderPostProcessing = true;
+
+        // ── CharacterSelectManager ────────────────────────────────────────────
+        var mgrGO = new GameObject("CharacterSelectManager");
+        mgrGO.AddComponent<CharacterSelectManager>();
+
+        // ── EventSystem ───────────────────────────────────────────────────────
+        var esGO = new GameObject("EventSystem");
+        esGO.AddComponent<EventSystem>();
+        var inputModuleType = System.Type.GetType(
+            "UnityEngine.InputSystem.UI.InputSystemUIInputModule, Unity.InputSystem");
+        if (inputModuleType != null)
+            esGO.AddComponent(inputModuleType);
+        else
+            esGO.AddComponent<StandaloneInputModule>();
+
+        // ── Save ──────────────────────────────────────────────────────────────
+        EditorSceneManager.SaveScene(scene, CHAR_SELECT_SCENE_PATH);
+        AssetDatabase.Refresh();
+
+        // ── Rebuild build settings with all 3 scenes ──────────────────────────
+        ApplyBuildSettings();
+
+        Debug.Log($"[RoD] ✅ CharacterSelect scene created → {CHAR_SELECT_SCENE_PATH}");
+        EditorUtility.DisplayDialog(
+            "✅ Character Select Scene Ready",
+            "CharacterSelect.unity created!\n\n" +
+            "Build settings updated:\n" +
+            "  Index 0 → LoginScene\n" +
+            "  Index 1 → CharacterSelect\n" +
+            "  Index 2 → GameWorld\n\n" +
+            "Flow: LOGIN → CHARACTER SELECT → GAME WORLD",
+            "Got it!");
+
+        // Return to LoginScene
+        if (File.Exists(LOGIN_SCENE_PATH))
+            EditorSceneManager.OpenScene(LOGIN_SCENE_PATH, OpenSceneMode.Single);
+    }
 
     // ─────────────────────────────────────────────────────────────────────────
     //  1. Create Login Scene
@@ -176,7 +250,10 @@ public static class RodEditorSetup
     {
         ApplyBuildSettings();
         EditorUtility.DisplayDialog("✅ Build Settings Updated",
-            "Scene order:\n  Index 0 → LoginScene\n  Index 1 → GameWorld\n\n" +
+            "Scene order:\n" +
+            "  Index 0 → LoginScene\n" +
+            "  Index 1 → CharacterSelect\n" +
+            "  Index 2 → GameWorld\n\n" +
             "This is required for Mirror's online/offline scene system.", "OK");
     }
 
@@ -302,7 +379,8 @@ public static class RodEditorSetup
     {
         var scenes = new List<EditorBuildSettingsScene>();
 
-        foreach (var path in new[] { LOGIN_SCENE_PATH, GAME_WORLD_PATH })
+        // Order matters: Login(0) → CharacterSelect(1) → GameWorld(2)
+        foreach (var path in new[] { LOGIN_SCENE_PATH, CHAR_SELECT_SCENE_PATH, GAME_WORLD_PATH })
         {
             if (File.Exists(path))
                 scenes.Add(new EditorBuildSettingsScene(path, true));
@@ -311,6 +389,6 @@ public static class RodEditorSetup
         }
 
         EditorBuildSettings.scenes = scenes.ToArray();
-        Debug.Log("[RoD] Build Settings updated: LoginScene(0), GameWorld(1)");
+        Debug.Log("[RoD] Build Settings updated: LoginScene(0), CharacterSelect(1), GameWorld(2)");
     }
 }

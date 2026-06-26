@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Game/Scenes/LoginScene.unity
     guid: f5589813cf4cebd48b9bea7541dae402
   - enabled: 1
+    path: Assets/Game/Scenes/CharacterSelect.unity
+    guid: 60bf09610c5006643a521d72b52bbf0a
+  - enabled: 1
     path: Assets/brbmuffins Skybox/Scenes/GameWorld.unity
     guid: 594da9eac4a488a479b252ff922516d9
   m_configObjects:
