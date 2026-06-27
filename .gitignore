@@ -55,6 +55,7 @@ TestDemo*
 
 # ── Shareable builds (distribute via download page, not git) ─────────────────
 Shareable Windows Build/
+New folder/
 
 # ── Debug symbols ─────────────────────────────────────────────────────────────
 *_BackUpThisFolder_ButDontShipItWithYourGame/

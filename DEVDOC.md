@@ -322,13 +322,10 @@ Every UI system that can be hidden follows this pattern. Forgetting `blocksRayca
 | 4000 | Manager dashboard | Basic Auth protected |
 | 4000/gm-dashboard | GM server health dashboard | Token auth — see bookmark below |
 | 7777 UDP | Mirror game server (`rod-server`) | Unity KCP transport |
-| 3001 | Uptime Kuma | Monitoring — login: admin / admin1 |
+| 3001 | Uptime Kuma | Monitoring (credentials in private notes) |
 
 ### GM Dashboard
-```
-http://15.204.243.36:4000/gm-dashboard?token=f64cde4ee459ba73c6c50f6ac37c4844ab6fe60dbf124cda
-```
-Shows: rod-server status, player spawn count, last 50 log lines (color-coded), restart button, log download, Uptime Kuma link.
+`http://15.204.243.36:4000/gm-dashboard?token=<ADMIN_TOKEN>` — token stored in `.env` on VPS. Shows: rod-server status, player spawn count, last 50 log lines (color-coded), restart button, log download, Uptime Kuma link.
 
 ### Useful Server Commands
 ```bash
