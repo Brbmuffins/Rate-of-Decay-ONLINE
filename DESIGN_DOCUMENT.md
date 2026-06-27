@@ -5,7 +5,7 @@
 
 ## Vision
 
-A tight, polished sci-fi action MMO built for a small crew of friends. Combat feels like Guild Wars 2 — active, movement-driven, readable — wrapped in a post-apocalyptic world where gear is everything and no one sits at max level waiting to get good. Target audience: 10 players max. Target feel: AAA mechanics at indie scope.
+A tight, polished dark fantasy action MMO built for a small crew of friends. Combat feels like Guild Wars 2 — active, movement-driven, readable — wrapped in a world of rune-magic, ancient armour, and arcane power where gear is everything and no one sits at max level waiting to get good. Target audience: 10 players max. Target feel: AAA mechanics at indie scope.
 
 ---
 
@@ -18,7 +18,7 @@ Reading the existing code reveals a surprisingly mature foundation:
 - **ClassAbilityPool** — 4 equipped abilities drawn from a larger class spellbook. Already matches the GW2 feel you want.
 - **CharacterStats** — gear feeds DamageMultiplier, CooldownReduction, MoveSpeedMultiplier, HealMultiplier. Clean design.
 - **StatusEffectManager** — robust debuff/buff layer already in place.
-- **Engineer class** — distinct sci-fi identity with deployables, phase relays, nanite swarms, singularities.
+- **Warden class** — distinct conjurer identity with runic constructs, spirit relays, healing wisps, void wells.
 
 ---
 
@@ -88,7 +88,7 @@ CREATE TABLE characters (
     id          INT PRIMARY KEY AUTO_INCREMENT,
     account_id  INT NOT NULL REFERENCES accounts(id),
     name        VARCHAR(64) UNIQUE NOT NULL,
-    class_name  VARCHAR(64) NOT NULL,     -- 'Engineer', 'Vanguard', etc.
+    class_name  VARCHAR(64) NOT NULL,     -- 'Warden', 'Ironclad', 'Arcanist', 'Cleric', 'Shadowblade'
     equipped_abilities JSON,              -- array of 4 spellbook indices
     zone        VARCHAR(128) DEFAULT 'StartingZone',
     pos_x FLOAT DEFAULT 0, pos_y FLOAT DEFAULT 0, pos_z FLOAT DEFAULT 0,
@@ -201,51 +201,69 @@ This is a mid-project addition. Lock in ground movement first.
 
 ## Classes — Crossworlds Roster
 
-Your Engineer is a great template. Here's a full 4-class roster that fits the sci-fi setting:
+Five classes drawn from dark fantasy archetypes — heavy armour, arcane robes, divine light, shadow blades, and runic constructs. Same tight combat loop; all flavour is magic and steel, no tech.
 
-### 1. Engineer (You Have This)
-*The Tactician — deploys turrets, mines, relays. Zones battlefields.*
+### 1. Warden (Formerly Engineer)
+*The Conjurer — deploys runic sentinels, arcane snares, spirit relays. Controls the battlefield.*
 
-**Abilities**: Nanite Swarm, Singularity, Null Field Zone, Phase Relay, Shock Mine
-**Identity Passive**: Overengineered (existing), Phase Charge (existing)
-**Ultimate**: Siege Mode (existing — turret form)
+**Abilities**: Spirit Wisps, Void Maw, Silence Ward, Spirit Redirect, Runic Snare
+**Identity Passive**: Runic Mastery (existing: Overengineered), Arcane Charge (existing: Phase Charge)
+**Ultimate**: Conjurer's Surge — all active constructs erupt simultaneously
 **Role feel**: Battlefield control, sustained AoE, team utility
+**Visual**: Black & emerald armour, gold rune trim, glowing teal constructs
 
-### 2. Vanguard
-*The Front Line — heavy armor, kinetic shields, gap closers.*
+### 2. Ironclad (Formerly Guardian)
+*The Warlord — heavy armour, kinetic shields, gap closers.*
 
 **Abilities**:
-- **Shield Slam** — charge forward, knock back first target hit
-- **Iron Barricade** — project a physical barrier (blocks projectiles for 4s)
-- **Retaliation Field** — aura that reflects 30% of damage taken back to attacker
-- **Plasma Anchor** — tether to an enemy, reducing their movement speed and pulling them toward you over 3s
-- **[Ultimate] Colossus Stance** — 8s: immune to CC, 50% DR, all attacks knock back
+- **Shieldwall Charge** — charge forward, stagger first target hit + 3 Threat stacks
+- **Iron Rampart** — raise a stone rune wall (blocks projectiles for 10s)
+- **Counter Blow** — absorb incoming damage for 3s, release as a cone burst
+- **Gravity Slam** — slam the ground, pulling all nearby enemies to the anchor point
+- **[Ultimate] Stalwart Stance** — 6s: 40% damage reduction, 3× Threat generation; immovable
 
 **Role feel**: Tank/aggro anchor, CC chain, peel for teammates
+**Visual**: Dark plate armour, red cloth, double-headed axe, runic shield
 
-### 3. Specter
-*The Ghost — stealth, assassination bursts, repositioning.*
-
-**Abilities**:
-- **Phase Step** — short-range blink (2 charges)
-- **Shadow Mark** — mark a target; your next attack deals +60% damage and applies Revealed
-- **Smoke Screen** — AoE cloud that blinds enemies (50% miss chance) for 3s
-- **Neural Spike** — interrupt + silence for 2s; 20s cooldown
-- **[Ultimate] Phantom Protocol** — 6s full stealth; all abilities cost no stamina; next attack from stealth deals 200% damage
-
-**Role feel**: Pick, silence, disrupt casters; high risk/reward
-
-### 4. Medic
-*The Lifeline — reactive heals, purges, resurrection tech.*
+### 3. Arcanist (Formerly Phaser)
+*The Wizard — arcane bursts, teleportation, void gravity.*
 
 **Abilities**:
-- **Restoration Beacon** (already exists!) — place AoE heal zone
-- **Trauma Patch** — instant moderate heal on target; shorter CD if target is below 30% HP
-- **Nanite Purge** — cleanse all debuffs from target; applies a 3s debuff immunity shield
-- **Overcharge** — sacrifice 20% of your own HP to give target a 10s damage buff (+30%)
-- **[Ultimate] Emergency Protocol** — channel 2s: revive all downed allies in 20m range at 50% HP, apply 5s damage immunity to all revived
+- **Arcane Step** — blink up to 10 units in aimed direction
+- **Forked Lightning** — chain lightning; jumps up to 4 targets (30/25/20/15 dmg)
+- **Void Maw** — pull enemies to center for 3s, then AoE burst
+- **Mind Spike** — arcane mental spike; 35 damage, no charge needed
+- **[Ultimate] Collapsing Void** — 12-unit pull, 3s collapse, 60 AoE + Weakened window
+
+**Role feel**: Burst damage, displacement, arcane control
+**Visual**: Navy blue robes, gold trim, tall wizard hat, cobalt gem staff
+
+### 4. Cleric (Formerly Medic)
+*The Divine — reactive heals, purges, divine resurrection.*
+
+**Abilities**:
+- **Sanctum Beacon** (already exists!) — place AoE healing circle
+- **Mend** — instant direct heal on target + cleanse one debuff
+- **Dispel** — cleanse ALL debuffs from target ally instantly
+- **Sacred Aegis** — shield ally that grows stronger as they take hits (20→80 absorb over 8s)
+- **Soul Bond** — tether to ally: their incoming damage reroutes to you for 5s
+- **[Ultimate] Temporal Grace** — rewind entire party 5 seconds: HP, position, debuffs all restored
 
 **Role feel**: Reactive, high stakes, punishes poor positioning — not a passive heal-bot
+**Visual**: White robes, gold cross emblem, bishop hat, divine light staff
+
+### 5. Shadowblade (Formerly Wraith)
+*The Assassin — stealth, curse stacking, burst detonation.*
+
+**Abilities**:
+- **Shadow Veil** — full invisibility for 4s; breaking stealth with Mind Spike = +50% damage
+- **Silence Ward** — curse field: Silences + Curses enemies inside for 5s
+- **Dark Mark** — single target; applies Weakened (dmg +25%) + Cursed DoT
+- **Void Bolt** — charged cone burst; applies Cursed + Slow
+- **[Ultimate] Dark Harvest** — detonate ALL debuffs on nearby enemies; 20 dmg per stack
+
+**Role feel**: Curse → stack → harvest; stealth opener; accessibility class (no aim on most abilities)
+**Visual**: Black & crimson leather, gold accents, crescent dual blades, red shadow magic
 
 ---
 
@@ -274,7 +292,7 @@ The rogue AI in its physical cradle.
 - Phase 2 (50% HP): Activates your own Snapshot System against you — reverses last 3s of player positions (everyone teleports back). Players must anticipate this.
 - Phase 3 (25% HP): Enrage, all damage +50%, spawns mirror copies of 2 random players
 
-**Loot**: Gear tier "Array" — strong Haste/CDR focus, great for Engineer/Medic
+**Loot**: Gear tier "Array" — strong Haste/CDR focus, great for Warden/Cleric
 
 ---
 
@@ -353,7 +371,7 @@ Use `SimpleWebTransport` or Mirror's built-in `KcpTransport`. For auth, implemen
 ### Phase 2 — Combat Polish (Month 2–3)
 - [ ] Dodge roll with i-frames on Health component
 - [ ] Networked ability VFX (ClientRpc for effects, Command for damage)
-- [ ] All 4 classes playable — Vanguard, Specter, Medic abilities implemented
+- [ ] All 5 classes playable — Ironclad, Arcanist, Cleric, Shadowblade, Warden abilities implemented
 - [ ] Status effect sync over network (StatusEffectManager → SyncList)
 - [ ] Basic enemy AI that works server-side (EnemyAI.cs exists, make it server-authoritative)
 

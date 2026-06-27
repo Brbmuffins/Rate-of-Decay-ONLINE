@@ -13,10 +13,10 @@ public class StatusEffectManager : MonoBehaviour
     private Health _health;
 
     // Quick state queries used by other systems
-    public bool IsSuppressed => HasEffect(StatusEffectType.Suppress);
-    public bool IsExposed    => HasEffect(StatusEffectType.Exposed);
-    public bool IsTethered   => HasEffect(StatusEffectType.Tethered);
-    public bool IsStaggered  => HasEffect(StatusEffectType.Stagger);
+    public bool IsSilenced  => HasEffect(StatusEffectType.Silenced);
+    public bool IsWeakened  => HasEffect(StatusEffectType.Weakened);
+    public bool IsBound     => HasEffect(StatusEffectType.Bound);
+    public bool IsStaggered => HasEffect(StatusEffectType.Stagger);
 
     public UnityEvent<StatusEffectType> onEffectAdded;
     public UnityEvent<StatusEffectType> onEffectRemoved;
@@ -52,7 +52,7 @@ public class StatusEffectManager : MonoBehaviour
         GameObject src = null;
         foreach (var e in _effects)
         {
-            if (e.type != StatusEffectType.DamageOverTime) continue;
+            if (e.type != StatusEffectType.Cursed) continue;
             dps += e.value;
             if (src == null) src = e.source;
         }
@@ -95,18 +95,18 @@ public class StatusEffectManager : MonoBehaviour
         return false;
     }
 
-    // Effect types Collapse can detonate. Tethered (the Guardian's leash) is
+    // Effect types Dark Harvest can detonate. Bound (the Ironclad's leash) is
     // positional control rather than detonatable decay, so it's excluded — a
-    // Wraith Collapse shouldn't break the Guardian's tether.
+    // Shadowblade's Dark Harvest shouldn't break the Ironclad's chain.
     public static bool IsDebuff(StatusEffectType t)
     {
         switch (t)
         {
             case StatusEffectType.Slow:
             case StatusEffectType.Stagger:
-            case StatusEffectType.Suppress:
-            case StatusEffectType.DamageOverTime:
-            case StatusEffectType.Exposed:
+            case StatusEffectType.Silenced:
+            case StatusEffectType.Cursed:
+            case StatusEffectType.Weakened:
                 return true;
             default:
                 return false;

@@ -1,4 +1,8 @@
-# Crossworlds (BCE)
+<p align="center">
+  <img src="Docs/logo.png" alt="Crossworlds BCE" width="220"/>
+</p>
+
+# Crossworlds BCE
 
 **Genre:** 4-10 player co-op combat MMO  
 **Engine:** Unity 6 LTS · Universal Render Pipeline  

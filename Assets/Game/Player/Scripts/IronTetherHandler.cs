@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Guardian — Iron Tether
+// Ironclad — Rune Chain
 // Locks an enemy within maxDistance of the Guardian for duration seconds.
 // VFX: brbmuffins Dark Arts/Fantasy Pack/Prefabs/Leaves shield.prefab
 //      (drop it on the enemy's feet for the tether anchor visual)
@@ -55,9 +55,9 @@ public class IronTetherHandler : MonoBehaviour
         _active       = true;
         _line.enabled = true;
 
-        // Apply Tethered status effect so EnemyAI knows not to move freely
+        // Apply Bound status effect so EnemyAI knows not to move freely
         targetGO.GetComponent<StatusEffectManager>()
-            ?.AddEffect(new StatusEffect(StatusEffectType.Tethered, duration));
+            ?.AddEffect(new StatusEffect(StatusEffectType.Bound, duration));
 
         if (anchorVFX != null)
             _anchorInstance = Instantiate(anchorVFX, targetGO.transform.position, Quaternion.identity,

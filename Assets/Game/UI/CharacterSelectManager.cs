@@ -44,19 +44,19 @@ public class CharacterSelectManager : MonoBehaviour
     {
         new ClassDef
         {
-            idx = 0, name = "ENGINEER", role = "Damage  ·  Control",
-            blurb = "Builds the killzone before enemies arrive. Turrets, shock mines, and arc cannon work in concert. Set up before the fight — if you're reacting, you're losing.",
-            abilities = new[] { "Sentinel Drop", "Shock Mine", "Arc Cannon", "Dark Blast" },
-            passive = "Overengineered — deployables stack output in overlapping zones",
+            idx = 0, name = "WARDEN", role = "Damage  ·  Control",
+            blurb = "Commands runic sentinels and snare traps that work in concert. Set up the killzone before enemies arrive — place, position, activate. Reactive Wardens lose; patient ones dominate.",
+            abilities = new[] { "Runic Sentinel", "Runic Snare", "Battle Hymn", "Conjurer's Surge" },
+            passive = "Overengineered — constructs in overlapping zones stack output",
             accent = new Color(1f, 0.55f, 0.05f),
             vfxA = "Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Character auras/Plexus.prefab",
             vfxB = "Assets/brbmuffins Technologies/brbmuffins Particle Pack/EffectExamples/Misc Effects/Prefabs/ElectricalSparks.prefab",
         },
         new ClassDef
         {
-            idx = 1, name = "GUARDIAN", role = "Tank  ·  Crowd Control",
-            blurb = "Takes hits for the team, punishes enemies who focus them. Iron Tether locks one target for 5 full seconds. Breach Slam staggers everything nearby. The anvil everything else is smashed against.",
-            abilities = new[] { "Breach Slam", "Iron Tether", "Barrier Wall", "Shield Bash" },
+            idx = 1, name = "IRONCLAD", role = "Tank  ·  Crowd Control",
+            blurb = "Takes hits for the team and punishes enemies who focus them. Rune Chain locks one target for 5 full seconds. Shieldwall Charge staggers everything in its path. The anvil everything else is smashed against.",
+            abilities = new[] { "Shieldwall Charge", "Rune Chain", "Iron Rampart", "Counter Blow" },
             passive = "Threat Protocol — damage stacks DR bonus and redirects enemy aggro",
             accent = new Color(0.15f, 0.65f, 1f),
             vfxA = "Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Character auras/Lightning aura.prefab",
@@ -64,9 +64,9 @@ public class CharacterSelectManager : MonoBehaviour
         },
         new ClassDef
         {
-            idx = 2, name = "WRAITH", role = "Stealth  ·  Burst",
-            blurb = "Null fields, shadow relays, backstab burst. Invisible until it's too late. A Wraith who knows when to detonate beats button-mashers every single time.",
-            abilities = new[] { "Shadow Step", "Null Field", "Phase Strike", "Shadow Relay" },
+            idx = 2, name = "SHADOWBLADE", role = "Stealth  ·  Burst",
+            blurb = "Silence wards, shadow veils, and debuff detonations. Invisible until it's too late. A Shadowblade who knows when to harvest beats button-mashers every single time.",
+            abilities = new[] { "Shadow Veil", "Silence Ward", "Dark Mark", "Dark Harvest" },
             passive = "Bounty System — elite kills instantly reset all cooldowns",
             accent = new Color(0.6f, 0.1f, 1f),
             vfxA = "Assets/brbmuffins Dark Arts/brbmuffins Fantasy Pack/Prefabs/Effects normal/Death magic circle.prefab",
@@ -74,19 +74,19 @@ public class CharacterSelectManager : MonoBehaviour
         },
         new ClassDef
         {
-            idx = 3, name = "MEDIC", role = "Support  ·  Sustain",
-            blurb = "Emergency revivals, heal shields, and sustained team uptime. The difference between a wipe and a clutch win. No one notices the Medic — until they're down and need one.",
-            abilities = new[] { "Mend", "Trauma Shield", "Mass Revive", "Triage Pulse" },
-            passive = "Triage Loop — each ally healed triggers 8% self-heal on the Medic",
+            idx = 3, name = "CLERIC", role = "Support  ·  Sustain",
+            blurb = "Emergency revivals, sacred aegis shields, and sustained team uptime. The difference between a wipe and a clutch win. No one notices the Cleric — until they're down and need one.",
+            abilities = new[] { "Soul Bond", "Spirit Wisps", "Divine Spark", "Temporal Grace" },
+            passive = "Triage Loop — each ally healed triggers 8% self-heal on the Cleric",
             accent = new Color(0.1f, 1f, 0.45f),
             vfxA = "Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Magic circles/Healing circle.prefab",
             vfxB = "Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Character auras/Healing.prefab",
         },
         new ClassDef
         {
-            idx = 4, name = "PHASER", role = "Assassin  ·  Mobility",
-            blurb = "Phase shifts and singularity pulls. Appears where least expected — kills before detection. Every 6 casts triggers a ×1.4 damage window. Count your casts or play badly.",
-            abilities = new[] { "Phase Shift", "Singularity", "Blink Strike", "Void Pull" },
+            idx = 4, name = "ARCANIST", role = "Assassin  ·  Mobility",
+            blurb = "Void maws and collapsing voids. Appears where least expected — kills before detection. Every 6 casts triggers a ×1.4 damage window. Count your casts or play badly.",
+            abilities = new[] { "Arcane Step", "Void Maw", "Forked Lightning", "Collapsing Void" },
             passive = "Phase Charge — every 6 ability casts triggers ×1.4 damage multiplier",
             accent = new Color(0.88f, 0.88f, 1f),
             vfxA = "Assets/brbmuffins Dark Arts/brbmuffins Fantasy Pack/Prefabs/Effects normal/Magic circle.prefab",
@@ -310,9 +310,8 @@ public class CharacterSelectManager : MonoBehaviour
         cb.pressedColor     = Color.white;
         _enterBtn.colors    = cb;
 
-        // Phaser = not yet playable indicator
         if (_enterLabel != null)
-            _enterLabel.text = (idx == 4) ? "COMING SOON" : "ENTER WORLD";
+            _enterLabel.text = "ENTER WORLD";
 
         SwapVFX(d);
     }
@@ -321,9 +320,7 @@ public class CharacterSelectManager : MonoBehaviour
 
     void OnEnterWorld()
     {
-        if (_sel == 4) return; // Phaser not yet playable
-
-        int mirrorIdx = Mathf.Clamp(_sel, 0, 3);
+        int mirrorIdx = Mathf.Clamp(_sel, 0, Classes.Length - 1);
         PlayerPrefs.SetInt("SelectedCharacter", mirrorIdx);
         PlayerPrefs.Save();
 
@@ -449,10 +446,7 @@ public class CharacterSelectManager : MonoBehaviour
         Txt(bg, d.role, 10, TextAnchor.UpperLeft,
             new Color(0.5f, 0.5f, 0.6f), TL(14, 40, LEFT_W - 30, 18));
 
-        // Coming soon badge for Phaser
-        if (d.idx == 4)
-            Txt(bg, "SOON", 8, TextAnchor.MiddleRight,
-                new Color(0.5f, 0.5f, 0.6f), TL(0, 28, LEFT_W - 16, 18));
+        // (All 5 classes are now playable — no "COMING SOON" badge needed)
 
         return btn;
     }
@@ -464,7 +458,7 @@ public class CharacterSelectManager : MonoBehaviour
         var p = Img(cvs, "Center", Color.clear, PanelCenter(LEFT_W, RIGHT_W));
 
         // Header title
-        Txt(p, "RATE OF DECAY ONLINE  ·  SURVIVOR SELECT", 11,
+        Txt(p, "CROSSWORLDS BCE  ·  CLASS SELECT", 11,
             TextAnchor.MiddleCenter, new Color(0.35f, 0.35f, 0.45f),
             StretchTop(HEADER_H));
         HRule(p, HEADER_H, 0f, stretchH: true);
@@ -487,7 +481,7 @@ public class CharacterSelectManager : MonoBehaviour
 
         // Footer
         HRule(p, FOOTER_H, 0f, stretchH: true, fromBottom: true);
-        Txt(p, "SELECT YOUR SURVIVOR  ·  CHOOSE WISELY", 9,
+        Txt(p, "SELECT YOUR CLASS  ·  CHOOSE WISELY", 9,
             TextAnchor.MiddleCenter, new Color(0.3f, 0.3f, 0.4f),
             StretchBottom(FOOTER_H));
     }
@@ -688,3 +682,5 @@ public class CharacterSelectManager : MonoBehaviour
     {
         go.layer = layer;
         foreach (Transform c in go.transform) SetLayer(c.gameObject, layer);
+    }
+}

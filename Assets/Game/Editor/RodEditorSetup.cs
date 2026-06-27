@@ -10,27 +10,63 @@ using UnityEngine.Rendering;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  RodEditorSetup
-//  Unity menu: RoD/Setup/...
+//  Unity menu: BCE/Setup/...
 //
 //  Run in order:
 //    1 ▶ Create Login Scene      — builds LoginScene.unity from scratch,
 //                                  wires NetworkManager + Auth + Transport,
-//                                  adds both scenes to Build Settings.
+//                                  adds scenes to Build Settings.
 //    2 ▶ Clean GameWorld         — removes stale NetworkManager from GameWorld.
 //    3 ▶ Fix Build Settings      — re-applies correct scene order if ever lost.
-//    4 ▶ Create Class Prefabs    — creates Engineer/Guardian/Wraith/Medic prefabs
-//                                  from the Engineer FBX + all required components,
-//                                  then auto-assigns them to RodNetworkManager.
+//    4 ▶ Create Class Prefabs    — creates class prefabs from Engineer FBX.
 //
+//  Scenes are also auto-registered on every editor load via [InitializeOnLoad].
 //  After step 1+4 the only drag left is:
 //    • LoginScreenVFX → brbmuffins prefab slots
 // ═══════════════════════════════════════════════════════════════════════════════
 
+[InitializeOnLoad]
 public static class RodEditorSetup
 {
+    // ── Auto-register scenes into Build Settings on every editor reload ───────
+    // This prevents the "scene not in Build Profiles" error without any manual steps.
+    static RodEditorSetup()
+    {
+        EnsureScenesInBuildSettings();
+    }
+
+    static void EnsureScenesInBuildSettings()
+    {
+        var required = new[]
+        {
+            LOGIN_SCENE_PATH,
+            CHAR_SELECT_SCENE_PATH,
+            HUB_SCENE_PATH,
+        };
+
+        bool changed = false;
+        var current = new List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+
+        foreach (string path in required)
+        {
+            if (!File.Exists(path)) continue;
+            bool alreadyIn = current.Exists(s => s.path == path);
+            if (!alreadyIn)
+            {
+                current.Add(new EditorBuildSettingsScene(path, true));
+                changed = true;
+                Debug.Log($"[BCE] Auto-registered scene in Build Settings: {path}");
+            }
+        }
+
+        if (changed)
+            EditorBuildSettings.scenes = current.ToArray();
+    }
+
     const string LOGIN_SCENE_PATH       = "Assets/Game/Scenes/LoginScene.unity";
     const string CHAR_SELECT_SCENE_PATH = "Assets/Game/Scenes/CharacterSelect.unity";
-    const string GAME_WORLD_PATH        = "Assets/brbmuffins Skybox/Scenes/GameWorld.unity";
+    const string HUB_SCENE_PATH         = "Assets/Game/Scenes/Hub.unity";
+    const string GAME_WORLD_PATH        = "Assets/brbmuffins Skybox/Scenes/GameWorld.unity"; // legacy ref
     const string SERVER_ADDRESS         = "15.204.243.36";
     const string ENGINEER_FBX_PATH      = "Assets/Game/Characters/Engineer/Model/Idle.fbx";
     const string PREFABS_DIR            = "Assets/Game/Prefabs";
@@ -277,7 +313,7 @@ public static class RodEditorSetup
         Directory.CreateDirectory(PREFABS_DIR);
 
         // Class names — index must match RodNetworkManager.classPrefabs order
-        string[] classNames = { "Engineer", "Guardian", "Wraith", "Medic" };
+        string[] classNames = { "Warden", "Ironclad", "Shadowblade", "Cleric", "Arcanist" };
         var createdPaths    = new string[classNames.Length];
 
         for (int i = 0; i < classNames.Length; i++)
@@ -379,8 +415,8 @@ public static class RodEditorSetup
     {
         var scenes = new List<EditorBuildSettingsScene>();
 
-        // Order matters: Login(0) → CharacterSelect(1) → GameWorld(2)
-        foreach (var path in new[] { LOGIN_SCENE_PATH, CHAR_SELECT_SCENE_PATH, GAME_WORLD_PATH })
+        // Order matters: LoginScene(0) → CharacterSelect(1) → Hub(2)
+        foreach (var path in new[] { LOGIN_SCENE_PATH, CHAR_SELECT_SCENE_PATH, HUB_SCENE_PATH })
         {
             if (File.Exists(path))
                 scenes.Add(new EditorBuildSettingsScene(path, true));
@@ -389,6 +425,6 @@ public static class RodEditorSetup
         }
 
         EditorBuildSettings.scenes = scenes.ToArray();
-        Debug.Log("[BCE] Build Settings updated: LoginScene(0), CharacterSelect(1), GameWorld(2)");
+        Debug.Log("[BCE] Build Settings updated: LoginScene(0), CharacterSelect(1), Hub(2)");
     }
 }

@@ -61,7 +61,16 @@ public class RodNetworkAuthenticator : NetworkAuthenticator
 
     void OnAuthRequest(NetworkConnectionToClient conn, AuthRequestMessage msg)
     {
-        if (devMode)
+        // Auto-detect dev mode in the editor even when the Inspector checkbox is off:
+        // the LoginManager's HOST (DEV) button sets jwt_token = "dev".
+        // On a real Linux server build, Application.isEditor is always false so this
+        // never fires in production — keeping the server auth-protected.
+#if UNITY_EDITOR
+        bool isDev = devMode || msg.jwt == "dev";
+#else
+        bool isDev = devMode;
+#endif
+        if (isDev)
         {
             // Dev: skip auth server, trust PlayerPrefs class selection
             conn.authenticationData = new RodPlayerAuth

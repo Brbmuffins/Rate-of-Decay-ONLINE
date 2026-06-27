@@ -79,25 +79,25 @@ public class AbilityCaster : MonoBehaviour
     public IronTetherHandler      ironTetherHandler;
 
     [Header("Deployable Prefabs — assign the matching runtime prefabs")]
-    [Tooltip("ShockMineBehaviour prefab — brbmuffins Technologies SmallExplosion as castVFX on it")]
+    [Tooltip("ShockMineBehaviour prefab (Runic Snare) — rune burst trap")]
     public GameObject shockMinePrefab;
-    [Tooltip("NaniteSwarmBehaviour prefab — HealingBuff child VFX")]
+    [Tooltip("NaniteSwarmBehaviour prefab (Spirit Wisps) — healing orb cloud")]
     public GameObject naniteSwarmPrefab;
-    [Tooltip("SingularityBehaviour prefab (Singularity ability)")]
+    [Tooltip("SingularityBehaviour prefab (Void Maw ability)")]
     public GameObject singularityPrefab;
-    [Tooltip("SingularityBehaviour prefab with applyExposed=true (Event Horizon)")]
+    [Tooltip("SingularityBehaviour prefab with applyExposed=true (Collapsing Void)")]
     public GameObject eventHorizonPrefab;
-    [Tooltip("LastBastionWall prefab — Mana wall child VFX")]
+    [Tooltip("LastBastionWall prefab (Iron Rampart) — stone rune wall")]
     public GameObject lastBastionPrefab;
-    [Tooltip("NullFieldZone prefab — GroundFog child VFX")]
+    [Tooltip("NullFieldZone prefab (Silence Ward) — curse fog")]
     public GameObject nullFieldPrefab;
 
     [Header("Class Deployables")]
-    [Tooltip("RestorationBeacon (Medic) or BastionNode (Guardian)")]
+    [Tooltip("RestorationBeacon (Cleric) or BastionNode (Ironclad)")]
     public GameObject beaconPrefab;
-    [Tooltip("PhaseRelayDeployable (Phaser)")]
+    [Tooltip("PhaseRelayDeployable (Arcanist)")]
     public GameObject phaseRelayPrefab;
-    [Tooltip("ShadowRelayDeployable (Wraith)")]
+    [Tooltip("ShadowRelayDeployable (Shadowblade)")]
     public GameObject shadowRelayPrefab;
 
     [Header("Mouse Aim")]
@@ -107,72 +107,72 @@ public class AbilityCaster : MonoBehaviour
     public AbilityDef[] spellbook = new AbilityDef[]
     {
         // ── SHARED / CROSS-CLASS (indices 0–7) ─────────────────────────────────────────
-        new AbilityDef { abilityName = "Sentinel Drop",    shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 1.5f, spawnTurret = true, cooldown = 6f },
-        new AbilityDef { abilityName = "Dark Blast",       shape = AbilityShape.Cone,      category = AbilityCategory.Damage,  range = 8f, coneAngle = 60f, cooldown = 3f, chargeable = true, maxChargeTime = 1.5f, damage = 10f, maxChargeDamage = 30f, maxChargeSizeMultiplier = 1.6f, targetTag = "Enemy", chargedTint = new Color(0.4f, 0.1f, 0.8f, 0.9f) },
-        new AbilityDef { abilityName = "Repair Wave",      shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 3f, cooldown = 5f },
-        new AbilityDef { abilityName = "Arc Cannon",       shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 10f, rectWidth = 1.5f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 15f, maxChargeDamage = 50f, maxChargeSizeMultiplier = 1.8f, targetTag = "Enemy" },
-        new AbilityDef { abilityName = "Thermal Charge",   shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 12f, indicatorSize = 2f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 20f, maxChargeDamage = 45f, maxChargeSizeMultiplier = 2f, targetTag = "Enemy", chargedTint = new Color(1f, 0.4f, 0.05f, 0.9f) },
-        new AbilityDef { abilityName = "Neural Spike",     shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 2.5f, cooldown = 5f, damage = 35f, targetTag = "Enemy" },
-        new AbilityDef { abilityName = "Stasis Wave",      shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 5f, indicatorSize = 5f, cooldown = 6f, damage = 15f, targetTag = "Enemy" },
-        new AbilityDef { abilityName = "Deflect Protocol", shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 8f, shieldAbsorb = 50f, shieldDuration = 5f },
+        new AbilityDef { abilityName = "Runic Sentinel",   shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 1.5f, spawnTurret = true, cooldown = 6f },
+        new AbilityDef { abilityName = "Void Bolt",        shape = AbilityShape.Cone,      category = AbilityCategory.Damage,  range = 8f, coneAngle = 60f, cooldown = 3f, chargeable = true, maxChargeTime = 1.5f, damage = 10f, maxChargeDamage = 30f, maxChargeSizeMultiplier = 1.6f, targetTag = "Enemy", chargedTint = new Color(0.4f, 0.1f, 0.8f, 0.9f) },
+        new AbilityDef { abilityName = "Mending Circle",   shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 3f, cooldown = 5f },
+        new AbilityDef { abilityName = "Storm Lash",       shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 10f, rectWidth = 1.5f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 15f, maxChargeDamage = 50f, maxChargeSizeMultiplier = 1.8f, targetTag = "Enemy" },
+        new AbilityDef { abilityName = "Ember Surge",      shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 12f, indicatorSize = 2f, cooldown = 4f, chargeable = true, maxChargeTime = 1.5f, damage = 20f, maxChargeDamage = 45f, maxChargeSizeMultiplier = 2f, targetTag = "Enemy", chargedTint = new Color(1f, 0.4f, 0.05f, 0.9f) },
+        new AbilityDef { abilityName = "Mind Spike",       shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 2.5f, cooldown = 5f, damage = 35f, targetTag = "Enemy" },
+        new AbilityDef { abilityName = "Binding Wave",     shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 5f, indicatorSize = 5f, cooldown = 6f, damage = 15f, targetTag = "Enemy" },
+        new AbilityDef { abilityName = "Arcane Ward",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 8f, shieldAbsorb = 50f, shieldDuration = 5f },
 
-        // ── ENGINEER (indices 8–14) ─────────────────────────────────────────────────────
-        // [8]  Shock Mine — proximity burst trap; engineer and wraith
-        new AbilityDef { abilityName = "Shock Mine",       shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 8f, indicatorSize = 1f, cooldown = 5f, damage = 40f, targetTag = "Enemy" },
-        // [9]  Overdrive — team damage aura; instant self-cast
-        new AbilityDef { abilityName = "Overdrive",        shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 6f, cooldown = 12f },
-        // [10] Drone Command — redirect active Sentinel onto focus target
-        new AbilityDef { abilityName = "Drone Command",    shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 12f, indicatorSize = 1f, cooldown = 8f },
-        // [11] Field Repair — single-target direct heal + debuff cleanse
-        new AbilityDef { abilityName = "Field Repair",     shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 1f, cooldown = 6f },
-        // [12] System Overload (Engineer Ultimate) — all deployables fire at max stacks simultaneously
-        new AbilityDef { abilityName = "System Overload",  shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 45f },
+        // ── WARDEN (indices 8–12) ───────────────────────────────────────────────────────
+        // [8]  Runic Snare — proximity burst rune trap; Warden and Shadowblade
+        new AbilityDef { abilityName = "Runic Snare",      shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 8f, indicatorSize = 1f, cooldown = 5f, damage = 40f, targetTag = "Enemy" },
+        // [9]  Battle Hymn — team CDR aura; instant self-cast
+        new AbilityDef { abilityName = "Battle Hymn",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 6f, cooldown = 12f },
+        // [10] Spirit Redirect — redirect active Runic Sentinel onto focus target
+        new AbilityDef { abilityName = "Spirit Redirect",  shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 12f, indicatorSize = 1f, cooldown = 8f },
+        // [11] Mend — single-target direct heal + debuff cleanse
+        new AbilityDef { abilityName = "Mend",             shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 1f, cooldown = 6f },
+        // [12] Conjurer's Surge (Warden Ultimate) — all constructs activate at full power simultaneously
+        new AbilityDef { abilityName = "Conjurer's Surge", shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 45f },
 
-        // ── GUARDIAN (indices 13–19) ───────────────────────────────────────────────────
-        // [13] Kinetic Reversal — absorb damage for 3s, release as cone burst up to 60 dmg
-        new AbilityDef { abilityName = "Kinetic Reversal", shape = AbilityShape.Cone,      category = AbilityCategory.Support, range = 8f, coneAngle = 70f, cooldown = 10f, damage = 60f, targetTag = "Enemy" },
-        // [14] Magnetize — pull all enemies in radius to anchor point, no damage
-        new AbilityDef { abilityName = "Magnetize",        shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 4f, cooldown = 7f },
-        // [15] Breach Slam — charge forward 6 units, 25 dmg, stagger + 3 Threat stacks
-        new AbilityDef { abilityName = "Breach Slam",      shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 6f, rectWidth = 2f, cooldown = 6f, damage = 25f, targetTag = "Enemy" },
-        // [16] Siege Mode — stationary stance: 40% DR + 3x Threat generation for 6s
-        new AbilityDef { abilityName = "Siege Mode",       shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 14f },
-        // [17] Iron Tether — leash one enemy within 8 units for 5s; absorb 15% of their attacks on allies
-        new AbilityDef { abilityName = "Iron Tether",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 9f },
-        // [18] Last Bastion (Guardian Ultimate) — full-width hardlight wall, blocks projectiles 10s
-        new AbilityDef { abilityName = "Last Bastion",     shape = AbilityShape.Rectangle, category = AbilityCategory.Support, range = 8f, rectWidth = 8f, cooldown = 50f },
+        // ── IRONCLAD (indices 13–18) ───────────────────────────────────────────────────
+        // [13] Counter Blow — absorb damage for 3s, release as cone burst up to 60 dmg
+        new AbilityDef { abilityName = "Counter Blow",     shape = AbilityShape.Cone,      category = AbilityCategory.Support, range = 8f, coneAngle = 70f, cooldown = 10f, damage = 60f, targetTag = "Enemy" },
+        // [14] Gravity Slam — pull all enemies in radius to anchor point, no damage
+        new AbilityDef { abilityName = "Gravity Slam",     shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 4f, cooldown = 7f },
+        // [15] Shieldwall Charge — charge forward 6 units, 25 dmg, stagger + 3 Threat stacks
+        new AbilityDef { abilityName = "Shieldwall Charge",shape = AbilityShape.Rectangle, category = AbilityCategory.Damage,  range = 6f, rectWidth = 2f, cooldown = 6f, damage = 25f, targetTag = "Enemy" },
+        // [16] Stalwart Stance — stationary stance: 40% DR + 3x Threat generation for 6s
+        new AbilityDef { abilityName = "Stalwart Stance",  shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 14f },
+        // [17] Rune Chain — leash one enemy within 8 units for 5s; absorb 15% of their attacks on allies
+        new AbilityDef { abilityName = "Rune Chain",       shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 9f },
+        // [18] Iron Rampart (Ironclad Ultimate) — full-width stone rune wall, blocks projectiles 10s
+        new AbilityDef { abilityName = "Iron Rampart",     shape = AbilityShape.Rectangle, category = AbilityCategory.Support, range = 8f, rectWidth = 8f, cooldown = 50f },
 
-        // ── PHASER (indices 19–24) ─────────────────────────────────────────────────────
-        // [19] Phase Shift — teleport up to 10 units in aimed direction
-        new AbilityDef { abilityName = "Phase Shift",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 0.5f, cooldown = 4f },
-        // [20] Singularity — pull enemies to center for 3s then 20 AoE burst
-        new AbilityDef { abilityName = "Singularity",      shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 8f, cooldown = 9f, damage = 20f, targetTag = "Enemy" },
-        // [21] Arc Lance — chain lightning, jumps up to 4 enemies (30/25/20/15 dmg)
-        new AbilityDef { abilityName = "Arc Lance",        shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 1.5f, cooldown = 7f, damage = 30f, targetTag = "Enemy" },
-        // [22] Event Horizon (Phaser Ultimate) — 12-unit pull, 3s collapse, 60 AoE + 25% exposed window
-        new AbilityDef { abilityName = "Event Horizon",    shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 14f, indicatorSize = 12f, cooldown = 50f, damage = 60f, targetTag = "Enemy" },
+        // ── ARCANIST (indices 19–22) ───────────────────────────────────────────────────
+        // [19] Arcane Step — teleport up to 10 units in aimed direction
+        new AbilityDef { abilityName = "Arcane Step",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 0.5f, cooldown = 4f },
+        // [20] Void Maw — pull enemies to center for 3s then 20 AoE burst
+        new AbilityDef { abilityName = "Void Maw",         shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 8f, cooldown = 9f, damage = 20f, targetTag = "Enemy" },
+        // [21] Forked Lightning — chain lightning, jumps up to 4 enemies (30/25/20/15 dmg)
+        new AbilityDef { abilityName = "Forked Lightning",  shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 10f, indicatorSize = 1.5f, cooldown = 7f, damage = 30f, targetTag = "Enemy" },
+        // [22] Collapsing Void (Arcanist Ultimate) — 12-unit pull, 3s collapse, 60 AoE + Weakened window
+        new AbilityDef { abilityName = "Collapsing Void",  shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 14f, indicatorSize = 12f, cooldown = 50f, damage = 60f, targetTag = "Enemy" },
 
-        // ── MEDIC (indices 23–27) ──────────────────────────────────────────────────────
-        // [23] Transfer Protocol — tether ally: their incoming damage reroutes to you for 5s
-        new AbilityDef { abilityName = "Transfer Protocol",shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 9f },
-        // [24] Nanite Swarm — mobile heal cloud, drifts toward ally, chips enemies it passes through
-        new AbilityDef { abilityName = "Nanite Swarm",     shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 10f, indicatorSize = 2f, cooldown = 7f },
-        // [25] Defibrillator — revive downed ally at 30% HP OR 60 burst dmg to robotic enemies
-        new AbilityDef { abilityName = "Defibrillator",    shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 1.5f, cooldown = 14f, damage = 60f, targetTag = "Enemy" },
-        // [26] Adaptive Shield — shield on ally that scales 20→80 absorb as they take hits over 8s
-        new AbilityDef { abilityName = "Adaptive Shield",  shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 10f, shieldAbsorb = 20f, shieldDuration = 8f },
-        // [27] Purge Protocol — instant cleanse all debuffs from target ally
-        new AbilityDef { abilityName = "Purge Protocol",   shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 7f },
-        // [28] System Rollback (Medic Ultimate) — rewind entire team 5 seconds: HP, position, debuffs
-        new AbilityDef { abilityName = "System Rollback",  shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 0f, indicatorSize = 1f, cooldown = 60f },
+        // ── CLERIC (indices 23–28) ─────────────────────────────────────────────────────
+        // [23] Soul Bond — tether ally: their incoming damage reroutes to you for 5s
+        new AbilityDef { abilityName = "Soul Bond",        shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 9f },
+        // [24] Spirit Wisps — mobile healing orbs, drift toward ally, chip enemies they pass through
+        new AbilityDef { abilityName = "Spirit Wisps",     shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 10f, indicatorSize = 2f, cooldown = 7f },
+        // [25] Divine Spark — revive downed ally at 30% HP OR 60 burst dmg to undead enemies
+        new AbilityDef { abilityName = "Divine Spark",     shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 6f, indicatorSize = 1.5f, cooldown = 14f, damage = 60f, targetTag = "Enemy" },
+        // [26] Sacred Aegis — shield on ally that scales 20→80 absorb as they take hits over 8s
+        new AbilityDef { abilityName = "Sacred Aegis",     shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 10f, shieldAbsorb = 20f, shieldDuration = 8f },
+        // [27] Dispel — instant cleanse all debuffs from target ally
+        new AbilityDef { abilityName = "Dispel",           shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 8f, indicatorSize = 1f, cooldown = 7f },
+        // [28] Temporal Grace (Cleric Ultimate) — rewind entire team 5 seconds: HP, position, debuffs
+        new AbilityDef { abilityName = "Temporal Grace",   shape = AbilityShape.Circle,    category = AbilityCategory.Heal,    range = 0f, indicatorSize = 1f, cooldown = 60f },
 
-        // ── WRAITH (indices 29–31) ─────────────────────────────────────────────────────
-        // [29] Phase Cloak — full invisibility for 4s; breaking with Neural Spike = +50% damage
-        new AbilityDef { abilityName = "Phase Cloak",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 10f },
-        // [30] Null Field — suppress all enemy abilities in radius for 5s
-        new AbilityDef { abilityName = "Null Field",       shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 5f, cooldown = 12f },
-        // [31] Collapse (Wraith Ultimate) — consume all active debuffs on enemies in range: 20 dmg per stack
-        new AbilityDef { abilityName = "Collapse",         shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 8f, indicatorSize = 8f, cooldown = 40f, damage = 20f, targetTag = "Enemy" },
+        // ── SHADOWBLADE (indices 29–31) ────────────────────────────────────────────────
+        // [29] Shadow Veil — full invisibility for 4s; breaking with Mind Spike = +50% damage
+        new AbilityDef { abilityName = "Shadow Veil",      shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 0f, indicatorSize = 1f, cooldown = 10f },
+        // [30] Silence Ward — silence all enemy abilities in radius for 5s
+        new AbilityDef { abilityName = "Silence Ward",     shape = AbilityShape.Circle,    category = AbilityCategory.Support, range = 10f, indicatorSize = 5f, cooldown = 12f },
+        // [31] Dark Harvest (Shadowblade Ultimate) — consume all active debuffs on enemies in range: 20 dmg per stack
+        new AbilityDef { abilityName = "Dark Harvest",     shape = AbilityShape.Circle,    category = AbilityCategory.Damage,  range = 8f, indicatorSize = 8f, cooldown = 40f, damage = 20f, targetTag = "Enemy" },
     };
 
     [Header("Equipped slots (indices into spellbook)")]
@@ -616,108 +616,108 @@ public class AbilityCaster : MonoBehaviour
     {
         switch (ability.abilityName)
         {
-            // ─ Engineer ──────────────────────────────────────────
-            case "Shock Mine":
+            // ─ Warden ────────────────────────────────────────────
+            case "Runic Snare":
                 SpawnDeployableAt(shockMinePrefab ?? ability.deployablePrefab, castPoint,
                     go => { var m = go.GetComponent<ShockMineBehaviour>(); if (m) m.owner = gameObject; });
                 break;
 
-            case "Overdrive":
+            case "Battle Hymn":
                 CastOverdrive(ability);
                 break;
 
-            case "Drone Command":
+            case "Spirit Redirect":
                 CastDroneCommand(castPoint);
                 break;
 
-            case "Field Repair":
+            case "Mend":
                 CastFieldRepair(ability, castPoint);
                 break;
 
-            case "System Overload":
+            case "Conjurer's Surge":
                 CastSystemOverload();
                 break;
 
-            // ─ Guardian ──────────────────────────────────────────
-            case "Kinetic Reversal":
+            // ─ Ironclad ──────────────────────────────────────────
+            case "Counter Blow":
                 kineticReversalHandler?.Activate();
                 break;
 
-            case "Magnetize":
+            case "Gravity Slam":
                 CastMagnetize(ability, castPoint);
                 break;
 
-            case "Breach Slam":
+            case "Shieldwall Charge":
                 dashHandler?.BreachSlam(GetComponent<PassiveThreatProtocol>());
                 break;
 
-            case "Siege Mode":
+            case "Stalwart Stance":
                 siegeModeHandler?.Activate();
                 break;
 
-            case "Iron Tether":
+            case "Rune Chain":
                 CastIronTether(castPoint);
                 break;
 
-            case "Last Bastion":
+            case "Iron Rampart":
                 SpawnDeployableAt(lastBastionPrefab ?? ability.deployablePrefab, castPoint, null, transform.rotation);
                 break;
 
-            // ─ Phaser ────────────────────────────────────────────
-            case "Phase Shift":
+            // ─ Arcanist ──────────────────────────────────────────
+            case "Arcane Step":
                 dashHandler?.PhaseShift(castPoint);
                 break;
 
-            case "Singularity":
+            case "Void Maw":
                 CastSingularity(ability, castPoint, false, dmgMult);
                 break;
 
-            case "Arc Lance":
+            case "Forked Lightning":
                 CastArcLance(ability, castPoint, dmgMult);
                 break;
 
-            case "Event Horizon":
+            case "Collapsing Void":
                 CastSingularity(ability, castPoint, true, dmgMult);
                 break;
 
-            // ─ Medic ─────────────────────────────────────────────
-            case "Transfer Protocol":
+            // ─ Cleric ────────────────────────────────────────────
+            case "Soul Bond":
                 CastTransferProtocol(castPoint);
                 break;
 
-            case "Nanite Swarm":
+            case "Spirit Wisps":
                 CastNaniteSwarm(ability, castPoint);
                 break;
 
-            case "Defibrillator":
+            case "Divine Spark":
                 CastDefibrillator(ability, castPoint, dmgMult);
                 break;
 
-            case "Adaptive Shield":
+            case "Sacred Aegis":
                 CastAdaptiveShield(castPoint);
                 break;
 
-            case "Purge Protocol":
+            case "Dispel":
                 CastPurgeProtocol(castPoint);
                 break;
 
-            case "System Rollback":
+            case "Temporal Grace":
                 SnapshotSystem.Instance?.Rollback(5f);
                 break;
 
-            // ─ Wraith ────────────────────────────────────────────
-            case "Phase Cloak":
+            // ─ Shadowblade ───────────────────────────────────────
+            case "Shadow Veil":
             {
                 float dur = ability.activeDuration > 0f ? ability.activeDuration : 4f;
                 stealthHandler?.BeginCloak(dur);
                 break;
             }
 
-            case "Null Field":
+            case "Silence Ward":
                 SpawnDeployableAt(nullFieldPrefab ?? ability.deployablePrefab, castPoint, null);
                 break;
 
-            case "Collapse":
+            case "Dark Harvest":
                 CastCollapse(ability, castPoint, dmgMult);
                 break;
         }
@@ -1097,7 +1097,7 @@ public class AbilityCaster : MonoBehaviour
     int GetClassDeployableLimit()
     {
         if (classPool == null) return 1;
-        return classPool.className == "Engineer" ? 3 : 1;
+        return classPool.className == "Warden" ? 3 : 1;
     }
 
     void ApplyCircleDamage(AbilityDef ability, GameObject indicator, float damageMultiplier = 1f)

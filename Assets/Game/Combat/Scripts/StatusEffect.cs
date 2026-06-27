@@ -4,11 +4,11 @@ using UnityEngine;
 public enum StatusEffectType
 {
     Slow,           // reduces move speed
-    Stagger,        // brief interrupt (Breach Slam)
-    Suppress,       // cannot attack (Null Field)
-    DamageOverTime, // decay damage per second (Null Field) — Collapse fuel
-    Exposed,        // incoming damage +25% (Event Horizon)
-    Tethered        // cannot move beyond max range (Iron Tether)
+    Stagger,        // brief interrupt (Shieldwall Charge)
+    Silenced,       // cannot use abilities (Silence Ward)
+    Cursed,         // damage over time per second (Silence Ward) — Dark Harvest fuel
+    Weakened,       // incoming damage +25% (Collapsing Void)
+    Bound           // cannot move beyond max range (Rune Chain)
 }
 
 [Serializable]

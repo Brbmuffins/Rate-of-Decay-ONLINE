@@ -6,18 +6,19 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 
 /// <summary>
-/// RoD/Setup/4 — Creates Engineer/Guardian/Wraith/Medic prefabs from the
-/// Engineer FBX model and auto-assigns them to RodNetworkManager.
+/// BCE/Setup/4 — Creates Warden/Ironclad/Shadowblade/Cleric/Arcanist prefabs
+/// from the character FBX model and auto-assigns them to RodNetworkManager.
 /// </summary>
 public static class RodPrefabBuilder
 {
     const string FBX_PATH      = "Assets/Game/Characters/Engineer/Model/Idle.fbx";
     const string PREFABS_DIR   = "Assets/Game/Prefabs";
     const string LOGIN_SCENE   = "Assets/Game/Scenes/LoginScene.unity";
+    const string ANIM_CTRL     = "Assets/Game/Characters/Engineer/Animations/AnimationController.controller";
 
-    static readonly string[] ClassNames = { "Engineer", "Guardian", "Wraith", "Medic" };
+    static readonly string[] ClassNames = { "Warden", "Ironclad", "Shadowblade", "Cleric", "Arcanist" };
 
-    [MenuItem("BCE/Setup/4 ▶ Create Class Prefabs (Engineer x4)", priority = 4)]
+    [MenuItem("BCE/Setup/4 ▶ Create Class Prefabs (5 Classes)", priority = 4)]
     static void Build()
     {
         // ── Load source FBX ───────────────────────────────────────────────────
@@ -28,6 +29,12 @@ public static class RodPrefabBuilder
                 "Could not load:\n" + FBX_PATH + "\n\nCheck the path.", "OK");
             return;
         }
+
+        // ── Load AnimatorController (non-fatal if missing) ────────────────────
+        var animCtrl = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(ANIM_CTRL);
+        if (animCtrl == null)
+            Debug.LogWarning("[BCE] AnimatorController not found at " + ANIM_CTRL +
+                             " — prefabs will have no animations. Run BCE/Setup/5 to fix.");
 
         Directory.CreateDirectory(PREFABS_DIR);
 
@@ -40,7 +47,7 @@ public static class RodPrefabBuilder
             // Root GameObject
             GameObject go = new GameObject(ClassNames[i]);
 
-            // Mirror networking (NetworkTransform added at runtime — see RodNetworkManager)
+            // Mirror networking
             go.AddComponent<NetworkIdentity>();
 
             // Our identity SyncVar
@@ -67,6 +74,15 @@ public static class RodPrefabBuilder
             modelChild.transform.localPosition = Vector3.zero;
             modelChild.transform.localRotation = Quaternion.identity;
             modelChild.transform.localScale    = Vector3.one;
+
+            // Assign AnimatorController so walk/run/jump play immediately
+            if (animCtrl != null)
+            {
+                var anim = modelChild.GetComponentInChildren<Animator>(true);
+                if (anim == null) anim = modelChild.AddComponent<Animator>();
+                anim.runtimeAnimatorController = animCtrl;
+                anim.applyRootMotion = false;   // physics-driven movement — no root motion
+            }
 
             // Save
             PrefabUtility.SaveAsPrefabAsset(go, prefabPath);
@@ -112,8 +128,6 @@ public static class RodPrefabBuilder
     }
 
     // ── Step 5: Fix AnimatorController on existing prefabs ────────────────────
-
-    const string ANIM_CTRL = "Assets/Game/Characters/Engineer/Animations/AnimationController.controller";
 
     [MenuItem("BCE/Setup/5 ▶ Fix Animator Controllers", priority = 5)]
     static void FixAnimators()

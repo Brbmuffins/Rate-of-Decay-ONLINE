@@ -54,6 +54,7 @@ public class CameraFollow : MonoBehaviour
     bool    _leftHeld;
     bool    _typingInUI;
     bool    _prevLookActive;   // detect first frame of look to discard stale delta
+    bool    _leftStartedOnUI;  // true if left-click began over a UI element — skip cursor lock
     Vector3 _smoothPos;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -77,12 +78,23 @@ public class CameraFollow : MonoBehaviour
         _rightHeld = mouse.rightButton.isPressed;
         _leftHeld  = mouse.leftButton.isPressed;
 
+        // Track whether this left-click started on a UI element.
+        // We check IsPointerOverGameObject() only on the press frame to avoid the
+        // "invisible canvas always returns true" problem — checking per-frame would
+        // permanently kill camera rotation.
+        if (mouse.leftButton.wasPressedThisFrame)
+            _leftStartedOnUI = EventSystem.current != null
+                               && EventSystem.current.IsPointerOverGameObject();
+        if (!_leftHeld)
+            _leftStartedOnUI = false;
+
         // Only block orbit when the player is actively typing in a text field.
-        // Deliberately skip IsPointerOverGameObject() — any invisible UI canvas
-        // returns true permanently and would kill all camera rotation.
         var selGO = EventSystem.current?.currentSelectedGameObject;
         _typingInUI = selGO != null && selGO.GetComponent<TMPro.TMP_InputField>() != null;
-        bool lookActive = (_rightHeld || _leftHeld) && !_typingInUI;
+
+        // Left-click only activates camera orbit if it didn't start on UI (e.g. chat box).
+        // Right-click always orbits (it has no UI use outside the game world).
+        bool lookActive = (_rightHeld || (_leftHeld && !_leftStartedOnUI)) && !_typingInUI;
 
         // ── Cursor lock / unlock ──────────────────────────────────────────
         if (lookActive && Cursor.lockState != CursorLockMode.Locked)

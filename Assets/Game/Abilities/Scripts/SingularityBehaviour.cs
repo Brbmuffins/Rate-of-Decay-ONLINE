@@ -1,7 +1,7 @@
 using System.Collections;
 using UnityEngine;
 
-// Phaser — Singularity / Event Horizon
+// Arcanist — Void Maw / Collapsing Void
 // Phase 1: pull all enemies in radius toward center for pullDuration.
 // Phase 2: burst AoE damage, then destroy.
 // VFX: brbmuffins Dark Arts/Fantasy Pack/Prefabs/Effects normal/Death magic circle.prefab (cast)
@@ -19,7 +19,7 @@ public class SingularityBehaviour : MonoBehaviour
     public float burstDamage  = 20f;
     public float burstRadius  = 8f;
 
-    [Header("Exposed Debuff (Event Horizon only)")]
+    [Header("Weakened Debuff (Collapsing Void only)")]
     public bool  applyExposed        = false;
     public float exposedDuration     = 8f;
 
@@ -84,11 +84,11 @@ public class SingularityBehaviour : MonoBehaviour
             Health h = col.GetComponent<Health>();
             h?.TakeDamage(burstDamage, owner);
 
-            // Event Horizon: apply Exposed debuff
+            // Collapsing Void: apply Weakened debuff
             if (applyExposed)
             {
                 var sem = col.GetComponent<StatusEffectManager>();
-                sem?.AddEffect(new StatusEffect(StatusEffectType.Exposed, exposedDuration));
+                sem?.AddEffect(new StatusEffect(StatusEffectType.Weakened, exposedDuration));
             }
         }
 

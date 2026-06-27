@@ -14,7 +14,7 @@ public class PlayerIdentity : NetworkBehaviour
     [SyncVar] public string playerName  = "Player";
     [SyncVar] public int    classIndex  = 0;
 
-    static readonly string[] ClassNames = { "Engineer", "Guardian", "Wraith", "Medic" };
+    static readonly string[] ClassNames = { "Warden", "Ironclad", "Shadowblade", "Cleric", "Arcanist" };
 
     public string ClassName => classIndex >= 0 && classIndex < ClassNames.Length
         ? ClassNames[classIndex]

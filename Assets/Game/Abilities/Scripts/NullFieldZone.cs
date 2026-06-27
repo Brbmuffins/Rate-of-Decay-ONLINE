@@ -2,9 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Wraith — Null Field (decay field)
-// Suppresses enemies inside (they cannot attack — see EnemyAI) AND applies a
-// damage-over-time "decay" while they remain affected.
+// Shadowblade — Silence Ward (curse field)
+// Silences enemies inside (they cannot use abilities — see EnemyAI) AND applies a
+// Cursed damage-over-time while they remain affected.
 // VFX: brbmuffins Technologies/Particle Pack/Smoke & Steam Effects/Prefabs/GroundFog.prefab
 //      tinted purple/grey. Drop as child of this object.
 [RequireComponent(typeof(SphereCollider))]
@@ -22,7 +22,7 @@ public class NullFieldZone : MonoBehaviour
     // Assign: brbmuffins Technologies/.../GroundFog.prefab
     public GameObject zoneVFX;
 
-    private readonly List<StatusEffectManager> _suppressed = new List<StatusEffectManager>();
+    private readonly List<StatusEffectManager> _silenced = new List<StatusEffectManager>();
     private GameObject _vfxInstance;
 
     void Start()
@@ -42,10 +42,10 @@ public class NullFieldZone : MonoBehaviour
         if (!other.CompareTag(enemyTag)) return;
         var sem = other.GetComponent<StatusEffectManager>();
         if (sem == null) return;
-        sem.AddEffect(new StatusEffect(StatusEffectType.Suppress, duration));
+        sem.AddEffect(new StatusEffect(StatusEffectType.Silenced, duration));
         if (decayDamagePerSecond > 0f)
-            sem.AddEffect(new StatusEffect(StatusEffectType.DamageOverTime, duration, decayDamagePerSecond));
-        _suppressed.Add(sem);
+            sem.AddEffect(new StatusEffect(StatusEffectType.Cursed, duration, decayDamagePerSecond));
+        _silenced.Add(sem);
     }
 
     void OnTriggerExit(Collider other)
@@ -54,7 +54,7 @@ public class NullFieldZone : MonoBehaviour
         // Suppress will expire naturally via StatusEffectManager.Update;
         // we just remove from tracking list.
         var sem = other.GetComponent<StatusEffectManager>();
-        if (sem != null) _suppressed.Remove(sem);
+        if (sem != null) _silenced.Remove(sem);
     }
 
     IEnumerator Expire()

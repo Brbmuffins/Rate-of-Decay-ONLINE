@@ -3,27 +3,27 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  WraithAbilities
-//  Attach to the Wraith player prefab alongside Health and StatusEffectManager.
+//  ShadowbladeAbilities
+//  Attach to the Shadowblade player prefab alongside Health and StatusEffectManager.
 //
 //  DESIGN PILLARS
 //  ─────────────
-//  • DoT-first: every ability applies or amplifies damage-over-time stacks.
-//  • Collapse detonates all debuffs on a target for burst — the core loop is
-//    "stack → detonate."
-//  • No aim required for most abilities — the Wraith is the accessibility class.
-//    Corruption is passive, Null Field is placed, Collapse is targeted by proximity.
-//  • Phase Shift (ultimate) makes the Wraith temporarily untouchable and
-//    poisons everything nearby on exit.
+//  • Curse-first: every ability applies or amplifies Cursed (DoT) stacks.
+//  • Dark Harvest detonates all debuffs on a target for burst — the core loop is
+//    "curse → harvest."
+//  • No aim required for most abilities — the Shadowblade is the accessibility class.
+//    Corruption is passive, Silence Ward is placed, Dark Harvest is targeted by proximity.
+//  • Shadow Veil (ultimate) makes the Shadowblade temporarily untouchable and
+//    curses everything nearby on exit.
 //
 //  ABILITY SUMMARY
 //  ───────────────
-//  [PASSIVE]  Corruption       — every ability hit adds a DamageOverTime stack.
-//  [Q]        Dark Blast       — cone burst; applies DoT + Slow.
-//  [W]        Null Field       — places a zone; Suppresses + DoTs enemies inside.
-//  [E]        Event Horizon    — single target; applies Exposed (dmg +25%) + DoT.
-//  [R]        Collapse         — detonates ALL debuffs on nearby enemies for burst dmg.
-//  [F / Ult]  Phase Shift      — 2s invulnerable stealth; exit applies DoT to all nearby.
+//  [PASSIVE]  Corruption       — every ability hit adds a Cursed (DoT) stack.
+//  [Q]        Void Bolt        — cone burst; applies Cursed + Slow.
+//  [W]        Silence Ward     — places a zone; Silences + Curses enemies inside.
+//  [E]        Dark Mark        — single target; applies Weakened (dmg +25%) + Cursed.
+//  [R]        Dark Harvest     — detonates ALL debuffs on nearby enemies for burst dmg.
+//  [F / Ult]  Shadow Veil      — 2s invulnerable stealth; exit applies Cursed to all nearby.
 //
 //  WIRING
 //  ──────
@@ -163,7 +163,7 @@ public class WraithAbilities : MonoBehaviour
             hits++;
         }
 
-        Debug.Log($"[Wraith] Dark Blast hit {hits} enemies.");
+        Debug.Log($"[Shadowblade] Dark Blast hit {hits} enemies.");
     }
 
     // ── [W] Null Field ────────────────────────────────────────────────────
@@ -195,7 +195,7 @@ public class WraithAbilities : MonoBehaviour
             {
                 if (!IsEnemy(col)) continue;
                 var s = col.GetComponent<StatusEffectManager>();
-                s?.AddEffect(new StatusEffect(StatusEffectType.Suppress, nullFieldSuppressDur, 0f, gameObject));
+                s?.AddEffect(new StatusEffect(StatusEffectType.Silenced, nullFieldSuppressDur, 0f, gameObject));
                 ApplyCorruption(s);
             }
             yield return new WaitForSeconds(nullFieldTickRate);
@@ -219,10 +219,10 @@ public class WraithAbilities : MonoBehaviour
         var s = target.GetComponent<StatusEffectManager>();
 
         h?.TakeDamage(eventHorizonDamage, gameObject);
-        s?.AddEffect(new StatusEffect(StatusEffectType.Exposed, exposedDuration, 0f, gameObject));
+        s?.AddEffect(new StatusEffect(StatusEffectType.Weakened, exposedDuration, 0f, gameObject));
         ApplyCorruption(s);
 
-        Debug.Log($"[Wraith] Event Horizon → {target.name} (Exposed + DoT)");
+        Debug.Log($"[Shadowblade] Dark Mark → {target.name} (Weakened + Cursed)");
     }
 
     // ── [R] Collapse ──────────────────────────────────────────────────────
@@ -258,7 +258,7 @@ public class WraithAbilities : MonoBehaviour
             }
         }
 
-        Debug.Log($"[Wraith] Collapse detonated {totalStacks} total stacks.");
+        Debug.Log($"[Shadowblade] Collapse detonated {totalStacks} total stacks.");
     }
 
     // ── [F] Phase Shift ───────────────────────────────────────────────────
@@ -300,7 +300,7 @@ public class WraithAbilities : MonoBehaviour
         {
             if (!IsEnemy(col)) continue;
             var s = col.GetComponent<StatusEffectManager>();
-            s?.AddEffect(new StatusEffect(StatusEffectType.DamageOverTime,
+            s?.AddEffect(new StatusEffect(StatusEffectType.Cursed,
                 phaseShiftExitDur, phaseShiftExitDoTDPS, gameObject));
         }
 
@@ -317,7 +317,7 @@ public class WraithAbilities : MonoBehaviour
         if (target == null) return;
         // Each call refreshes/adds a DamageOverTime stack.
         target.AddEffect(new StatusEffect(
-            StatusEffectType.DamageOverTime,
+            StatusEffectType.Cursed,
             corruptionDuration,
             corruptionDPS,
             gameObject));

@@ -1,9 +1,9 @@
 using UnityEngine;
 
 // ScriptableObject that defines which spellbook indices a class can equip.
-// Create one asset per class via: Create > RoD > Class Ability Pool
+// Create one asset per class via: Create > BCE > Class Ability Pool
 // Assign to the player's AbilityCaster before the session starts.
-[CreateAssetMenu(menuName = "RoD/Class Ability Pool", fileName = "ClassAbilityPool")]
+[CreateAssetMenu(menuName = "BCE/Class Ability Pool", fileName = "ClassAbilityPool")]
 public class ClassAbilityPool : ScriptableObject
 {
     public string className;

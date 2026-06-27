@@ -49,8 +49,8 @@ public class EnemyAI : MonoBehaviour
         // Staggered: briefly interrupted (Breach Slam) — no move, no attack
         if (_status.IsStaggered) return;
 
-        // Tethered: movement handled externally by IronTetherHandler
-        if (_status.IsTethered) return;
+        // Bound: movement handled externally by IronTetherHandler
+        if (_status.IsBound) return;
 
         if (aggroTarget == null)
         {
@@ -78,8 +78,8 @@ public class EnemyAI : MonoBehaviour
         }
         else
         {
-            // Suppressed (Null Field): cannot attack — the zone is real CC now
-            if (_status.IsSuppressed) return;
+            // Silenced (Silence Ward): cannot attack — the zone is real CC now
+            if (_status.IsSilenced) return;
 
             // Attack
             _attackTimer += Time.deltaTime;

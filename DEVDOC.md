@@ -333,7 +333,7 @@ Every UI system that can be hidden follows this pattern. Forgetting `blocksRayca
 systemctl status rod-server
 
 # Live log tail
-tail -f /var/log/rod-server.log
+tail -f /var/log/crossworlds.log
 
 # Restart game server
 systemctl restart rod-server
@@ -348,7 +348,7 @@ ls /game/Builds/
 ### Game Server Binary
 - **Binary:** `/game/Builds/Crossworlds.x86_64`
 - **Data:** `/game/Builds/Crossworlds_Data/`
-- **Log:** `/var/log/rod-server.log`
+- **Log:** `/var/log/crossworlds.log`
 - Managed by systemd service `rod-server`
 
 ### Download Page
@@ -501,7 +501,7 @@ Class is selected in CharacterSelect, stored in the DB, synced to the server via
 | Path | Purpose |
 |------|---------|
 | `/game/Builds/Crossworlds.x86_64` | Game server binary |
-| `/var/log/rod-server.log` | Game server log |
+| `/var/log/crossworlds.log` | Game server log |
 | `/var/www/rod/` | Public website (Nginx port 80) |
 | `/var/www/rod/downloads/` | Drop `RateOfDecayONLINE.zip` here to activate download button |
 

@@ -5,13 +5,15 @@ using UnityEngine;
 //  RodNetworkManager
 //
 //  Inspector setup:
-//    • classPrefabs[0] = Engineer prefab
-//    • classPrefabs[1] = Guardian prefab
-//    • classPrefabs[2] = Wraith prefab
-//    • classPrefabs[3] = Medic prefab
+//    • classPrefabs[0] = Warden prefab
+//    • classPrefabs[1] = Ironclad prefab
+//    • classPrefabs[2] = Shadowblade prefab
+//    • classPrefabs[3] = Cleric prefab
+//    • classPrefabs[4] = Arcanist prefab
 //    • Authenticator   = RodNetworkAuthenticator (same GameObject)
-//    • Online Scene    = "GameWorld"
 //    • Network Address = 15.204.243.36
+//
+//  offlineScene / onlineScene are set in Awake() — do NOT set in Inspector.
 //
 //  Class selection is now server-authoritative:
 //    - Production: RodNetworkAuthenticator fetches class from DB after JWT verify.
@@ -27,7 +29,7 @@ using UnityEngine;
 public class RodNetworkManager : NetworkManager
 {
     [Header("Class Prefabs")]
-    [Tooltip("0=Engineer, 1=Guardian, 2=Wraith, 3=Medic")]
+    [Tooltip("0=Warden, 1=Ironclad, 2=Shadowblade, 3=Cleric, 4=Arcanist")]
     public GameObject[] classPrefabs;
 
     [Header("Auth Server")]
@@ -40,6 +42,12 @@ public class RodNetworkManager : NetworkManager
     {
         autoCreatePlayer = false;
         playerPrefab     = null;
+
+        // Wire scenes in code so they're never mis-set in the Inspector.
+        // Mirror uses offlineScene to auto-navigate back to login on disconnect —
+        // this is what makes Logout and chat teardown work correctly.
+        offlineScene = "Assets/Game/Scenes/LoginScene.unity";
+        onlineScene  = "Assets/Game/Scenes/Hub.unity";
 
         if (transport == null)
             transport = GetComponent<Mirror.Transport>();
@@ -83,6 +91,23 @@ public class RodNetworkManager : NetworkManager
             if (prefab != null) NetworkClient.RegisterPrefab(prefab);
     }
 
+    // ── Client connected + authenticated ──────────────────────────────────────
+    // Mirror fires OnClientConnect AFTER authentication completes (when an
+    // authenticator is present). Send CreatePlayerMessage here so the server
+    // knows which class to spawn and what username to assign.
+
+    public override void OnClientConnect()
+    {
+        base.OnClientConnect();
+
+        NetworkClient.Send(new CreatePlayerMessage
+        {
+            username      = PlayerPrefs.GetString("username", "Player"),
+            selectedClass = PlayerPrefs.GetInt("SelectedCharacter", 0),
+        });
+        Debug.Log("[RodNM] Sent CreatePlayerMessage — awaiting spawn.");
+    }
+
     // ── Server ───────────────────────────────────────────────────────────────
 
     public override void OnStartServer()
@@ -101,7 +126,7 @@ public class RodNetworkManager : NetworkManager
     {
         if (classPrefabs == null || classPrefabs.Length == 0)
         {
-            Debug.LogError("[RodNM] classPrefabs is empty — run RoD ▶ Setup ▶ 4.");
+            Debug.LogError("[RodNM] classPrefabs is empty — run BCE ▶ Setup ▶ 4.");
             return;
         }
 
@@ -175,4 +200,6 @@ public class RodNetworkManager : NetworkManager
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-      
+        base.OnServerDisconnect(conn);
+    }
+}

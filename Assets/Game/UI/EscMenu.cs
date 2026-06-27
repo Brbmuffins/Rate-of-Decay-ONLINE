@@ -2,7 +2,6 @@ using Mirror;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -53,14 +52,19 @@ public class EscMenu : MonoBehaviour
     {
         var kb = Keyboard.current;
         if (kb == null) return;
+        if (!kb.escapeKey.wasPressedThisFrame) return;
 
-        // Don't intercept Escape while typing in a chat/GM input field
-        var sel = UnityEngine.EventSystems.EventSystem.current?.currentSelectedGameObject;
-        bool typingInUI = sel != null && sel.GetComponent<TMP_InputField>() != null;
-        if (typingInUI) return;
+        // If a chat / input field is focused, first ESC defocuses it (standard MMO behaviour).
+        // Second ESC will then open the menu normally.
+        var es  = UnityEngine.EventSystems.EventSystem.current;
+        var sel = es?.currentSelectedGameObject;
+        if (sel != null && sel.GetComponent<TMP_InputField>() != null)
+        {
+            es.SetSelectedGameObject(null);
+            return;
+        }
 
-        if (kb.escapeKey.wasPressedThisFrame)
-            SetOpen(!_open);
+        SetOpen(!_open);
     }
 
     // ── Actions ───────────────────────────────────────────────────────────
@@ -70,14 +74,20 @@ public class EscMenu : MonoBehaviour
     void Logout()
     {
         SetOpen(false);
+
+        // Re-enable cursor before scene transition so login screen isn't mouse-locked
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible   = true;
+
         if (NetworkServer.active && NetworkClient.isConnected)
             NetworkManager.singleton.StopHost();
         else if (NetworkClient.isConnected)
             NetworkManager.singleton.StopClient();
         else if (NetworkServer.active)
             NetworkManager.singleton.StopServer();
-
-        SceneManager.LoadScene("Login");
+        // RodNetworkManager.Awake() sets offlineScene = LoginScene, so Mirror
+        // navigates there automatically. Do NOT also call SceneManager.LoadScene()
+        // here — that double-loads the scene and can hang the editor.
     }
 
     void Quit()

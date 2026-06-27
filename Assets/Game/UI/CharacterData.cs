@@ -22,7 +22,7 @@ public class AbilityPreview
     [TextArea(1, 3)] public string description;
 }
 
-[CreateAssetMenu(fileName = "CharacterData", menuName = "RoD/Character Data")]
+[CreateAssetMenu(fileName = "CharacterData", menuName = "BCE/Character Data")]
 public class CharacterData : ScriptableObject
 {
     [Header("Identity")]

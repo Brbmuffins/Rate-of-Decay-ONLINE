@@ -12,7 +12,7 @@ using UnityEngine;
 //  Safe to use on both networked and local-only NPCs.
 // ═══════════════════════════════════════════════════════════════════════════
 
-[AddComponentMenu("RoD/World/NPC Controller")]
+[AddComponentMenu("BCE/World/NPC Controller")]
 public class NpcController : MonoBehaviour
 {
     public enum NpcType { Enemy, Friendly, Environmental }

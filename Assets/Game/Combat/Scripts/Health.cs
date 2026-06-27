@@ -93,8 +93,8 @@ public class Health : MonoBehaviour
         if (currentHealth <= 0f) return;
         if (isInvulnerable) return;   // dodge roll i-frames
 
-        // Exposed: +25% incoming (Event Horizon)
-        if (_statusEffects != null && _statusEffects.IsExposed)
+        // Weakened: +25% incoming (Collapsing Void)
+        if (_statusEffects != null && _statusEffects.IsWeakened)
             amount *= 1.25f;
 
         // Damage reduction (Siege Mode, Threat Protocol)

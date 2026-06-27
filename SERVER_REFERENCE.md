@@ -146,7 +146,7 @@ sudo journalctl -u rod-auth -f
 sudo journalctl -u rod-gameserver -f
 
 # Watch game server log directly
-tail -f /game/logs/server.log
+tail -f /var/log/crossworlds.log
 
 # Check auth server is responding
 curl http://localhost:3000/health
