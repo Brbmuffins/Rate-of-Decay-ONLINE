@@ -371,7 +371,10 @@ public class CharacterSelectManager : MonoBehaviour
             yield break;
         }
 
-        Debug.Log("[CharSel] Character confirmed. Connecting to server...");
+        // Apply whichever server IP the player entered on the login screen
+        string serverIP = PlayerPrefs.GetString("game_server_ip", "15.204.243.36");
+        NetworkManager.singleton.networkAddress = serverIP;
+        Debug.Log($"[CharSel] Connecting to game server at {serverIP}...");
         NetworkManager.singleton.StartClient();
     }
 

@@ -55,6 +55,7 @@ public class LoginManager : MonoBehaviour
     private Canvas          _canvas;
     private TMP_InputField  _userInput, _passInput;
     private TMP_InputField  _regUserInput, _regEmailInput, _regPassInput;
+    private TMP_InputField  _serverInput;
     private TMP_Text        _statusText, _regStatusText;
     private TextMeshProUGUI _titleText;
     private GameObject      _loginPanel, _registerPanel;
@@ -211,28 +212,39 @@ public class LoginManager : MonoBehaviour
         // Password field
         _passInput = BuildInputField(panelRt, "PASSWORD", new Vector2(0.05f, 0.40f), new Vector2(0.95f, 0.56f), true);
 
-        // Status text
+        // Server IP field — small, below password
+        var serverLabel = MakeLabel(panelRt, "ServerLabel", "GAME SERVER", 9f, FontStyles.Bold,
+            new Color(AccentCyan.r, AccentCyan.g, AccentCyan.b, 0.55f));
+        serverLabel.rectTransform.anchorMin = new Vector2(0.05f, 0.305f);
+        serverLabel.rectTransform.anchorMax = new Vector2(0.55f, 0.365f);
+        serverLabel.rectTransform.offsetMin = serverLabel.rectTransform.offsetMax = Vector2.zero;
+        serverLabel.characterSpacing = 4f;
+
+        _serverInput = BuildInputField(panelRt, "IP", new Vector2(0.05f, 0.235f), new Vector2(0.95f, 0.31f), false);
+        _serverInput.text = PlayerPrefs.GetString("game_server_ip", "15.204.243.36");
+
+        // Status text (shifted up slightly to make room)
         _statusText = MakeLabel(panelRt, "Status", "", 12f, FontStyles.Normal, TextDim);
-        _statusText.rectTransform.anchorMin = new Vector2(0.05f, 0.28f);
-        _statusText.rectTransform.anchorMax = new Vector2(0.95f, 0.39f);
+        _statusText.rectTransform.anchorMin = new Vector2(0.05f, 0.16f);
+        _statusText.rectTransform.anchorMax = new Vector2(0.95f, 0.235f);
         _statusText.rectTransform.offsetMin = _statusText.rectTransform.offsetMax = Vector2.zero;
         _statusText.alignment = TextAlignmentOptions.Center;
         _statusText.textWrappingMode = TextWrappingModes.Normal;
 
         // Login button
         BuildButton(panelRt, "ENTER WORLD", BtnLogin,
-            new Vector2(0.05f, 0.10f), new Vector2(0.95f, 0.26f), OnLoginClicked);
+            new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.155f), OnLoginClicked);
 
         // Register link
         var regLink = BuildFlatButton(panelRt, "No account? REGISTER",
-            new Vector2(0.05f, 0.02f), new Vector2(0.95f, 0.10f), ShowRegister);
+            new Vector2(0.05f, -0.06f), new Vector2(0.95f, 0.02f), ShowRegister);
         regLink.color = TextDim;
         regLink.fontSize = 11f;
 
 #if UNITY_EDITOR
         // Dev HOST button — editor only, bypasses auth for local testing
         BuildButton(panelRt, "▶ HOST (DEV)", new Color(0.08f, 0.35f, 0.12f, 1f),
-            new Vector2(0.05f, -0.14f), new Vector2(0.95f, -0.01f), OnHostClicked);
+            new Vector2(0.05f, -0.22f), new Vector2(0.95f, -0.07f), OnHostClicked);
 #endif
 
         return panel;
@@ -476,6 +488,13 @@ public class LoginManager : MonoBehaviour
             SetStatus(_statusText, "Enter your username and password.", false);
             return;
         }
+
+        // Save the chosen server IP so CharacterSelectManager can apply it before StartClient()
+        string ip = _serverInput != null ? _serverInput.text.Trim() : "15.204.243.36";
+        if (string.IsNullOrEmpty(ip)) ip = "15.204.243.36";
+        PlayerPrefs.SetString("game_server_ip", ip);
+        PlayerPrefs.Save();
+
         StartCoroutine(LoginRoutine(user, pass));
     }
 
