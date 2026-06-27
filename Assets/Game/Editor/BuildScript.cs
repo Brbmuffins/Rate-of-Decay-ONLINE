@@ -22,13 +22,13 @@ public static class BuildScript
 
     // ── Dedicated Server (Linux) ─────────────────────────────────────────
 
-    [MenuItem("RoD/Build/Dedicated Server (Linux)")]
+    [MenuItem("BCE/Build/Dedicated Server (Linux)")]
     public static void BuildDedicatedServer()
     {
         var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {
             scenes              = SCENES,
-            locationPathName    = "build/DedicatedServer/RateOfDecayOnline.x86_64",
+            locationPathName    = "build/DedicatedServer/Crossworlds.x86_64",
             target              = BuildTarget.StandaloneLinux64,
             subtarget           = (int)StandaloneBuildSubtarget.Server,
             options             = BuildOptions.None,
@@ -36,8 +36,8 @@ public static class BuildScript
 
         bool ok = report.summary.result == BuildResult.Succeeded;
         Debug.Log(ok
-            ? $"[RoD] ✅ Server build OK ({report.summary.totalSize / 1_048_576} MB)"
-            : $"[RoD] ❌ Server build FAILED — {report.summary.totalErrors} error(s)");
+            ? $"[BCE] ✅ Server build OK ({report.summary.totalSize / 1_048_576} MB)"
+            : $"[BCE] ❌ Server build FAILED — {report.summary.totalErrors} error(s)");
 
         if (Application.isBatchMode)
             EditorApplication.Exit(ok ? 0 : 1);
@@ -45,21 +45,21 @@ public static class BuildScript
 
     // ── Windows Client ───────────────────────────────────────────────────
 
-    [MenuItem("RoD/Build/Windows Client")]
+    [MenuItem("BCE/Build/Windows Client")]
     public static void BuildWindowsClient()
     {
         var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {
             scenes              = SCENES,
-            locationPathName    = "build/WindowsClient/RateOfDecayOnline.exe",
+            locationPathName    = "build/WindowsClient/Crossworlds.exe",
             target              = BuildTarget.StandaloneWindows64,
             options             = BuildOptions.None,
         });
 
         bool ok = report.summary.result == BuildResult.Succeeded;
         Debug.Log(ok
-            ? $"[RoD] ✅ Client build OK ({report.summary.totalSize / 1_048_576} MB)"
-            : $"[RoD] ❌ Client build FAILED — {report.summary.totalErrors} error(s)");
+            ? $"[BCE] ✅ Client build OK ({report.summary.totalSize / 1_048_576} MB)"
+            : $"[BCE] ❌ Client build FAILED — {report.summary.totalErrors} error(s)");
 
         if (Application.isBatchMode)
             EditorApplication.Exit(ok ? 0 : 1);

@@ -56,7 +56,7 @@ public static class RodNpcBuilder
 
     // ── Menu item ─────────────────────────────────────────────────────────────
 
-    [MenuItem("RoD/World/Populate GameWorld with NPCs", priority = 10)]
+    [MenuItem("BCE/World/Populate GameWorld with NPCs", priority = 10)]
     static void BuildNpcs()
     {
         if (!File.Exists(GAME_WORLD))
@@ -183,7 +183,7 @@ public static class RodNpcBuilder
         else
         {
             // Model not found — placeholder capsule so the NPC still shows
-            Debug.LogWarning($"[RoD] Model not found for {npcName}: {modelPath} — using placeholder.");
+            Debug.LogWarning($"[BCE] Model not found for {npcName}: {modelPath} — using placeholder.");
             var cap = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             cap.transform.SetParent(root.transform);
             cap.transform.localPosition = new Vector3(0f, 1f, 0f);
@@ -192,6 +192,6 @@ public static class RodNpcBuilder
         }
 
         EditorUtility.SetDirty(root);
-        Debug.Log($"[RoD] Placed NPC: {npcName} at {pos}");
+        Debug.Log($"[BCE] Placed NPC: {npcName} at {pos}");
     }
 }

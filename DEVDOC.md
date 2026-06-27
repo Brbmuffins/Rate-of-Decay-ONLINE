@@ -1,4 +1,4 @@
-# Rate of Decay ONLINE — Developer & Feature Reference
+# Crossworlds (BCE) — Developer & Feature Reference
 
 > **Living document.** Update this file as features are added. Last updated: June 27, 2026.
 
@@ -84,7 +84,7 @@ The console is a runtime dev tool. Key use cases beyond the command list:
 
 ## 1. What This Game Is
 
-**Rate of Decay ONLINE** is a multiplayer 3rd-person action game built in Unity 6 using Mirror networking. Players log in, select a character class, and enter a shared social Hub world. From the Hub, portals lead to gameplay zones.
+**Crossworlds (BCE)** is a multiplayer 3rd-person action game built in Unity 6 using Mirror networking. Players log in, select a character class, and enter a shared social Hub world. From the Hub, portals lead to gameplay zones.
 
 - **Engine:** Unity 6000.0.77f1
 - **Networking:** Mirror (KCP transport, UDP)
@@ -346,8 +346,8 @@ ls /game/Builds/
 ```
 
 ### Game Server Binary
-- **Binary:** `/game/Builds/Portalis.x86_64`
-- **Data:** `/game/Builds/Portalis_Data/`
+- **Binary:** `/game/Builds/Crossworlds.x86_64`
+- **Data:** `/game/Builds/Crossworlds_Data/`
 - **Log:** `/var/log/rod-server.log`
 - Managed by systemd service `rod-server`
 
@@ -500,11 +500,11 @@ Class is selected in CharacterSelect, stored in the DB, synced to the server via
 ### Server (VPS)
 | Path | Purpose |
 |------|---------|
-| `/game/Builds/Portalis.x86_64` | Game server binary |
+| `/game/Builds/Crossworlds.x86_64` | Game server binary |
 | `/var/log/rod-server.log` | Game server log |
 | `/var/www/rod/` | Public website (Nginx port 80) |
 | `/var/www/rod/downloads/` | Drop `RateOfDecayONLINE.zip` here to activate download button |
 
 ---
 
-*Rate of Decay ONLINE — internal developer reference. Keep updated as features ship.*
+*Crossworlds (BCE) — internal developer reference. Keep updated as features ship.*

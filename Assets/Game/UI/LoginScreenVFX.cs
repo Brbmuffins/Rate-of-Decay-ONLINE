@@ -35,7 +35,7 @@ using UnityEngine.Rendering;
 //   5. Assign the LoginManager Canvas on top (Screen Space Overlay)
 // ═══════════════════════════════════════════════════════════════════════════
 
-[AddComponentMenu("RoD/UI/Login Screen VFX")]
+[AddComponentMenu("BCE/UI/Login Screen VFX")]
 public class LoginScreenVFX : MonoBehaviour
 {
     [Header("Ambient — assign prefabs from brbmuffins packs")]

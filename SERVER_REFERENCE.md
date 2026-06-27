@@ -1,4 +1,4 @@
-# Rate of Decay ONLINE — Server Reference
+# Crossworlds (BCE) — Server Reference
 *Keep this private. Contains usernames and file locations.*
 
 ---
@@ -108,8 +108,8 @@ PORT=3000
 **Key files:**
 ```
 /game/
-├── RateOfDecayOnline.x86_64    ← the server binary (run this)
-├── RateOfDecayOnline_Data/     ← game data (required, don't delete)
+├── Crossworlds.x86_64    ← the server binary (run this)
+├── Crossworlds_Data/     ← game data (required, don't delete)
 ├── GameAssembly.so             ← compiled game code (required)
 ├── UnityPlayer.so              ← Unity runtime (required)
 └── logs/

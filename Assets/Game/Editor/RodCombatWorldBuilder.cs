@@ -49,7 +49,7 @@ public static class RodCombatWorldBuilder
 
     // ── Menu entry ────────────────────────────────────────────────────────────
 
-    [MenuItem("RoD/World/Build Combat Base", priority = 20)]
+    [MenuItem("BCE/World/Build Combat Base", priority = 20)]
     static void Build()
     {
         if (!File.Exists(GAME_WORLD_PATH))
@@ -79,7 +79,7 @@ public static class RodCombatWorldBuilder
         EditorSceneManager.SaveScene(scene);
         AssetDatabase.Refresh();
 
-        Debug.Log("[RoD] ✅ Combat base built in GameWorld.");
+        Debug.Log("[BCE] ✅ Combat base built in GameWorld.");
         EditorUtility.DisplayDialog("✅ Combat Base Ready",
             "GameWorld populated with:\n" +
             "  • Arena floor + cover blocks\n" +
@@ -196,7 +196,7 @@ public static class RodCombatWorldBuilder
             if (ps != null) tc.muzzleFlash = ps;
         }
 
-        Debug.Log("[RoD] Turret placed at (0, 0.5, 3)");
+        Debug.Log("[BCE] Turret placed at (0, 0.5, 3)");
     }
 
     // ── Zone Indicators ───────────────────────────────────────────────────────
@@ -236,7 +236,7 @@ public static class RodCombatWorldBuilder
         SpawnVFX(VFX_DEATH_CIRCLE, rectZone.transform, new Vector3(0f, 0f,  1.5f), 0.5f, "RectEndB");
         AddZoneLabel(rectZone, "RECT ZONE\nBeam / Last Bastion", new Color(0.15f, 0.65f, 1f));
 
-        Debug.Log("[RoD] Zone indicators placed.");
+        Debug.Log("[BCE] Zone indicators placed.");
     }
 
     static void AddZoneLabel(GameObject parent, string text, Color color)
@@ -312,7 +312,7 @@ public static class RodCombatWorldBuilder
             }
         }
 
-        Debug.Log("[RoD] Enemy clusters placed.");
+        Debug.Log("[BCE] Enemy clusters placed.");
     }
 
     // ── Wave Chest ────────────────────────────────────────────────────────────
@@ -331,7 +331,7 @@ public static class RodCombatWorldBuilder
         // Ambient glow
         SpawnVFX(VFX_MAGIC_CIRCLE, chestGO.transform, new Vector3(0f, -0.5f, 0f), 0.4f, "ChestGlow");
 
-        Debug.Log("[RoD] Wave chest placed.");
+        Debug.Log("[BCE] Wave chest placed.");
     }
 
     // ── Ambient VFX ───────────────────────────────────────────────────────────
@@ -355,7 +355,7 @@ public static class RodCombatWorldBuilder
         // Heat distortion near the turret (implying a hot barrel)
         SpawnVFX(VFX_HEAT, ambientRoot.transform, new Vector3(0f, 1.5f, 3f), 0.4f, "TurretHeat");
 
-        Debug.Log("[RoD] Ambient VFX placed.");
+        Debug.Log("[BCE] Ambient VFX placed.");
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -365,7 +365,7 @@ public static class RodCombatWorldBuilder
         var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
         if (prefab == null)
         {
-            Debug.LogWarning($"[RoD] VFX not found: {path}");
+            Debug.LogWarning($"[BCE] VFX not found: {path}");
             return null;
         }
 

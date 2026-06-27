@@ -26,7 +26,7 @@ using UnityEditor;
 //  VFX load with AssetDatabase in Editor play mode. Builds need addressables.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-[AddComponentMenu("RoD/UI/Character Select Manager")]
+[AddComponentMenu("BCE/UI/Character Select Manager")]
 public class CharacterSelectManager : MonoBehaviour
 {
     // ── Class Definitions ────────────────────────────────────────────────────
@@ -688,5 +688,3 @@ public class CharacterSelectManager : MonoBehaviour
     {
         go.layer = layer;
         foreach (Transform c in go.transform) SetLayer(c.gameObject, layer);
-    }
-}

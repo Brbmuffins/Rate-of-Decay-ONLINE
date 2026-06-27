@@ -1,9 +1,9 @@
 # ═══════════════════════════════════════════════════════════════════════════
-#  Rate of Decay ONLINE — Build & Deploy
+#  Crossworlds (BCE) — Build & Deploy
 #
 #  Triggers on every push to main.
 #  Two parallel jobs:
-#    build-server  → Linux dedicated server → SCP to VPS → restart rod-server
+#    build-server  → Linux dedicated server → SCP to VPS → restart crossworlds
 #    build-client  → Windows client → GitHub Release (stable download URL)
 #
 #  One-time secrets to add in GitHub → Settings → Secrets → Actions:
@@ -14,15 +14,21 @@
 #    VPS_SSH_KEY     — private key that can SSH as ubuntu@VPS_HOST
 #
 #  Stable client download URL (share this with friends):
-#    https://github.com/Brbmuffins/Rate-of-Decay-ONLINE/releases/latest/download/RateOfDecayOnline-Windows.zip
+#    https://github.com/Brbmuffins/Rate-of-Decay-ONLINE/releases/latest/download/Crossworlds-Windows.zip
 # ═══════════════════════════════════════════════════════════════════════════
 
 name: Build and Deploy
 
 on:
-  push:
-    branches: [main]
-  workflow_dispatch:   # lets you trigger manually from GitHub UI
+  workflow_dispatch:   # manual trigger only — auto-push disabled until secrets are configured
+  # push:
+  #   branches: [main]
+  # Uncomment push above and add these secrets in GitHub → Settings → Secrets → Actions:
+  #   UNITY_LICENSE   — contents of your .ulf license file (run Unity → Help → Manage License → Export)
+  #   UNITY_EMAIL     — your Unity account email
+  #   UNITY_PASSWORD  — your Unity account password
+  #   VPS_HOST        — 15.204.243.36
+  #   VPS_SSH_KEY     — private SSH key for ubuntu@VPS_HOST
 
 jobs:
 
@@ -55,13 +61,13 @@ jobs:
           buildMethod:    BuildScript.BuildDedicatedServer
           versioning:     None
 
-      - name: Stop rod-server on VPS
+      - name: Stop crossworlds on VPS
         uses: appleboy/ssh-action@v1
         with:
           host:     ${{ secrets.VPS_HOST }}
           username: ubuntu
           key:      ${{ secrets.VPS_SSH_KEY }}
-          script:   sudo systemctl stop rod-server || true
+          script:   sudo systemctl stop crossworlds || true
 
       - name: Upload server build to VPS
         uses: appleboy/scp-action@v0.1.7
@@ -73,7 +79,7 @@ jobs:
           target:           /game/incoming/
           strip_components: 2
 
-      - name: Swap build and restart rod-server
+      - name: Swap build and restart crossworlds
         uses: appleboy/ssh-action@v1
         with:
           host:     ${{ secrets.VPS_HOST }}
@@ -82,12 +88,12 @@ jobs:
           script: |
             rsync -a --delete /game/incoming/ /game/
             rm -rf /game/incoming
-            chmod +x /game/RateOfDecayOnline.x86_64
-            sudo systemctl start rod-server
+            chmod +x /game/Crossworlds.x86_64
+            sudo systemctl start crossworlds
             sleep 5
-            sudo systemctl status rod-server --no-pager
+            sudo systemctl status crossworlds --no-pager
             echo "--- last 10 log lines ---"
-            tail -10 /var/log/rod-server.log
+            tail -10 /var/log/crossworlds.log
 
   # ── Windows Client ────────────────────────────────────────────────────────
   build-client:
@@ -121,15 +127,6 @@ jobs:
       - name: Zip client
         run: |
           cd build/WindowsClient
-          zip -r ../../RateOfDecayOnline-Windows.zip .
+          zip -r ../../Crossworlds-Windows.zip .
 
-      - name: Publish to GitHub Releases (stable "latest" tag)
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name:   game-client
-          name:       "Rate of Decay ONLINE — Latest Client"
-          body:       "Auto-built from `${{ github.sha }}` on ${{ github.event.head_commit.timestamp }}"
-          prerelease: false
-          files:      RateOfDecayOnline-Windows.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publis

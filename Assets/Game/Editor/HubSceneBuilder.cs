@@ -50,12 +50,14 @@ public static class HubSceneBuilder
             sun.shadows   = LightShadows.Soft;
         }
 
-        // ── Ground — large grass plane ─────────────────────────────────────
-        var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        // ── Ground — flat cube with BoxCollider (more reliable than Plane MeshCollider) ──
+        // Surface sits exactly at Y=0; box extends downward so nothing falls through.
+        var ground = GameObject.CreatePrimitive(PrimitiveType.Cube);
         ground.name = "Ground";
         ground.tag  = "Ground";
         ground.transform.SetParent(root.transform);
-        ground.transform.localScale = new Vector3(16f, 1f, 16f); // 160 × 160 world units
+        ground.transform.position   = new Vector3(0f, -0.5f, 0f);  // top face at Y=0
+        ground.transform.localScale = new Vector3(160f, 1f, 160f);
 
         var groundMat = Asset<Material>(
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Materials/MI_Grass 1.mat");
@@ -84,36 +86,26 @@ public static class HubSceneBuilder
         };
         PlaceInRing(root, treesOuter, count: 22, radius: 40f, scaleMin: 1.3f, scaleMax: 2.2f);
 
-        // ── Bushes & ferns — mid-ring scatter ────────────────────────────
+        // ── Bushes & ferns — sparse mid-ring scatter ──────────────────────
         string[] bushes =
         {
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Bush_A.prefab",
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Bush_B.prefab",
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Fern_A.prefab",
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Fern_C.prefab",
-            "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Cattail_A.prefab",
         };
-        PlaceScattered(root, bushes, count: 22, innerR: 12f, outerR: 27f);
+        PlaceScattered(root, bushes, count: 12, innerR: 14f, outerR: 27f);
 
-        // ── Flowers — inner clearing edge ────────────────────────────────
+        // ── Flowers — light accent near treeline only ─────────────────────
         string[] flowers =
         {
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Flowers_A.prefab",
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Flowers_C.prefab",
             "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Flowers_E.prefab",
-            "Assets/Vegetation_Stylized_Pack_ByLuxArtStudios/Prefabs/Bushes/S_Flowers_G.prefab",
         };
-        PlaceScattered(root, flowers, count: 18, innerR: 5f, outerR: 20f, scaleMin: 0.6f, scaleMax: 1.1f);
+        PlaceScattered(root, flowers, count: 10, innerR: 18f, outerR: 26f, scaleMin: 0.6f, scaleMax: 1.0f);
 
-        // ── Metal ore nodes — resource flavour ───────────────────────────
-        string[] ores =
-        {
-            "Assets/Metal Ore/Prefabs/Silver.prefab",
-            "Assets/Metal Ore/Prefabs/Gold.prefab",
-            "Assets/Metal Ore/Prefabs/Moon.prefab",
-            "Assets/Metal Ore/Prefabs/Iron.prefab",
-        };
-        PlaceScattered(root, ores, count: 6, innerR: 14f, outerR: 24f, scaleMin: 0.8f, scaleMax: 1.1f);
+        // (Ore nodes removed — felt like clutter in a social hub)
 
         // ── Crystal clusters — 4 cardinal accent points ───────────────────
         string[] crystals =
@@ -132,28 +124,47 @@ public static class HubSceneBuilder
                   Vector3.one * Random.Range(0.9f, 1.3f));
         }
 
-        // ── Three portals — evenly spaced at radius 21 ────────────────────
-        //    These are the "choose where to go" feature attractions
-        (string path, float angle, string label)[] portals =
+        // ── Three portals — evenly spaced at radius 18 ────────────────────
+        //    Blue   = Combat Zone (GameWorld)
+        //    Green  = Starting Zone (placeholder, coming soon)
+        //    Yellow = future zone
+        (string path, float angle, string label, string scene)[] portals =
         {
-            ("Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Portals/Portal blue.prefab",   0f,   "North Portal"),
-            ("Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Portals/Portal green.prefab",  120f, "East Portal"),
-            ("Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Portals/Portal yellow.prefab", 240f, "West Portal"),
+            ("Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Portals/Portal blue.prefab",
+             0f,   "Combat Zone",    "GameWorld"),
+            ("Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Portals/Portal green.prefab",
+             120f, "Starting Zone",  ""),          // empty = coming soon
+            ("Assets/brbmuffins Studio/brbmuffins Magic Pack/Prefabs/Portals/Portal yellow.prefab",
+             240f, "Dark Frontier",  ""),          // empty = coming soon
         };
 
-        foreach (var (pPath, pAngle, pLabel) in portals)
+        foreach (var (pPath, pAngle, pLabel, pScene) in portals)
         {
-            float rad   = pAngle * Mathf.Deg2Rad;
-            Vector3 pos = new Vector3(Mathf.Sin(rad) * 21f, 0f, Mathf.Cos(rad) * 21f);
+            float rad      = pAngle * Mathf.Deg2Rad;
+            Vector3 pos    = new Vector3(Mathf.Sin(rad) * 18f, 0f, Mathf.Cos(rad) * 18f);
             Quaternion rot = Quaternion.Euler(0f, pAngle + 180f, 0f); // face inward
 
             var portalGO = Place(root, pPath, pos, rot, Vector3.one * 1.6f);
-            if (portalGO != null) portalGO.name = pLabel;
+            if (portalGO != null)
+            {
+                portalGO.name = pLabel;
+
+                // Wire HubPortal component
+                var hp          = portalGO.AddComponent<HubPortal>();
+                hp.portalLabel  = pLabel;
+                hp.targetScene  = pScene;
+                hp.activateRadius = 5f;
+
+                // Trigger collider for proximity (sphere, no physics response)
+                var sc = portalGO.AddComponent<SphereCollider>();
+                sc.isTrigger = true;
+                sc.radius    = 3f;
+            }
 
             // Light pillar rising from each portal
             Place(root,
                 "Assets/brbmuffins VFX/brbmuffins Free VFX/Prefab/FX_LightPillar.prefab",
-                pos + Vector3.up * 0.1f, Quaternion.identity, Vector3.one * 1.2f);
+                pos + Vector3.up * 0.1f, Quaternion.identity, Vector3.one * 1.0f);
         }
 
         // ── Central shrine — magic circle on the ground ───────────────────
@@ -172,22 +183,16 @@ public static class HubSceneBuilder
             "Assets/brbmuffins Technologies/brbmuffins Particle Pack/EffectExamples/Misc Effects/Prefabs/DustMotesEffect.prefab",
             new Vector3(0f, 1.5f, 0f), Quaternion.identity, Vector3.one * 3f);
 
-        // Ground fog wisps along the treeline
-        float[] fogAngles = { 0f, 90f, 180f, 270f };
-        foreach (float fa in fogAngles)
-        {
-            float rad = fa * Mathf.Deg2Rad;
-            Vector3 fp = new Vector3(Mathf.Sin(rad) * 22f, 0f, Mathf.Cos(rad) * 22f);
-            Place(root,
-                "Assets/brbmuffins Technologies/brbmuffins Particle Pack/EffectExamples/Smoke & Steam Effects/Prefabs/GroundFog.prefab",
-                fp, Quaternion.identity, Vector3.one * 2.5f);
-        }
+        // Single light ground-fog at centre — subtle, not spammy
+        Place(root,
+            "Assets/brbmuffins Technologies/brbmuffins Particle Pack/EffectExamples/Smoke & Steam Effects/Prefabs/GroundFog.prefab",
+            new Vector3(0f, 0f, 0f), Quaternion.identity, Vector3.one * 3f);
 
-        // ── Candles near the central shrine ──────────────────────────────
-        float[] candleAngles = { 0f, 72f, 144f, 216f, 288f };
+        // ── Candles near the central shrine (4 cardinal) ─────────────────
+        float[] candleAngles = { 0f, 90f, 180f, 270f };
         foreach (float ca in candleAngles)
         {
-            float rad = ca * Mathf.Deg2Rad;
+            float rad   = ca * Mathf.Deg2Rad;
             Vector3 cp2 = new Vector3(Mathf.Sin(rad) * 4.5f, 0f, Mathf.Cos(rad) * 4.5f);
             Place(root,
                 "Assets/brbmuffins Technologies/brbmuffins Particle Pack/EffectExamples/Misc Effects/Prefabs/Candles.prefab",
@@ -196,11 +201,11 @@ public static class HubSceneBuilder
 
         // ── NetworkStartPosition — spawn points spread around the clearing ──
         // Mirror picks these via GetStartPosition() when spawning players.
-        // 8 points evenly spaced at radius 4, slightly above ground.
+        // 8 points evenly spaced at radius 5, at Y=0.5 to stay clear of ground surface.
         for (int i = 0; i < 8; i++)
         {
             float angle = (360f / 8f * i) * Mathf.Deg2Rad;
-            Vector3 sp  = new Vector3(Mathf.Sin(angle) * 4f, 0.1f, Mathf.Cos(angle) * 4f);
+            Vector3 sp  = new Vector3(Mathf.Sin(angle) * 5f, 0.5f, Mathf.Cos(angle) * 5f);
             var spGO    = new GameObject($"SpawnPoint_{i}");
             spGO.transform.SetParent(root.transform);
             spGO.transform.position = sp;

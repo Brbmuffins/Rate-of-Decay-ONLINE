@@ -17,7 +17,7 @@ public static class RodPrefabBuilder
 
     static readonly string[] ClassNames = { "Engineer", "Guardian", "Wraith", "Medic" };
 
-    [MenuItem("RoD/Setup/4 ▶ Create Class Prefabs (Engineer x4)", priority = 4)]
+    [MenuItem("BCE/Setup/4 ▶ Create Class Prefabs (Engineer x4)", priority = 4)]
     static void Build()
     {
         // ── Load source FBX ───────────────────────────────────────────────────
@@ -73,7 +73,7 @@ public static class RodPrefabBuilder
             Object.DestroyImmediate(go);
 
             builtPaths.Add(prefabPath);
-            Debug.Log("[RoD] Created: " + prefabPath);
+            Debug.Log("[BCE] Created: " + prefabPath);
         }
 
         AssetDatabase.Refresh();
@@ -81,7 +81,7 @@ public static class RodPrefabBuilder
         // ── Wire to NetworkManager in LoginScene ──────────────────────────────
         if (!File.Exists(LOGIN_SCENE))
         {
-            Debug.LogWarning("[RoD] LoginScene not found — run step 1 first.");
+            Debug.LogWarning("[BCE] LoginScene not found — run step 1 first.");
             ShowDone(builtPaths, wired: false);
             return;
         }
@@ -105,7 +105,7 @@ public static class RodPrefabBuilder
             EditorUtility.SetDirty(nm);
             EditorSceneManager.SaveScene(scene);
             wired = true;
-            Debug.Log("[RoD] classPrefabs assigned to RodNetworkManager.");
+            Debug.Log("[BCE] classPrefabs assigned to RodNetworkManager.");
         }
 
         ShowDone(builtPaths, wired);
@@ -115,7 +115,7 @@ public static class RodPrefabBuilder
 
     const string ANIM_CTRL = "Assets/Game/Characters/Engineer/Animations/AnimationController.controller";
 
-    [MenuItem("RoD/Setup/5 ▶ Fix Animator Controllers", priority = 5)]
+    [MenuItem("BCE/Setup/5 ▶ Fix Animator Controllers", priority = 5)]
     static void FixAnimators()
     {
         var ctrl = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(ANIM_CTRL);
@@ -131,7 +131,7 @@ public static class RodPrefabBuilder
         {
             string path = PREFABS_DIR + "/" + className + ".prefab";
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-            if (prefab == null) { Debug.LogWarning("[RoD] Prefab not found: " + path); continue; }
+            if (prefab == null) { Debug.LogWarning("[BCE] Prefab not found: " + path); continue; }
 
             // Edit the prefab asset directly
             using (var scope = new PrefabUtility.EditPrefabContentsScope(path))
@@ -143,11 +143,11 @@ public static class RodPrefabBuilder
                 {
                     anim.runtimeAnimatorController = ctrl;
                     fixed_++;
-                    Debug.Log("[RoD] Assigned AnimatorController to: " + path);
+                    Debug.Log("[BCE] Assigned AnimatorController to: " + path);
                 }
                 else
                 {
-                    Debug.LogWarning("[RoD] No Animator found in: " + path);
+                    Debug.LogWarning("[BCE] No Animator found in: " + path);
                 }
             }
         }

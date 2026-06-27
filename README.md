@@ -1,4 +1,4 @@
-# Rate of Decay ONLINE
+# Crossworlds (BCE)
 
 **Genre:** 4-10 player co-op combat MMO  
 **Engine:** Unity 6 LTS · Universal Render Pipeline  
@@ -52,7 +52,7 @@ Each class has 4 equipped abilities + 1 ultimate. See [`COMBAT.md`](COMBAT.md) f
 - Built on Node.js / Express at `/opt/rod-dashboard/` · systemd managed
 
 **GM Server Dashboard** — `http://15.204.243.36:4000/gm-dashboard` · token auth (in `.env` on VPS)
-- Live rod-server status (green/red pill)
+- Live crossworlds status (green/red pill)
 - Spawn events pulled from server log
 - Last 50 log lines, color-coded by type
 - Restart game server button (auto-reloads after 8s)
@@ -164,97 +164,4 @@ Access gated by `GM_USERS` allowlist in `GmConsole.cs`. Command history: ↑/↓
 ## Project Structure
 
 ```
-Rate of Decay ONLINE/
-│
-├── Assets/
-│   └── Game/
-│       ├── Networking/       — Mirror network scripts
-│       │   ├── RodNetworkManager.cs        spawn, auth, class prefabs
-│       │   ├── RodNetworkAuthenticator.cs  JWT verification
-│       │   ├── PlayerIdentity.cs           synced player name + class
-│       │   ├── RodChatManager.cs           networked chat
-│       │   └── RodPositionSaver.cs         save position to DB on disconnect
-│       │
-│       ├── UI/               — All UI: self-bootstrapping, no prefabs required
-│       │   ├── LoginManager.cs             login screen, Tab field cycling
-│       │   ├── CharacterSelectManager.cs   class picker + 3D preview
-│       │   ├── EscMenu.cs                  ESC → Resume / Logout / Quit
-│       │   ├── GmConsole.cs                GM console (` or F1)
-│       │   ├── PlayerListUI.cs             Who's Online panel (P)
-│       │   └── PlayerNameplate.cs          floating name/class above players
-│       │
-│       ├── Combat/Scripts/   — Combat systems
-│       │   ├── Health.cs                   shields, downed state, gear stats
-│       │   ├── StatusEffectManager.cs      Slow, Stagger, Suppress, DoT, Exposed, Tethered
-│       │   ├── EnemyAI.cs                  aggro, attack, stealth suppression
-│       │   ├── TurretController.cs         range scan, muzzle flash, burst mode
-│       │   ├── AbilityCaster.cs            targeting indicators, full spellbook
-│       │   ├── WraithAbilities.cs          DoT kit: Corruption → stack → Collapse
-│       │   ├── WaveChest.cs                hold-E activation, wave spawning, loot
-│       │   └── WaveManager.cs              arena orchestrator, difficulty scaling
-│       │
-│       ├── Characters/       — Per-class prefabs and scripts
-│       │   └── Engineer/Scripts/
-│       │       └── CameraFollow.cs         WoW-style 3rd-person camera
-│       │
-│       └── Editor/           — Editor tools (not included in builds)
-│           ├── HubSceneBuilder.cs          RoD → Build Hub Scene
-│           ├── BuildScript.cs              RoD/Build/ menu + CI entry
-│           ├── RodEditorSetup.cs           RoD/Setup/ scene builders
-│           ├── RodCombatWorldBuilder.cs    RoD/World/Build Combat Base
-│           └── RodPrefabBuilder.cs         RoD/Setup/4 class prefab creator
-│
-├── Scenes/
-│   ├── LoginScene              index 0 — login + register
-│   ├── CharacterSelect         index 1 — class picker
-│   └── Hub                     index 2 — social Hub (run HubSceneBuilder first)
-│
-├── brbmuffins */               VFX + magic + skybox asset packs
-├── Mirror/                     Mirror Networking package
-├── Docs/                       vps-character-system-prompt.txt, BackendSetup
-│
-├── DEVDOC.md                   ← Full developer + feature reference
-├── COMBAT.md                   Combat bible: dodge system, class breakdowns, combos
-├── DESIGN_DOCUMENT.md          Full system design and architecture decisions
-└── README.md                   This file
-```
-
-### VPS Ports at a Glance
-
-| Port | Service |
-|------|---------|
-| 80 | Nginx — public download page |
-| 3000 | Auth server (DO NOT TOUCH) |
-| 4000 | Manager dashboard |
-| 7777 UDP | Mirror game server |
-| 3001 | Uptime Kuma monitoring |
-
----
-
-## Setup
-
-**Prerequisites:** Unity 6 LTS, Mirror (included), Node.js on VPS
-
-**First-time (run in order):**
-1. Open project in Unity
-2. `Edit → Project Settings → Player → Other Settings` → **Allow downloads over HTTP → Always allowed**
-3. `RoD → Setup → 0 ▶ Create Character Select Scene`
-4. `RoD → Setup → 1 ▶ Create Login Scene`
-5. `RoD → Setup → 4 ▶ Create Class Prefabs`
-6. `RoD → Setup → 5 ▶ Fix Animator Controllers`
-7. `RoD → World → Build Combat Base`
-8. Press Play in LoginScene → **HOST (DEV)** → pick class → **ENTER WORLD**
-
-**For multiplayer (others joining your session):**
-- Players enter your IP in the **GAME SERVER** field on the login screen before logging in
-- Default is the VPS IP; change to host's LAN/WAN IP for player-hosted sessions
-
-For VPS auth server setup: `Docs/vps-character-system-prompt.txt`
-
----
-
-## About
-
-Mostly smarter people than Brbmuffins. Some Unity store assets. Lots of AI. Not much of my own original work really. Puprets
-
----
+Rate 

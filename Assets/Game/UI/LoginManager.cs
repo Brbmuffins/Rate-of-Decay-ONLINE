@@ -176,7 +176,7 @@ public class LoginManager : MonoBehaviour
         GameObject titleGO = new GameObject("Title", typeof(RectTransform), typeof(TextMeshProUGUI));
         titleGO.transform.SetParent(root, false);
         _titleText = titleGO.GetComponent<TextMeshProUGUI>();
-        _titleText.text       = "RATE OF DECAY";
+        _titleText.text       = "CROSSWORLDS";
         _titleText.fontSize   = 72f;
         _titleText.fontStyle  = FontStyles.Bold;
         _titleText.color      = AccentCyan;
@@ -191,7 +191,7 @@ public class LoginManager : MonoBehaviour
         GameObject subGO = new GameObject("Subtitle", typeof(RectTransform), typeof(TextMeshProUGUI));
         subGO.transform.SetParent(root, false);
         var sub = subGO.GetComponent<TextMeshProUGUI>();
-        sub.text      = "O N L I N E";
+        sub.text      = "B C E";
         sub.fontSize  = 22f;
         sub.color     = new Color(TextDim.r, TextDim.g, TextDim.b, 0.85f);
         sub.alignment = TextAlignmentOptions.Center;
@@ -453,6 +453,17 @@ public class LoginManager : MonoBehaviour
         field.interactable   = true;
         if (password)
             field.contentType = TMP_InputField.ContentType.Password;
+
+        // Focus highlight — brighter background + full-brightness underline when selected
+        Image bgImg    = go.GetComponent<Image>();
+        Image ulImg    = underline.GetComponent<Image>();
+        Color normalBg = InputBG;
+        Color focusBg  = new Color(0.14f, 0.10f, 0.26f, 0.98f);
+        Color normalUl = new Color(AccentCyan.r, AccentCyan.g, AccentCyan.b, 0.50f);
+        Color focusUl  = new Color(AccentCyan.r, AccentCyan.g, AccentCyan.b, 1.00f);
+
+        field.onSelect.AddListener(_  => { bgImg.color = focusBg;  ulImg.color = focusUl;  });
+        field.onDeselect.AddListener(_ => { bgImg.color = normalBg; ulImg.color = normalUl; });
 
         return field;
     }

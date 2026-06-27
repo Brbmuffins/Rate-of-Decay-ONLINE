@@ -18,7 +18,7 @@ using UnityEngine.Networking;
 //    Steps 2-3 are skipped. Class comes from PlayerPrefs, position is default.
 // ═══════════════════════════════════════════════════════════════════════════
 
-[AddComponentMenu("RoD/Network/Rod Network Authenticator")]
+[AddComponentMenu("BCE/Network/Rod Network Authenticator")]
 public class RodNetworkAuthenticator : NetworkAuthenticator
 {
     [Header("Auth Server")]

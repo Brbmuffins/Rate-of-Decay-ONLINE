@@ -23,7 +23,7 @@ using UnityEngine;
 //    - Dev/first login: default spawn or Mirror start position.
 // ═══════════════════════════════════════════════════════════════════════════
 
-[AddComponentMenu("RoD/Network/Rod Network Manager")]
+[AddComponentMenu("BCE/Network/Rod Network Manager")]
 public class RodNetworkManager : NetworkManager
 {
     [Header("Class Prefabs")]
@@ -175,38 +175,4 @@ public class RodNetworkManager : NetworkManager
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-        // RodPositionSaver.OnDestroy handles the HTTP call when the player object
-        // is destroyed as part of disconnect — nothing extra needed here.
-        base.OnServerDisconnect(conn);
-        Debug.Log($"[RodNM] Client disconnected: {conn}");
-    }
-
-    // ── Client ───────────────────────────────────────────────────────────────
-
-    public override void OnClientConnect()
-    {
-        base.OnClientConnect();
-
-        // Send username + class (class is dev-mode fallback only;
-        // server uses DB value when auth.fromDB = true)
-        NetworkClient.Send(new CreatePlayerMessage
-        {
-            username      = PlayerPrefs.GetString("username", "Player"),
-            selectedClass = PlayerPrefs.GetInt("SelectedCharacter", 0)
-        });
-    }
-
-    public override void OnClientDisconnect()
-    {
-        base.OnClientDisconnect();
-        Debug.Log("[RodNM] Disconnected from server.");
-    }
-
-    // ── Utility ───────────────────────────────────────────────────────────────
-
-    public static void ConnectToServer()
-    {
-        if (singleton == null) { Debug.LogError("[RodNM] No NetworkManager singleton."); return; }
-        singleton.StartClient();
-    }
-}
+      

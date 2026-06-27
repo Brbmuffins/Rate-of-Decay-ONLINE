@@ -1,356 +1,418 @@
-# Rate of Decay ONLINE — Combat Bible
-*Last updated: June 2026*
+# Crossworlds (BCE) — Combat Bible
+*Last updated: June 2026 — full redesign pass*
 
 ---
 
-## Combat Philosophy
+## Philosophy
 
-The feel we're going for: **active, readable, positional**. No tab targeting. No standing still casting. Every button press should feel like a decision that matters on the battlefield. GW2 proved that a small ability bar forces better game design — each slot earns its place.
+**Active, readable, positional.** No tab targeting. No standing still casting. Every button press is a decision. Movement is constant — the game never rewards staying still.
 
-**Core pillars:**
-- **Dodge is a resource**, not a reaction button. Two charges means you plan, not panic.
-- **Combos reward knowledge**, not reflexes. A Wraith who knows when to detonate beats button-mashers.
-- **Positioning matters every second**. Singularity pulls, Null Field zones, and Iron Tether leashes only work if someone built for them.
-- **Every class can survive**. No hard trinity — roles exist but no one is helpless without a healer.
-
----
-
-## Dodge Roll — The Foundation of Combat Feel
-
-The dodge roll is **the most important single feature** for making combat feel GW2-like. Everything else is secondary.
-
-### Spec
-- **Input**: Space (default jump), or dedicated Left Alt bind
-- **Behavior**: Burst of speed in your current movement direction (or backward if no input)
-- **I-frames**: 0.35s of `isInvulnerable = true` on Health — no damage taken
-- **Charges**: 2 maximum
-- **Recharge**: One charge every 5s (both charges recharge independently)
-- **Stamina bar**: Show as two small pips below the health bar — one pip = one charge
-- **Animation**: Hook into `Animator.SetTrigger("dodge")` — use the roll animation from Kevin Iglesias/Human Animations pack
-
-### How it's implemented
-See `PlayerMovement.cs` — the dodge system has been added directly. The `Health.cs` script's `isInvulnerable` field is checked at the top of `TakeDamage()`.
-
-### Why it feels good
-- Dodge is never "free" — spending both charges to survive one combo means you're vulnerable for 10s
-- It rewards movement — a stationary player runs out of dodges fast
-- I-frames make every successful dodge feel impactful, not just cosmetic
+**Four pillars:**
+- Dodge is a resource, not a panic button. Two charges means you plan.
+- Combos reward knowledge, not reflexes. A Wraith who knows when to detonate beats button-mashers.
+- Positioning matters every second. Zones, tethers, and pull abilities only work if someone built for them.
+- Every build can survive. No hard trinity — roles exist but no one is helpless without a healer.
 
 ---
 
-## The Four Classes
+## Depth Without Complexity — The Design Contract
 
-### ENGINEER — The Architect
-*Builds the battlefield before the fight starts. Strongest when the team positions around their structures.*
+This is the most important principle in the document. Read it before implementing anything.
 
-**Identity**: Deployables, area denial, turret warfare
-**Passive**: Overengineered — deployables gain bonus duration/effect when planted in overlapping zones
+**The system is wide, not deep.** A new player on day one has:
+- 1 core with 4 abilities (2 locked + movement + ultimate)
+- 3 flex slots from the talent rows
+- Auto-attack always available
 
-**4-Slot Standard Loadout:**
-| Slot | Ability | Cooldown | What it does |
-|------|---------|----------|--------------|
-| 1 | Sentinel Drop | 6s | Deploy auto-turret — sustained DPS anchor |
-| 2 | Shock Mine | 5s | Proximity explosive — 40 burst, place at chokepoints |
-| 3 | Arc Cannon | 4s | Chargeable rectangle — 15 to 50 damage, good for lanes |
-| 4 | Dark Blast | 3s | Fast cone filler — 10 to 30 damage, lowest cooldown |
-| U | System Overload / Overdrive | 12-45s | — see ultimate section |
+That's 7 total things to press. It's not overwhelming. It feels like a complete kit.
 
-**Combo: The Killzone**
-1. Drop Sentinel at a corner facing into a room
-2. Plant 2 Shock Mines at approach paths
-3. Use Arc Cannon (hold for full charge) on anything that makes it past the mines
-4. Use Dark Blast for mobile cleanup
+**But variety explodes when you look across all options:**
 
-**How it flows**: The Engineer is proactive. If you're casting your abilities reactively, you're playing them wrong. Set up before enemies arrive. The turret + mines do most of the work; your direct casts finish stragglers.
+| Layer | What a player chooses | How many options |
+|-------|-----------------------|-----------------|
+| Core | Which identity/playstyle | 9 cores |
+| Locked abilities | Set per core (defines the kit) | 2 per core = 18 unique abilities |
+| Movement abilities | Set per core | 9 unique movement tools |
+| Ultimate | Set per core | 9 ultimates, all dramatically different |
+| Flex Row 1 | Primary damage style | 3 options |
+| Flex Row 2 | Engagement tool | 3 options |
+| Flex Row 3 | Situational weapon | 3 options |
+| Trait Rows A/B/C | Passive modifiers | 3×3 = 9 passive options |
+| Gear preset | Stat emphasis | 6 named presets |
 
-**What makes it satisfying**: Watching 3 enemies walk into your kill zone simultaneously. The turret starts firing, a mine detonates, you drop an Arc Cannon on the survivor. Zero chaos, pure execution.
+**Total unique build permutations:** 9 cores × 27 talent combos × 6 gear presets = **1,458 distinct builds.** Most of them are genuinely good. None are "broken."
 
----
+**The learning curve is gradual by design:**
+- Day 1: Learn your 4 core abilities. Win with those.
+- After a few runs: Start swapping Flex Row 3 for encounters that punish your defaults.
+- Level 2/4/6: Trait rows unlock one at a time. New choice, not new overwhelm.
+- After 10+ runs on a core: Exclusive traits unlock — rewarding investment, not demanding it.
 
-### GUARDIAN — The Anvil
-*Takes hits for the team, punishes enemies who focus them, controls single targets.*
+**What makes it feel like GW2/LoL/Smite:**
+- Every core plays differently — a Mechanist and a Stormcaller share zero abilities
+- Cross-class combos exist and feel satisfying, but aren't required
+- Movement ability is always on a short cooldown — you're never just standing and trading
+- The 6 talent rows give you enough choice to feel crafted, not enough to feel analysed to death
 
-**Identity**: Crowd control, damage absorption, threat management
-**Passives**: Threat Protocol (stacks on hit → DR bonus), Triage Loop (low HP triggers emergency heal)
-
-**4-Slot Standard Loadout:**
-| Slot | Ability | Cooldown | What it does |
-|------|---------|----------|--------------|
-| 1 | Breach Slam | 6s | Dash forward, stagger all enemies hit (0.8s) |
-| 2 | Iron Tether | 9s | Lock one enemy in place for 5s, leash them to you |
-| 3 | Kinetic Reversal | 10s | Absorb incoming damage for 3s, release as a 70° cone |
-| 4 | Siege Mode | 14s | Root yourself, 40% DR, triple Threat stacks for 6s |
-| U | Last Bastion | 50s | Deploy a hardlight wall blocking all projectiles for 10s |
-
-**Combo: The Iron Vice**
-1. **Breach Slam** into a group → enemies are staggered, you're in melee
-2. **Kinetic Reversal** immediately → you absorb the counter-attack while they can't act
-3. **Iron Tether** the highest-priority target → leashed, can't retreat
-4. Use the Kinetic Reversal burst (auto-releases after 3s) → cone damage hits all nearby enemies
-5. **Siege Mode** if overwhelmed → you become a wall, generating Threat stacks to pull aggro
-
-**Why the combo works**: Breach Slam staggers for 0.8s — that's exactly enough time to activate Kinetic Reversal before they can hit back. You absorb their entire counterattack burst, then detonate it back in their faces. Iron Tether ensures your primary target can't escape while this plays out.
-
-**Design note**: Iron Tether's documented 15% damage redirect to the leashed enemy's attacks on allies is not yet implemented — when it is, the combo becomes even more powerful since all damage the tethered enemy deals flows into your Kinetic Reversal pool.
+This is deep without being technically difficult. You do not need a spreadsheet to play well. You need to know your kit, read the encounter, and swap one row before entering.
 
 ---
 
-### WRAITH — The Knife
-*Surgical. Goes in, disrupts, gets out. Wins by knowing exactly when to detonate.*
+## The Combat Loop
 
-**Identity**: Stealth, debuff loading, single-target assassination, zone suppression
-**Passive**: Bounty System — bonus credit on kills from stealth
+```
+Move (WASD) → Read enemy → Position → Dodge (Space) → Cast ability → Hit + feedback → CD starts → Move
+```
 
-**4-Slot Standard Loadout:**
-| Slot | Ability | Cooldown | What it does |
-|------|---------|----------|--------------|
-| 1 | Phase Cloak | 10s | Enter stealth. Next ability from stealth: +50% damage |
-| 2 | Neural Spike | 5s | AoE interrupt + 35 damage (triggers backstab bonus from cloak) |
-| 3 | Null Field | 12s | Zone: suppresses enemy attacks + 4 DPS decay for 5s |
-| 4 | Shadow Relay | deployable | Extends next cloak by 3s, reduces cloak CD on kill |
-| U | Collapse | 40s | Detonate all debuffs on all enemies in range — 20 damage per stack |
+Nothing happens while standing still. Dodge roll is the primary defensive action (2 charges, 5s each, 0.35s i-frames). Abilities chain between dodge windows. Smart play weaves auto-attacks between ability casts.
 
-**Combo: The Setup**
-1. **Phase Cloak** → approach safely
-2. **Neural Spike** from stealth → 52.5 damage (backstab ×1.5) + interrupt
-3. **Null Field** → suppresses target, applies DOT and Suppress debuffs (2 stacks loaded)
-4. Wait 2s for DOT to tick, then **Collapse** → 40 burst damage (2 stacks × 20) from the debuffs Null Field applied
-5. Total sustained burst: ~130 damage without gear, clean sequence
+**Auto-attack baseline:** Always available, no cooldown, 8 dmg × Power factor. A player using no abilities still contributes. This is the damage floor — no build ever feels dead.
 
-**Advanced: Shadow Relay positioning**
-Drop Shadow Relay *before* you cloak, in the position you plan to fight from. When you cloak and walk within 6 units of it, your cloak lasts 7 seconds instead of 4 — enough to set up Null Field before Neural Spike. The Shadow Relay also gives -4s cloak CD per kill, meaning active Wraiths can cycle back into stealth faster than cooldowns suggest.
+**No global cooldown.** Each ability slot cools independently. Rewards players who learn their cooldown timers.
 
-**What makes it satisfying**: The Collapse detonation. Watching a single button press delete a debuffed enemy is viscerally gratifying — if you loaded 4 stacks, that's 80+ damage from one cast.
+**Condition loop (parallel):** DoT builds (Wraith, Pyromancer) run a second loop: apply stacks → tick damage → stack more → detonate at threshold. Rewards patience and timing over button mashing.
 
 ---
 
-### MEDIC — The Lifeline
+## The Nine Cores
+
+A core is your identity. It defines your passive trait, two locked ability slots, movement ability, and ultimate. You pick a core at character creation and only change it at the character screen — not mid-run.
+
+### WRAITH — Stealth / Assassination
+*Goes in, disrupts, gets out. Wins by knowing exactly when to detonate.*
+
+**Passive:** Bounty System — bonus XP and credit on stealth kills.
+
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Phase Cloak | 10s | Enter stealth. +50% dmg on next ability from stealth. |
+| 2 (locked) | Null Field | 12s | Zone: suppress + 4/s DoT for 5s. Loads debuff stacks. |
+| Move | Shadow Step | 8s | Short blink in movement direction. |
+| Ultimate | Collapse | 40s | Detonate all debuffs on all enemies in range — 20 dmg/stack. |
+
+**Play pattern:** Cloak → Null Field free-cast → stack conditions → Collapse. Any CC from teammates multiplies the detonation window.
+
+---
+
+### SENTINEL — Tank / Crowd Control
+*Takes hits, punishes enemies who focus them, controls single targets.*
+
+**Passive:** Threat Protocol — stacking DR bonus on repeated hits. Triage Loop — low-HP self-heals passively.
+
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Breach Slam | 6s | Dash forward, stagger all enemies hit for 0.8s. |
+| 2 (locked) | Iron Tether | 9s | Lock one enemy in place for 5s — leashed to you. |
+| Move | Shield Charge | 10s | Rush forward, absorbing 30 damage en route. |
+| Ultimate | Last Bastion | 50s | Deploy hardlight wall blocking all projectiles for 10s. |
+
+**Play pattern:** Breach Slam staggers → immediately Kinetic Reversal absorbs their counterattack → Iron Tether the priority target → release burst. Siege Mode when overwhelmed.
+
+---
+
+### MECHANIST — Deployables / Zone Control
+*Builds the battlefield before the fight starts. Strongest when the team positions around structures.*
+
+**Passive:** Overengineered — deployables gain bonus effect when planted in overlapping zones.
+
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Sentinel Drop | 6s | Deploy auto-turret (max 3 out). Sustained DPS anchor. |
+| 2 (locked) | Shock Mine | 5s | Proximity explosive — 40 burst, 2.5u blast radius. |
+| Move | Boost Jets | 7s | Short hover burst — clears terrain and gaps. |
+| Ultimate | System Overload | 45s | All deployables overdrive simultaneously for 10s. |
+
+**Play pattern:** Proactive, not reactive. Drop Sentinel and mines before enemies arrive. Direct casts finish stragglers. If you're casting reactively, you're playing it wrong.
+
+---
+
+### LIFEBINDER — Healing / Support
 *Reactive, high-stakes. Not a passive heal-bot. At their best in dire situations.*
 
-**Identity**: Heal deployment, damage redirects, cleansing, emergency revival
-**Passive**: Triage Loop (also applies to team — low-HP allies get heal ticks)
+**Passive:** Triage Loop — allies below 25% HP receive passive heal ticks in range.
 
-**4-Slot Standard Loadout:**
-| Slot | Ability | Cooldown | What it does |
-|------|---------|----------|--------------|
-| 1 | Restoration Beacon | 6s | Deploy: heals 12 HP every 3s to allies in 8u for 30s |
-| 2 | Nanite Swarm | 7s | Mobile heal orb flies to target ally, heals 30 on arrival |
-| 3 | Transfer Protocol | 9s | Redirect 100% of ally's incoming damage to yourself for 5s |
-| 4 | Adaptive Shield | 10s | Apply 20 absorb shield; grows if ally takes damage |
-| U | System Rollback | 60s | Rollback entire team 5 seconds in time (position + HP) |
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Restoration Beacon | 6s | Deploy: heals 12 HP every 3s to allies in 8u for 30s. |
+| 2 (locked) | Transfer Protocol | 9s | Redirect 100% of ally's incoming damage to yourself for 5s. |
+| Move | Lifeline Rush | 8s | Dash to target ally, healing both on arrival. |
+| Ultimate | System Rollback | 60s | Rollback entire team — position + HP 5 seconds back. |
 
-**Combo: The Tank-Medic Loop**
-1. Place **Restoration Beacon** at the Guardian's position
-2. Cast **Adaptive Shield** on the Guardian — they're absorbing hits, shield grows with damage
-3. When Guardian dips below 30%, hit **Nanite Swarm** → quick burst heal while you stay at range
-4. If Guardian is about to be bursted: **Transfer Protocol** → eat their damage yourself for 5s while the Beacon heals you back
-5. If everything goes wrong: **System Rollback** → everyone teleports back 5s. Guardian is at full health. Enemies are back in their starting positions.
-
-**Advanced with Guardian**:
-Transfer Protocol + Guardian's Kinetic Reversal is a cross-class combo. Guardian activates Kinetic Reversal first. Medic then activates Transfer Protocol targeting the Guardian. For the next 3 seconds, the Guardian absorbs all incoming damage AND the Medic is absorbing the Guardian's damage — meaning the Kinetic Reversal pool fills from two sources. Release hits harder.
-
-**What makes it satisfying**: System Rollback is a "we don't lose" button. It doesn't feel overpowered because it has a 60s cooldown, but when it lands it creates an extraordinary moment. The entire team snaps backward in time, enemies are confused, and the fight resets. Nothing in WoW or GW2 does exactly this.
+**Play pattern:** Place Beacon at the tank's position. Shield the tank. Eat their burst damage via Transfer Protocol while Beacon heals you back. Rollback is the "we don't lose" button — save it.
 
 ---
 
-## Cross-Class Combos
+### PHASER — Teleportation / Burst
+*Controls space. Every fight happens on their terms.*
 
-These work best in a coordinated 4-player group:
+**Passive:** Slipstream — after any blink or teleport, +20% movement speed for 3s.
 
-### "The Anvil + The Knife" (Guardian + Wraith)
-- Wraith drops **Null Field** (suppress + DOT) on an enemy pack
-- Guardian **Breach Slams** in, **Iron Tethers** the priority target
-- Tethered target can't escape. They're suppressed. DOT is ticking.
-- Wraith **Collapses** — every enemy in the null field detonates simultaneously
-- Guardian **Kinetic Reversal** eats the remaining counterattack
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Phase Shift | 4s | Teleport 10u in aimed direction. Fastest repositioning. |
+| 2 (locked) | Singularity | 9s | Pull all enemies toward a point for 3s. |
+| Move | Fold | 6s | Instant position swap with a Phase Relay. |
+| Ultimate | Event Horizon | 50s | 60 AoE damage + Exposed 8s to all enemies hit. |
 
-### "The Architect's Trap" (Engineer + Wraith)
-- Engineer places **Sentinel Drop** and **Shock Mines** at a funnel
-- Wraith drives enemies into the funnel using **Null Field** as a herding tool (enemies retreat from it)
-- Enemies hit the mines, turret fires, Engineer finishes with **Arc Cannon**
-- Wraith picks off survivors from **Phase Cloak** for Bounty System stacks
-
-### "The Eternal Wall" (Guardian + Medic)
-- Guardian uses **Last Bastion** wall — blocks all projectiles for 10s
-- Medic stands behind the wall using **Restoration Beacon** and **Adaptive Shield**
-- Guardian steps out, takes a hit to build Kinetic Reversal, steps back behind wall
-- This cycle makes a small-group duo nearly unkillable in ranged encounters
-
-### "The Clock" (Medic + Anyone)
-- Any teammate is about to die
-- Medic **System Rollback** → everyone goes back 5 seconds
-- The "about to die" scenario is undone — enemies are further away, HP is restored
-- The combo requires the Medic to save the rollback — it's the highest-stakes resource management in the game
+**Play pattern:** Phase Shift into flanking position → Singularity bunches enemies → team focuses the cluster. Near Phase Relay, Singularity pull lasts 5s total.
 
 ---
 
-## Ability Combos Quick Reference
+### PYROMANCER — Burn / DoT Stacking *(new)*
+*Applies burn stacks and detonates them. The condition damage specialist.*
 
-| Trigger Ability | Combo Ability | Effect |
-|----------------|---------------|--------|
-| Breach Slam (stagger) | → Kinetic Reversal | Absorb counterattack during 0.8s stagger window |
-| Iron Tether (leash) | → Kinetic Reversal | Absorb tethered enemy's attacks into the pool |
-| Null Field (suppress + DOT) | → Collapse | Detonate for 40+ burst (2 stacks minimum) |
-| Phase Cloak (stealth) | → Neural Spike | +50% backstab damage (52.5 vs 35) |
-| Shadow Relay (nearby) | → Phase Cloak | +3s cloak duration (7s total) |
-| Singularity (pull) | → Arc Lance | Chain hits all bunched enemies (max jumps) |
-| Event Horizon (Exposed) | → Arc Lance | All jumps deal +25% on Exposed targets |
-| Phase Relay (nearby) | → Singularity | +2s pull phase (5s total pull) |
-| Adaptive Shield (on ally) | → Transfer Protocol | Absorb ally's damage; shield grows from redirected hits |
-| Restoration Beacon (placed) | → Transfer Protocol | Beacon heals Medic while eating ally's damage |
-| Kinetic Reversal (Guardian) | → Transfer Protocol (Medic) | Both players absorb simultaneously, KR pool fills faster |
+**Passive:** Ignition — enemies at 5+ burn stacks take +20% damage from all sources (team benefits).
+
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Flame Strike | 5s | Cone fire — 20 direct damage + 2 burn stacks. |
+| 2 (locked) | Molten Ground | 10s | Zone: applies 1 burn/s to enemies standing inside for 6s. |
+| Move | Fire Step | 8s | Dash and leave a fire trail for 2s — crosses burn 1 stack. |
+| Ultimate | Supernova | 45s | Detonate ALL burn stacks on ALL enemies in range — 15 dmg/stack. Mirror of Wraith's Collapse for fire. |
+
+**Play pattern:** Flame Strike applies stacks fast. Molten Ground zones enemies while stacking passively. At 5+ stacks, Ignition passive is live — the whole team deals more damage. Supernova is the detonation payoff. Devastating against immune-window bosses because stacks load during immunity.
 
 ---
 
-## VFX Assignments — Existing Assets
+### STORMCALLER — Chain Lightning / Mobility *(new)*
+*High-mobility mage. Chains damage across targets. Never stops moving.*
 
-All VFX uses assets you already have. No new purchases needed.
+**Passive:** Discharge — every 3rd ability cast auto-fires chain lightning (3 targets: 15/10/5 dmg). No button press needed.
 
-### brbmuffins Dark Arts / Fantasy Pack
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Arc Chain | 7s | Lightning jumps 5 targets — 30/25/20/15/10 damage. |
+| 2 (locked) | Storm Step | 6s | Dash any direction + leave shock trail 2s (crossing enemies stunned 0.5s). |
+| Move | Thunder Rush | 5s | Fastest movement ability in game — pure speed dash, no combat effect. |
+| Ultimate | Tempest | 50s | Call a storm at target point — chain lightning strike every 0.5s for 8s. |
 
-| Effect | Prefab | Used By |
-|--------|--------|---------|
-| Shield absorb (blue tint) | `Prefabs/Shield buff.prefab` | Kinetic Reversal activation, Adaptive Shield, Bastion Node |
-| Healing pulse | `Prefabs/Healing buff.prefab` | Restoration Beacon pulse, Nanite Swarm arrival |
-| Support buff (purple tint) | `Prefabs/Magic buff.prefab` | Phase Relay idle, Overdrive aura |
-| Ground ring | `Prefabs/Effects normal/Magic circle.prefab` | Restoration Beacon base, Singularity cast |
-| Danger zone (red tint) | `Prefabs/Effects normal/Death magic circle.prefab` | Singularity ambient, Event Horizon |
-| Projectile wall | `Prefabs/Effects normal/Mana wall.prefab` | Last Bastion wall (tint blue for hardlight) |
-| Orbs orbit | `Prefabs/Glowing orbs.prefab` | Nanite Swarm in flight, Transfer Protocol tether orb |
-| Dome | `Prefabs/Leaves shield.prefab` | Iron Tether anchor (tint blue/grey) |
-| Ball impact | `Prefabs/Plazma sphere.prefab` | Phase Shift arrival |
-
-### brbmuffins Technologies / Particle Pack
-
-| Effect | Prefab | Used By |
-|--------|--------|---------|
-| Ground crack | `Fire & Explosion/Prefabs/EarthShatter.prefab` | Breach Slam impact |
-| Electric sparks | `Misc Effects/Prefabs/ElectricalSparks.prefab` | Shock Mine idle |
-| Small explosion | `Fire & Explosion/Prefabs/SmallExplosion.prefab` | Shock Mine detonation |
-| Dissolve out | `Misc Effects/Prefabs/DissolveSolidHorizontal.prefab` | Phase Shift depart, Phase Cloak enter |
-| Ground fog (purple tint) | `Smoke & Steam/Prefabs/GroundFog.prefab` | Null Field zone |
-| Dust motes (dark) | `Misc Effects/Prefabs/DustMotesEffect.prefab` | Shadow Relay idle |
-| Steam vents | `Smoke & Steam/Prefabs/Steam.prefab` | Siege Mode anchor VFX |
-| Energy burst | `Fire & Explosion/Prefabs/EnergyExplosion.prefab` | Kinetic Reversal release, Overdrive |
-| Plasma explosion | `Legacy Particles/PlasmaExplosionEffect.prefab` | Singularity/Event Horizon burst |
-| Heat shimmer | `Misc Effects/HeatDistortion.prefab` | Singularity ambient (layered with magic circle) |
-
-### Dodge Roll VFX (from existing packs)
-- **Enter dodge**: `DissolveSolidHorizontal.prefab` scaled down to player feet
-- **Exit dodge**: `SparksEffect.prefab` brief spark at landing point
-- Both are instantiated and immediately auto-destroyed (2s lifetime)
+**Play pattern:** Keep moving to cycle Discharge passive. Storm Step repositions and punishes pursuers simultaneously. Arc Chain into packed enemies on Pyromancer's Molten Ground = massive synergy.
 
 ---
 
-## Bugs Fixed in This Update
+### WARDEN — Summons / Nature CC *(new)*
+*Commands spirits and roots enemies. Wins through presence rather than burst.*
 
-The following issues were found during code review and have been corrected:
+**Passive:** Bond — each active summon gives +5% damage and +10 max HP.
 
-### 1. LineRenderer Invisible in URP
-**Files**: `IronTetherHandler.cs`, `TransferProtocolHandler.cs`
-**Problem**: Both used `Shader.Find("Sprites/Default")` for the chain/tether line material. This shader is not supported in URP and renders as invisible (or a pink error material).
-**Fix**: Changed to `Shader.Find("Universal Render Pipeline/Particles/Unlit")` with `_BaseColor` property set instead of `_Color`.
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Summon Spirit Wolf | 20s | Melee AI companion attacks nearby enemies for 30s. |
+| 2 (locked) | Nature's Grasp | 11s | Roots up to 3 enemies in vines for 2s. |
+| Move | Wilder Surge | 9s | Charge forward — all summons teleport to new position. |
+| Ultimate | Call of the Wild | 60s | Summon 3 spirits simultaneously for 20s. Full Bond passive = 15% damage + 30 HP. |
 
-### 2. Overdrive Was a Complete Stub
-**File**: `AbilityCaster.cs`
-**Problem**: `CastOverdrive()` only played particle effects. The actual buff (team CDR) had a TODO comment.
-**Fix**: Overdrive now applies a 10s cooldown reduction aura to all teammates in 12u range using the existing `CharacterStats` system. 
-
-### 3. Stealth Immediately Broken by EnemyAI
-**File**: `EnemyAI.cs`
-**Problem**: When `StealthHandler` cleared `aggroTarget` to null, `EnemyAI.Update()` called `FindNearestPlayer()` on the very next frame, re-acquiring the cloaked Wraith (still tagged "Player", still nearest).
-**Fix**: Added a `_suppressedUntil` timestamp. When `SetAggroTarget(null)` is called externally (stealth), the AI waits 6 seconds before searching for a new target. Visual result: enemies lose the Wraith and stand confused for the duration of the cloak.
-
-### 4. Dodge Roll Added
-**File**: `PlayerMovement.cs`
-**Details**: See Dodge Roll section above. Two charges, 5s recharge per charge, 0.35s i-frames, directional burst.
+**Play pattern:** Keep summons alive to maintain Bond stacks. Nature's Grasp roots clusters for team follow-up. Wilder Surge repositions both you and your spirits. Ultimate creates overwhelming multi-target pressure.
 
 ---
 
-## Numbers Reference — All Ability Values
+### REAPER — Life Drain / Dark CC *(new)*
+*Siphons life, spreads fear, controls with death magic. Slow to ramp, devastating at full charge.*
 
-### Engineer
-| Ability | CD | Damage | Range | Notes |
-|---------|-----|--------|-------|-------|
-| Sentinel Drop | 6s | Turret auto | — | Max 3 deployables |
-| Dark Blast | 3s | 10–30 | Cone | Hold to charge |
-| Repair Wave | 5s | Heal 25 | 8u AoE | |
-| Arc Cannon | 4s | 15–50 | Rectangle | Hold to charge |
-| Thermal Charge | 4s | 20–45 | 5u Circle | Hold to charge |
-| Shock Mine | 5s | 40 burst | Place | 2.5u blast radius |
-| Overdrive | 12s | — | 12u AoE | Team CDR aura (now implemented) |
-| Field Repair | 6s | Heal 40 | — | + debuff cleanse |
-| Drone Command | 8s | — | 2u | Redirect turrets |
-| System Overload | 45s | — | — | Engineer ultimate |
+**Passive:** Soul Harvest — each enemy death within 12u heals you for 15 and adds 1 charge to ultimate.
 
-### Guardian
-| Ability | CD | Damage | Range | Notes |
-|---------|-----|--------|-------|-------|
-| Kinetic Reversal | 10s | 20–60 | 8u cone | Absorb 3s → release |
-| Magnetize | 7s | — | Pull | CC |
-| Breach Slam | 6s | 25 | 6u dash | + Stagger 0.8s |
-| Siege Mode | 14s | — | Self | 40% DR, root, ×3 Threat |
-| Iron Tether | 9s | — | 8u | Leash 5s |
-| Last Bastion | 50s | — | Wall | Blocks projectiles 10s |
-| Deflect Protocol | 8s | — | Self | Shield 50 absorb |
+| Slot | Ability | CD | Notes |
+|------|---------|----|-------|
+| 1 (locked) | Soul Rend | 6s | Single target — 25 damage, heal self for 12. |
+| 2 (locked) | Terror Wave | 10s | Cone fear — enemies flee for 2s (can't act or attack). |
+| Move | Death Fade | 10s | Brief phased sprint — untargetable for 1.5s while moving. |
+| Ultimate | Reaping | 55s | Channel 4s: 8 dmg/s to all nearby enemies, heal for each tick. Charges via Soul Harvest. |
 
-### Wraith
-| Ability | CD | Damage | Range | Notes |
-|---------|-----|--------|-------|-------|
-| Neural Spike | 5s | 35 (52.5 from cloak) | 5u circle | Interrupt |
-| Stasis Wave | 6s | 15 | 5u circle | |
-| Phase Cloak | 10s | — | Self | 4s stealth (+3s near Shadow Relay) |
-| Null Field | 12s | 4/s DOT | 5u zone | + Suppress |
-| Shadow Relay | deployable | — | — | Extends cloak, CDR on kill |
-| Collapse | 40s | 20×stacks | 4u radius | Wraith ultimate |
-
-### Phaser  
-| Ability | CD | Damage | Range | Notes |
-|---------|-----|--------|-------|-------|
-| Phase Shift | 4s | — | 10u | Teleport |
-| Singularity | 9s | 20 burst | 8u pull | 3s pull (+2s near Phase Relay) |
-| Arc Lance | 7s | 30→25→20→15 | Chain | 4 jumps, 5 falloff |
-| Phase Relay | deployable | — | 10u influence | Extends Singularity |
-| Event Horizon | 50s | 60 | 8u | + Exposed 8s |
-
-### Medic
-| Ability | CD | Damage | Range | Notes |
-|---------|-----|--------|-------|-------|
-| Transfer Protocol | 9s | — | 12u | Redirect 100% incoming to Medic 5s |
-| Nanite Swarm | 7s | Heal 30 | targeted | + 5 chip to enemies en route |
-| Defibrillator | 14s | 60 (robotic) | 2u | Or revive downed ally at 50% HP |
-| Adaptive Shield | 10s | — | Ally | 20 absorb, grows with damage taken |
-| Purge Protocol | 7s | — | Ally | Cleanse all debuffs |
-| Restoration Beacon | 6s | Heal 12/3s | 8u zone | 30s lifetime |
-| System Rollback | 60s | — | Team | Rollback all positions + HP 5s |
+**Play pattern:** Soul Rend sustains your HP without a healer. Terror Wave creates space or sets up fleeing enemies for teammate follow-up. Death Fade is the escape — use it when cornered, not proactively. Reaping charges faster in packs — better in wave content than single bosses.
 
 ---
 
-## Combat Flow Timing — What Good Play Looks Like
+## The Talent System (MoP-Style)
 
-A well-played 3-minute dungeon fight looks like:
+Six rows of three choices each. Pick one per row. All three options in any row are equal in total value — only situationally different. Swap freely in the hub between encounters.
 
-**0:00** — Engineer drops Sentinel, plants mines at the entrance  
-**0:03** — Wraith phases in, drops Null Field on the elite, Shadow Relay in the backline  
-**0:06** — Guardian Breach Slams the staggered group, Kinetic Reversal  
-**0:08** — Medic drops Restoration Beacon under the Guardian  
-**0:10** — Elite is suppressed + DOT, Guardian absorbs its flailing attacks  
-**0:12** — Kinetic Reversal bursts (60 damage cone), Wraith Collapses (40 burst)  
-**0:14** — Elite dies. Adds hit the mines.  
-**0:20** — Guardian Iron Tethers the last surviving add. Cleanup.  
+**The design rule:** A "wrong" pick should be at most 10–15% weaker than the "right" pick in any given encounter. Not game-breaking — just suboptimal.
 
-That's a 20-second encounter with 4 coordinated players. Every ability was used, every cooldown mattered, nobody stood still. That's the feel.
+### Flex Row 1 — Primary Damage Style
+*Choose based on enemy composition.*
+
+| Option | Name | Description | Best vs. |
+|--------|------|-------------|---------|
+| Burst | Overcharged Shot | Hold to charge — 50–80 direct damage, interrupts channels. | Single boss |
+| Zone | Proximity Burst | 20–55 AoE based on distance — full at 3u, falls off at 8u. | Packed groups |
+| Chain | Arc Chain | Lightning jumps 5 targets — 30/25/20/15/10. | 3+ enemy packs |
+
+### Flex Row 2 — Engagement Tool
+*Choose based on your role in the team.*
+
+| Option | Name | Description | Best vs. |
+|--------|------|-------------|---------|
+| Mobility | Surge | Dash 6u, knock back enemies hit 3u. Initiate or escape. | Open arenas |
+| Defense | Barrier | Apply 50 absorb shield to yourself, grows +5 per hit absorbed. | High burst encounters |
+| Control | Flash Freeze | Slow all enemies in 4u by 60% for 3s. Chilled targets take +10% next hit. | Mobile enemy packs |
+
+### Flex Row 3 — Situational Weapon
+*The encounter-tuning slot. Swap this most often.*
+
+| Option | Name | Description | Best vs. |
+|--------|------|-------------|---------|
+| Silence | Silence | Prevent one target from using abilities 2.5s. | Caster elites, bosses |
+| Counterstrike | Counterstrike | Absorb next hit, return as 150% AoE burst. | Melee engagers |
+| Rally Cry | Rally Cry | All allies in 14u gain +10% damage for 6s. | Team fights, multi-phase bosses |
+
+### Trait Row A — Combat Modifier (passive)
+*Unlocks at character level 2.*
+
+| Option | Name | Description |
+|--------|------|-------------|
+| Offensive | Executioner | +20% damage to targets below 25% HP. |
+| Defensive | Iron Skin | +10 armor when hit above 50% HP. Stacks up to 3×. |
+| Utility | Swiftfoot | Dodge charges recharge 1s faster each. |
+
+### Trait Row B — Scaling Modifier (passive)
+*Unlocks at character level 4.*
+
+| Option | Name | Description |
+|--------|------|-------------|
+| Offensive | Ravager | Crits apply 1 bleed stack — 0.5/s for 5s. Crits refresh. |
+| Defensive | Last Stand | Below 20% HP take 30% less damage. |
+| Utility | Tactician | Each kill reduces all cooldowns by 2s. |
+
+### Trait Row C — Team or Self (passive)
+*Unlocks at character level 6.*
+
+| Option | Name | Description |
+|--------|------|-------------|
+| Offensive | Exploit Weakness | +15% damage to Exposed, Silenced, or Rooted targets. |
+| Defensive | Second Wind | Once per fight: survive a lethal hit at 1 HP. Resets on full HP restore. |
+| Utility | Field Medic | Reviving an ally is 35% faster. Revived ally returns with 20% more HP. |
 
 ---
 
-## Outstanding Work (Not Yet Done)
+## Stat Architecture
 
-| Item | Priority | Notes |
-|------|----------|-------|
-| Iron Tether 15% damage redirect | High | Documented in spellbook, not implemented in IronTetherHandler |
-| Wall climbing | Medium | Needs Kinematic Character Controller or custom implementation |
-| Phase Cloak duration in spellbook | Low | Currently hardcoded fallback 4s in AbilityCaster; add `activeDuration = 4f` to spellbook entry |
-| Kinetic Reversal "Lightning cone" VFX | Low | Third VFX slot was designed but no public field exists in the handler |
-| Siege Mode speed restoration edge case | Low | Should save baseMoveSpeed not currentSpeed to avoid slow-stacking bug |
-| EnemyAI elite behavior | Low | `isElite` field is declared but never branched on |
-| Defibrillator priority edge case | Low | Can't damage robots while a downed ally is nearby — may want to add a modifier-key override |
+Eight stats, allocated by gear. Named gear presets make this approachable without exposing the math.
+
+| Stat | Effect |
+|------|--------|
+| Power | Scales direct ability damage |
+| Precision | Critical hit chance (1000 = 50% crit) |
+| Toughness | Reduces incoming direct damage |
+| Vitality | +10 max HP per point |
+| Healing Power | Scales outgoing heals |
+| Condition Damage | Scales DoT tick damage |
+| Expertise | Extends condition duration |
+| Ferocity | Increases critical hit multiplier |
+
+**Named presets (players pick a preset, not individual stats):**
+
+| Preset | Stats | Playstyle |
+|--------|-------|-----------|
+| Berserker | Power + Precision + Ferocity | Maximum burst damage, zero survivability |
+| Soldier | Power + Toughness + Vitality | Sustained damage, self-sufficient |
+| Mender | Healing Power + Vitality + Toughness | Support/heal focus |
+| Viper | Power + Condition Damage + Expertise | DoT specialist, pairs with Pyromancer/Wraith |
+| Paladin | Power + Toughness + Healing Power | Damage-capable tank |
+| Celestial | All stats (reduced values) | Jack-of-all-trades, flexible |
+
+### Combat Formulas
+
+```
+DirectDamage     = (AbilityBase × Power) / (1000 + Toughness × 0.5)
+ConditionDamage  = BaseStackRate × (1 + ConditionDamage × 0.001)
+CritDamage       = DirectDamage × (1.5 + Ferocity × 0.0015)
+HealAmount       = BaseHeal + (HealingPower × coefficient)
+MaxHP            = 200 + (Vitality × 10)
+
+Base stats at level 1: Power=1000, Toughness=1000, Vitality=10 → 300 HP
+```
+
+**Why these formulas prevent "broken" builds:**
+- Full glass cannon (2000 Power vs. 1000 Power) gives ~1.33× damage, not 2×. The Toughness divisor is always active.
+- Condition stacks are capped — Pyromancer's burn caps at 10 stacks. Adding more is wasted output.
+- Critical hit chance hard caps at 100% (1000 Precision + traits).
+
+---
+
+## Build Archetypes + Guard Rails
+
+### Archetype Labels
+When a player's picks match a pattern, the hub build card names it. This sets expectations before entering an encounter.
+
+| Label | Pattern | Strength | Vulnerability |
+|-------|---------|----------|---------------|
+| Glass Cannon | Burst row + Executioner + Berserker gear | Single-target burst, finishes fast | Dies to sustained damage, no escape |
+| Bruiser | Barrier + Last Stand + Soldier gear | Self-sufficient, hard to kill | Slower clear, team-dependent for burst |
+| Controller | Silence + Flash Freeze + CC traits | Locks down elites and bosses | Lower personal damage output |
+| Support Carry | Rally Cry + Field Medic + Mender gear | Team multiplier, revival speed | Can't solo effectively |
+| Condition Specialist | Chain + Viper gear + Exploit Weakness | Scales infinitely in long fights | Weak in short immunity-window fights |
+| All-Rounder | Celestial gear + balanced rows | Never bad, never great | Outclassed in specialized encounters |
+
+### Death Recap
+Shown every time a player is downed. One screen, three facts, one suggestion.
+
+```
+You were downed
+
+You took 78 burst damage in 1.8s from Iron Elite.
+Your build had no absorb in slot 4.
+You had 1 dodge charge available — not used.
+
+→ Barrier (Row 2, center) would have absorbed 50 of that.
+  Consider swapping in hub.
+```
+
+The recap points to a specific pick, not general advice. It teaches without shaming.
+
+### Hub Build Preview Card
+Shown when approaching a portal in the hub.
+
+```
+[WRAITH — Glass Cannon]
+Phase Cloak · Null Field · Overcharged Shot · Silence
+Executioner · Ravager · Exploit Weakness
+Gear: Berserker
+
+Strong vs:    single targets, high-burst windows
+Weaker vs:    sustained packs, no escape tool
+
+This zone: elite mobs + caster boss
+Favours: single-target burst, silence
+```
+
+---
+
+## HUD Design
+
+**Health bar:** Green. Shield absorb in blue layered on top. HP number displayed.
+
+**Dodge pips:** Two small squares below health bar. Filled = ready, empty = recharging (shows timer).
+
+**Ability slots:** Six slots (1, 2, 3, 4, movement, ultimate). Greyed + countdown when on cooldown. Glow rim when ready. Ultimate slot uses a distinct colour per core.
+
+**Condition stacks on target:** Small icons + count below enemy nameplate. Burn (flame), Slow (snowflake), Suppress (mute), Stagger (spiral), Exposed (broken shield), Tethered (chain).
+
+**Damage floats:**
+- White = direct damage
+- Yellow = critical hit
+- Orange = condition damage
+- Green = heal
+- Blue = shield absorbed
+- Size scales with magnitude. Floats below 5 dmg suppressed (no clutter from auto-attacks).
+
+---
+
+## Enemy Type Library
+
+| Type | Description | Tuning knobs |
+|------|-------------|-------------|
+| Grunt | Low HP, melee rush. Pack threat, not individual. | Count, speed |
+| Shielded | Front absorb blocks projectiles — must flank or use AoE. | Shield HP, arc angle |
+| Caster Elite | Channelled ranged attack. Interrupt with Silence or stagger. | Channel time, damage |
+| Berserker | High damage, charges on a 3s window. Tests dodge timing. | Charge CD, speed |
+| Tether Anchor | Roots nearest player unless destroyed. Punishes no-burst builds. | HP, root radius |
+| Void Crawler | Applies Suppress on hit — targets can't use abilities for 1s. | Attack rate |
+| Healer Drone | Regenerates nearby enemies until destroyed. Focus priority target. | Heal rate, HP |
+| World Boss | Shared HP pool. Phase abilities. Immunity windows reward DoT. | Phase HP, immunity duration |
+
+### Encounter Tuning Knobs
+Adjust encounters without touching ability numbers:
+
+- **Enemy HP pools** — high HP rewards sustained DoT, punishes pure burst
+- **Immunity windows** — direct damage blocked; condition stacks still load during immunity
+- **Spawn rate

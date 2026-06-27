@@ -39,7 +39,7 @@ public static class RodEditorSetup
     //  0. Create Character Select Scene
     // ─────────────────────────────────────────────────────────────────────────
 
-    [MenuItem("RoD/Setup/0 ▶ Create Character Select Scene", priority = 0)]
+    [MenuItem("BCE/Setup/0 ▶ Create Character Select Scene", priority = 0)]
     static void CreateCharacterSelectScene()
     {
         if (File.Exists(CHAR_SELECT_SCENE_PATH))
@@ -92,7 +92,7 @@ public static class RodEditorSetup
         // ── Rebuild build settings with all 3 scenes ──────────────────────────
         ApplyBuildSettings();
 
-        Debug.Log($"[RoD] ✅ CharacterSelect scene created → {CHAR_SELECT_SCENE_PATH}");
+        Debug.Log($"[BCE] ✅ CharacterSelect scene created → {CHAR_SELECT_SCENE_PATH}");
         EditorUtility.DisplayDialog(
             "✅ Character Select Scene Ready",
             "CharacterSelect.unity created!\n\n" +
@@ -112,7 +112,7 @@ public static class RodEditorSetup
     //  1. Create Login Scene
     // ─────────────────────────────────────────────────────────────────────────
 
-    [MenuItem("RoD/Setup/1 ▶ Create Login Scene", priority = 1)]
+    [MenuItem("BCE/Setup/1 ▶ Create Login Scene", priority = 1)]
     static void CreateLoginScene()
     {
         if (File.Exists(LOGIN_SCENE_PATH))
@@ -186,7 +186,7 @@ public static class RodEditorSetup
         // ── Build Settings ────────────────────────────────────────────────────
         ApplyBuildSettings();
 
-        Debug.Log($"[RoD] ✅ LoginScene created → {LOGIN_SCENE_PATH}");
+        Debug.Log($"[BCE] ✅ LoginScene created → {LOGIN_SCENE_PATH}");
         EditorUtility.DisplayDialog(
             "✅ Login Scene Ready",
             "LoginScene.unity created and wired!\n\n" +
@@ -202,7 +202,7 @@ public static class RodEditorSetup
     //  2. Clean GameWorld — remove old NetworkManager
     // ─────────────────────────────────────────────────────────────────────────
 
-    [MenuItem("RoD/Setup/2 ▶ Clean GameWorld (remove old NetworkManager)", priority = 2)]
+    [MenuItem("BCE/Setup/2 ▶ Clean GameWorld (remove old NetworkManager)", priority = 2)]
     static void CleanGameWorld()
     {
         if (!File.Exists(GAME_WORLD_PATH))
@@ -233,7 +233,7 @@ public static class RodEditorSetup
         }
 
         EditorSceneManager.SaveScene(scene);
-        Debug.Log($"[RoD] ✅ Removed {removed} NetworkManager(s) from GameWorld.");
+        Debug.Log($"[BCE] ✅ Removed {removed} NetworkManager(s) from GameWorld.");
 
         EditorUtility.DisplayDialog("✅ GameWorld Cleaned",
             $"Removed {removed} NetworkManager component(s) from GameWorld.\n\n" +
@@ -245,7 +245,7 @@ public static class RodEditorSetup
     //  3. Fix Build Settings
     // ─────────────────────────────────────────────────────────────────────────
 
-    [MenuItem("RoD/Setup/3 ▶ Fix Build Settings", priority = 3)]
+    [MenuItem("BCE/Setup/3 ▶ Fix Build Settings", priority = 3)]
     static void FixBuildSettings()
     {
         ApplyBuildSettings();
@@ -322,7 +322,7 @@ public static class RodEditorSetup
             Object.DestroyImmediate(root);
 
             createdPaths[i] = path;
-            Debug.Log($"[RoD] Created prefab: {path}");
+            Debug.Log($"[BCE] Created prefab: {path}");
 
             // Mark for Mirror spawning (prefab must have NetworkIdentity GUID)
             _ = prefab; // suppress unused warning
@@ -350,16 +350,16 @@ public static class RodEditorSetup
 
                 EditorUtility.SetDirty(nm);
                 EditorSceneManager.SaveScene(loginScene);
-                Debug.Log("[RoD] ✅ classPrefabs assigned to RodNetworkManager in LoginScene.");
+                Debug.Log("[BCE] ✅ classPrefabs assigned to RodNetworkManager in LoginScene.");
             }
             else
             {
-                Debug.LogWarning("[RoD] LoginScene found but no RodNetworkManager — run step 1 first.");
+                Debug.LogWarning("[BCE] LoginScene found but no RodNetworkManager — run step 1 first.");
             }
         }
         else
         {
-            Debug.LogWarning("[RoD] LoginScene not found — run step 1 first, then step 4.");
+            Debug.LogWarning("[BCE] LoginScene not found — run step 1 first, then step 4.");
         }
 
         EditorUtility.DisplayDialog("✅ Class Prefabs Created",
@@ -385,10 +385,10 @@ public static class RodEditorSetup
             if (File.Exists(path))
                 scenes.Add(new EditorBuildSettingsScene(path, true));
             else
-                Debug.LogWarning($"[RoD] Scene not found, skipping: {path}");
+                Debug.LogWarning($"[BCE] Scene not found, skipping: {path}");
         }
 
         EditorBuildSettings.scenes = scenes.ToArray();
-        Debug.Log("[RoD] Build Settings updated: LoginScene(0), CharacterSelect(1), GameWorld(2)");
+        Debug.Log("[BCE] Build Settings updated: LoginScene(0), CharacterSelect(1), GameWorld(2)");
     }
 }

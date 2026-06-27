@@ -32,7 +32,7 @@ public static class RodHubSceneBuilder
     const string LOGIN_SCENE_PATH = "Assets/Game/Scenes/LoginScene.unity";
     const string CHAR_SELECT_PATH = "Assets/Game/Scenes/CharacterSelect.unity";
 
-    [MenuItem("RoD/Setup/5 ▶ Create Hub Scene", priority = 5)]
+    [MenuItem("BCE/Setup/5 ▶ Create Hub Scene", priority = 5)]
     static void CreateHubScene()
     {
         if (File.Exists(HUB_SCENE_PATH))
@@ -127,7 +127,7 @@ public static class RodHubSceneBuilder
         // ── Build Settings ────────────────────────────────────────────────────
         ApplyBuildSettings();
 
-        Debug.Log($"[RoD] ✅ Hub scene created → {HUB_SCENE_PATH}");
+        Debug.Log($"[BCE] ✅ Hub scene created → {HUB_SCENE_PATH}");
         EditorUtility.DisplayDialog(
             "✅ Hub Scene Ready",
             "Hub.unity created in Assets/Game/Scenes/\n\n" +
@@ -152,7 +152,7 @@ public static class RodHubSceneBuilder
     {
         if (!File.Exists(LOGIN_SCENE_PATH))
         {
-            Debug.LogWarning("[RoD] LoginScene not found — run step 1 first, then step 5.");
+            Debug.LogWarning("[BCE] LoginScene not found — run step 1 first, then step 5.");
             return;
         }
 
@@ -169,11 +169,11 @@ public static class RodHubSceneBuilder
             nm.onlineScene = HUB_SCENE_PATH;
             EditorUtility.SetDirty(nm);
             EditorSceneManager.SaveScene(loginScene);
-            Debug.Log($"[RoD] RodNetworkManager.onlineScene → {HUB_SCENE_PATH}");
+            Debug.Log($"[BCE] RodNetworkManager.onlineScene → {HUB_SCENE_PATH}");
         }
         else
         {
-            Debug.LogWarning("[RoD] No RodNetworkManager in LoginScene — run step 1 first.");
+            Debug.LogWarning("[BCE] No RodNetworkManager in LoginScene — run step 1 first.");
         }
     }
 
@@ -187,9 +187,9 @@ public static class RodHubSceneBuilder
             if (File.Exists(path))
                 scenes.Add(new EditorBuildSettingsScene(path, true));
             else
-                Debug.LogWarning($"[RoD] Scene not found, skipping build entry: {path}");
+                Debug.LogWarning($"[BCE] Scene not found, skipping build entry: {path}");
         }
         EditorBuildSettings.scenes = scenes.ToArray();
-        Debug.Log("[RoD] Build Settings: LoginScene(0), CharacterSelect(1), Hub(2)");
+        Debug.Log("[BCE] Build Settings: LoginScene(0), CharacterSelect(1), Hub(2)");
     }
 }

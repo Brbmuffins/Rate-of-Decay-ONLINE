@@ -1,4 +1,4 @@
-# Rate of Decay ONLINE — Master Design Document
+# Crossworlds (BCE) — Master Design Document
 *Last updated: June 2026*
 
 ---
@@ -199,7 +199,7 @@ This is a mid-project addition. Lock in ground movement first.
 
 ---
 
-## Classes — Rate of Decay Roster
+## Classes — Crossworlds Roster
 
 Your Engineer is a great template. Here's a full 4-class roster that fits the sci-fi setting:
 

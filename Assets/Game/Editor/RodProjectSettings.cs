@@ -17,7 +17,7 @@ public static class RodProjectSettings
         if (PlayerSettings.insecureHttpOption != InsecureHttpOption.AlwaysAllowed)
         {
             PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
-            UnityEngine.Debug.Log("[RoD] HTTP allowed in Project Settings (insecureHttpOption = AlwaysAllowed).");
+            UnityEngine.Debug.Log("[BCE] HTTP allowed in Project Settings (insecureHttpOption = AlwaysAllowed).");
         }
     }
 }
