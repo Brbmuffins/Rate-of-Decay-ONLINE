@@ -17,6 +17,8 @@
 | Architecture | [DEVDOC → Section 7](DEVDOC.md#7-technical-architecture) |
 | VPS & Server | [DEVDOC → Section 8](DEVDOC.md#8-vps--server-infrastructure) |
 | Download Page | http://15.204.243.36 |
+| Server Manager | http://15.204.243.36:4000 |
+| GM Dashboard | http://15.204.243.36:4000/gm-dashboard |
 
 ---
 
@@ -41,6 +43,30 @@ Each class has 4 equipped abilities + 1 ultimate. See [`COMBAT.md`](COMBAT.md) f
 - `RodNetworkAuthenticator` — JWT verify → server-side GET /character → stores class + spawn position in `conn.authenticationData`
 - `RodNetworkManager` — server-authoritative class selection; reads DB class in production, client message in dev mode
 - `RodNetworkAuthenticator` dev mode — bypasses JWT for local HOST testing with one click
+
+### Server Manager & Account Management
+
+**Manager Dashboard** — `http://15.204.243.36:4000` · HTTP Basic Auth (admin credentials in private notes)
+- Player account overview
+- Service health and controls
+- Built on Node.js / Express at `/opt/rod-dashboard/` · systemd managed
+
+**GM Server Dashboard** — `http://15.204.243.36:4000/gm-dashboard` · token auth (in `.env` on VPS)
+- Live rod-server status (green/red pill)
+- Spawn events pulled from server log
+- Last 50 log lines, color-coded by type
+- Restart game server button (auto-reloads after 8s)
+- Download full server log
+- Link to Uptime Kuma monitoring
+
+**Auth Server** — `http://15.204.243.36:3000` · systemd service `rod-auth` · do not expose publicly
+- `POST /register` — create account
+- `POST /login` — returns JWT
+- `GET /health` — service check
+- `POST /character` — create/confirm character, returns full loadout
+- `GET /character` — used at spawn: returns class index, last position, gear
+- `PATCH /character/position` — saves position on disconnect
+- `POST /character/gear/equip` · `GET /items`
 
 ### Authentication & Characters (VPS)
 - Node.js / Express 5 auth server at `/opt/rod-auth/` · port 3000 · systemd service `rod-auth`
