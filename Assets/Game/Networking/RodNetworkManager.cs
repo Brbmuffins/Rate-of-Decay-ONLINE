@@ -83,12 +83,26 @@ public class RodNetworkManager : NetworkManager
     }
 
     // ── Client startup ────────────────────────────────────────────────────────
+    // Two-layer registration so prefabs are found in both player builds and editor:
+    //   1. Add to spawnPrefabs BEFORE base.OnStartClient() — Mirror's built-in path
+    //      calls RegisterPrefab on everything in that list during base execution.
+    //   2. Call RegisterPrefab directly AFTER base as belt-and-suspenders.
+    // This prevents "Could not spawn assetId=..." errors in non-editor builds where
+    // Mirror can't recompute assetId from GUID at runtime (no #if UNITY_EDITOR branch).
 
     public override void OnStartClient()
     {
-        base.OnStartClient();
-        foreach (var prefab in classPrefabs)
-            if (prefab != null) NetworkClient.RegisterPrefab(prefab);
+        if (classPrefabs != null)
+            foreach (var p in classPrefabs)
+                if (p != null && !spawnPrefabs.Contains(p))
+                    spawnPrefabs.Add(p);
+
+        base.OnStartClient(); // registers spawnPrefabs (now includes our class prefabs)
+
+        // Direct registration as well — redundant but safe
+        if (classPrefabs != null)
+            foreach (var prefab in classPrefabs)
+                if (prefab != null) NetworkClient.RegisterPrefab(prefab);
     }
 
     // ── Client connected + authenticated ──────────────────────────────────────

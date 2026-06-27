@@ -97,11 +97,15 @@ public class PlayerMovement : MonoBehaviour
             anim.SetTrigger(param);
     }
 
-    // Returns true when the player is typing in any UI input field
+    // Returns true when the player is typing in any UI input field.
+    // Also checks RodChatManager.IsOpen directly — the new Input System does NOT
+    // consume key events when a TMP_InputField has focus, so WASD would still
+    // move the character while typing without this second check.
     static bool IsTypingInUI()
     {
         var sel = EventSystem.current?.currentSelectedGameObject;
-        return sel != null && sel.GetComponent<TMP_InputField>() != null;
+        return (sel != null && sel.GetComponent<TMP_InputField>() != null)
+            || (RodChatManager.Instance != null && RodChatManager.Instance.IsOpen);
     }
 
     void Update()

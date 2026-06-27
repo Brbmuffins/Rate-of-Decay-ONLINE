@@ -30,11 +30,11 @@
 
 | Class | Role | Identity |
 |-------|------|----------|
-| **Engineer** | Damage / Control | Turrets, shock mines, arc cannon — builds the killzone before enemies arrive |
-| **Guardian** | Tank / CC | Iron Tether, Breach Slam, Siege Mode — the anvil the team fights around |
-| **Wraith** | DoT / Debuff | Corruption stacks, Null Field, Collapse detonation — no aim required, pure pressure |
-| **Medic** | Support | Emergency revivals, heal shields, Transfer Protocol — keeps the team alive |
-| **Phaser** | Assassin | Phase shifts, singularity pulls, spatial repositioning *(not yet playable)* |
+| **Warden** | Tank / Nature CC | Runic Snare, Battle Hymn, summon spirits — controls space and outlasts the fight |
+| **Ironclad** | Tank / CC | Shieldwall Charge, Iron Rampart, Counter Blow — the anvil the team fights around |
+| **Shadowblade** | DoT / Assassin | Shadow Veil, Dark Mark, Dark Harvest — stealth pressure and burst detonation |
+| **Cleric** | Support / Heal | Soul Bond, Divine Spark, Temporal Grace — keeps the team alive under fire |
+| **Arcanist** | Burst / Control | Arcane Step, Void Maw, Collapsing Void — spatial repositioning and burst payoff |
 
 Each class has 4 equipped abilities + 1 ultimate. See [`COMBAT.md`](COMBAT.md) for full ability tables, combos, and design intent.
 
@@ -45,7 +45,7 @@ Each class has 4 equipped abilities + 1 ultimate. See [`COMBAT.md`](COMBAT.md) f
 ### Networking
 - Mirror host/client live end-to-end (KCP transport, port 7777)
 - `RodNetworkAuthenticator` — JWT verify → server-side GET /character → stores class + spawn position in `conn.authenticationData`
-- `RodNetworkManager` — server-authoritative class selection; reads DB class in production, client message in dev mode
+- `RodNetworkManager` — server-authoritative class selection; reads DB class in production, client message in dev mode. Class prefabs are dual-registered: added to Mirror's `spawnPrefabs` (so `base.OnStartClient()` handles them) and directly via `NetworkClient.RegisterPrefab()` for belt-and-suspenders reliability in player builds
 - `RodNetworkAuthenticator` dev mode — bypasses JWT for local HOST testing with one click
 
 ### Server Manager & Account Management
@@ -98,25 +98,22 @@ LoginScene → CharacterSelect → GameWorld
 
 ### Combat
 - `Health` — shields, damage reduction, absorb window, downed state (players), gear stat channels, `onDeath` UnityEvent
-- `StatusEffectManager` — Slow, Stagger, Suppress, DamageOverTime, Exposed, Tethered; per-tick DoT, `ConsumeDebuffStacks()` for Wraith Collapse
+- `StatusEffectManager` — Slow, Stagger, Suppress, DamageOverTime, Exposed, Tethered; per-tick DoT, `ConsumeDebuffStacks()` for Shadowblade's Dark Harvest
 - `EnemyAI` — aggro, move, attack, stealth suppression window, status-gated actions
-- `TurretController` — range scan, retarget interval, muzzle flash, LineRenderer tracer, Drone Command override, System Overload burst
 - `AbilityCaster` — Cone / Circle / Rectangle targeting indicators; full 20+ ability spellbook
-- `WraithAbilities` — complete DoT kit: Corruption (passive), Dark Blast (cone), Null Field (zone), Event Horizon (expose), Collapse (detonate all debuffs), Phase Shift (2s invuln + exit poison)
 - `WaveChest` — hold-E activation, prep window, per-wave enemy spawning, player-count scaling, loot on clear
 - `WaveManager` — scene-level arena orchestrator; wave definitions with mob/elite/boss mix, difficulty multiplier per cycle (×1.2), shared boss health pool, loot score = wave × difficulty × √playerCount, arena boundary leash, fail detection
 
-### Editor Automation (`RoD →` menu)
+### Editor Automation (`BCE →` menu)
 | Menu Item | What it does |
 |-----------|-------------|
 | `Setup/0 ▶ Create Character Select Scene` | Builds CharacterSelect.unity with 3D preview camera, layer 31 isolation, EventSystem |
 | `Setup/1 ▶ Create Login Scene` | Builds LoginScene with NetworkManager, authenticator, KCP transport, UI |
 | `Setup/2 ▶ Clean GameWorld` | Removes stray NetworkManager components from GameWorld |
-| `Setup/3 ▶ Fix Build Settings` | Sets scene order: Login(0) → CharacterSelect(1) → GameWorld(2) |
-| `Setup/4 ▶ Create Class Prefabs` | Creates Engineer / Guardian / Wraith / Medic prefabs from FBX, assigns to NetworkManager |
-| `Setup/5 ▶ Fix Animator Controllers` | Assigns AnimatorController to all class prefabs |
-| `World/Populate GameWorld with NPCs` | Places Zompy, Bob, Kodiac, Turret NPCs with VFX and ground plane |
-| `World/Build Combat Base` | Populates GameWorld: arena floor, cover blocks, Sentinel Turret (ElectricalSparks VFX), 3 zone indicators (Circle/Cone/Rect with Dark Arts VFX), 3 enemy clusters, WaveChest, ambient VFX |
+| `Setup/3 ▶ Fix Build Settings` | Sets scene order: Login(0) → CharacterSelect(1) → Hub(2) |
+| `Setup/4 ▶ Create Class Prefabs (5 Classes)` | Creates Warden / Ironclad / Shadowblade / Cleric / Arcanist prefabs, assigns AnimatorController, wires to NetworkManager `classPrefabs` + `spawnPrefabs` |
+| `Setup/5 ▶ Fix Animator Controllers` | Re-assigns AnimatorController to existing prefabs if missing |
+| `Build Hub Scene` | Rebuilds Hub.unity: gray ground plane, directional light, 8 spawn points, RodChatManager |
 
 ### UI Systems
 - **ESC Menu** (`EscMenu.cs`) — Escape key → Resume / Logout / Quit. Self-bootstrapping, persists across scenes.
@@ -162,6 +159,17 @@ Access gated by `GM_USERS` allowlist in `GmConsole.cs`. Command history: ↑/↓
 - **Zone in and battle** — no lobby meta, no mandatory prep; pick class, enter arena, fight
 - **Community crafting** — server hub (max-player zone) has trainers, shared loot pool, community-built upgrades *(planned)*
 - **DoT class complete** — Wraith is fully playable with the corruption → stack → detonate loop
+
+---
+
+## Known TODOs
+
+| Priority | Item |
+|----------|------|
+| High | **HTTPS / Cloudflare** — all current URLs use plain HTTP (`http://15.204.243.36:3000`, `http://15.204.243.36:4000`). Route through Cloudflare proxy with SSL to secure auth tokens and JWT traffic before launch |
+| Medium | Clean up stale prefabs — `Engineer.prefab`, `Guardian.prefab`, `Wraith.prefab`, `Medic.prefab`, `PlayerPrefab.prefab` still in `Assets/Game/Prefabs/` |
+| Medium | Add Arcanist to CharacterSelect scene preview |
+| Low | Position save on scene exit (currently only on disconnect/quit) |
 
 ---
 

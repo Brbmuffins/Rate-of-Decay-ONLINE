@@ -88,9 +88,11 @@ public class CameraFollow : MonoBehaviour
         if (!_leftHeld)
             _leftStartedOnUI = false;
 
-        // Only block orbit when the player is actively typing in a text field.
+        // Block orbit when typing OR when chat is open — the second check covers the
+        // one-frame gap between ActivateInputField() and currentSelectedGameObject being set.
         var selGO = EventSystem.current?.currentSelectedGameObject;
-        _typingInUI = selGO != null && selGO.GetComponent<TMPro.TMP_InputField>() != null;
+        _typingInUI = (selGO != null && selGO.GetComponent<TMPro.TMP_InputField>() != null)
+                   || (RodChatManager.Instance != null && RodChatManager.Instance.IsOpen);
 
         // Left-click only activates camera orbit if it didn't start on UI (e.g. chat box).
         // Right-click always orbits (it has no UI use outside the game world).

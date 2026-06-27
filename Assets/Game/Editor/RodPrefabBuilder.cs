@@ -94,6 +94,15 @@ public static class RodPrefabBuilder
 
         AssetDatabase.Refresh();
 
+        // ── Force-reimport each prefab so NetworkIdentity.OnValidate runs ────────
+        // SaveAsPrefabAsset does NOT trigger OnValidate. Without this, _assetId
+        // stays 0 in the prefab file and Mirror's RegisterPrefab silently skips it
+        // in non-editor (built) clients, causing "Could not spawn assetId=..." errors.
+        foreach (var path in builtPaths)
+            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+        AssetDatabase.SaveAssets();
+        Debug.Log("[BCE] Force-reimported prefabs — NetworkIdentity.assetIds now set.");
+
         // ── Wire to NetworkManager in LoginScene ──────────────────────────────
         if (!File.Exists(LOGIN_SCENE))
         {
@@ -114,14 +123,22 @@ public static class RodPrefabBuilder
         bool wired = false;
         if (nm != null)
         {
+            // Populate classPrefabs (used at runtime for class-selection logic)
             nm.classPrefabs = new GameObject[builtPaths.Count];
+            // Also populate Mirror's built-in spawnPrefabs list so base.OnStartClient()
+            // registers them through Mirror's normal channel (belt-and-suspenders fix).
+            nm.spawnPrefabs.Clear();
             for (int i = 0; i < builtPaths.Count; i++)
-                nm.classPrefabs[i] = AssetDatabase.LoadAssetAtPath<GameObject>(builtPaths[i]);
+            {
+                var p = AssetDatabase.LoadAssetAtPath<GameObject>(builtPaths[i]);
+                nm.classPrefabs[i] = p;
+                if (p != null) nm.spawnPrefabs.Add(p);
+            }
 
             EditorUtility.SetDirty(nm);
             EditorSceneManager.SaveScene(scene);
             wired = true;
-            Debug.Log("[BCE] classPrefabs assigned to RodNetworkManager.");
+            Debug.Log("[BCE] classPrefabs + spawnPrefabs assigned to RodNetworkManager.");
         }
 
         ShowDone(builtPaths, wired);

@@ -36,6 +36,9 @@ public class RodChatManager : NetworkBehaviour
     // ── Singleton ─────────────────────────────────────────────────────────
     public static RodChatManager Instance { get; private set; }
 
+    /// <summary>True while the chat input field is open. Used by CameraFollow to suppress camera orbit.</summary>
+    public bool IsOpen => _open;
+
     // ── Tunables ──────────────────────────────────────────────────────────
     const int   MAX_MESSAGES = 60;
     const int   MAX_MSG_LEN  = 200;
@@ -50,8 +53,9 @@ public class RodChatManager : NetworkBehaviour
     GameObject     _inputArea;
     TMP_InputField _input;
 
-    bool  _open;
-    float _lastMsgTime = -999f;
+    bool   _open;
+    float  _lastMsgTime = -999f;
+    string _typedText   = "";
 
     readonly List<string> _history = new();
 
@@ -74,6 +78,8 @@ public class RodChatManager : NetworkBehaviour
 
     void OnDestroy()
     {
+        if (Keyboard.current != null)
+            Keyboard.current.onTextInput -= OnTextInput;
         if (Instance == this) Instance = null;
         if (_canvas != null) Destroy(_canvas.gameObject);
     }
@@ -97,8 +103,15 @@ public class RodChatManager : NetworkBehaviour
         }
         else
         {
-            if (kb.escapeKey.wasPressedThisFrame)
+            if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame)
+                CloseInput(send: true);
+            else if (kb.escapeKey.wasPressedThisFrame)
                 CloseInput(send: false);
+            else if (kb.backspaceKey.wasPressedThisFrame && _typedText.Length > 0)
+            {
+                _typedText = _typedText[..^1];
+                _input.text = _typedText;
+            }
         }
 
         // ── Fade ───────────────────────────────────────────────────────
@@ -108,11 +121,11 @@ public class RodChatManager : NetworkBehaviour
             float t = Mathf.InverseLerp(FADE_DELAY, FADE_DELAY + FADE_TIME, elapsed);
             _cg.alpha = Mathf.Lerp(1f, 0f, t);
 
-            // alpha=0 does NOT disable raycasting — do it manually so the
-            // invisible canvas doesn't swallow mouse input and break camera orbit.
-            bool visible = _cg.alpha > 0.01f;
-            _cg.blocksRaycasts = visible;
-            _cg.interactable   = visible;
+            // Keep blocksRaycasts ON even when faded so clicking the chat area doesn't
+            // count as "clicked on world" and trigger cursor lock → re-centering.
+            // interactable=false prevents actual interaction with the invisible elements.
+            _cg.blocksRaycasts = true;
+            _cg.interactable   = false;
         }
         else
         {
@@ -170,24 +183,42 @@ public class RodChatManager : NetworkBehaviour
 
     void OpenInput()
     {
-        _open = true;
+        _open      = true;
+        _typedText = "";
         _inputArea.SetActive(true);
         _panel.SetActive(true);
-        _cg.alpha = 1f;
+        _cg.alpha          = 1f;
+        _cg.interactable   = true;
+        _cg.blocksRaycasts = true;
         _input.text = "";
-        _input.ActivateInputField();
-        _input.Select();
+
+        // Capture text via Input System directly — bypasses TMP's EventSystem dependency
+        // so typing works regardless of which Input Module the EventSystem uses.
+        Keyboard.current.onTextInput -= OnTextInput; // guard against double-subscribe
+        Keyboard.current.onTextInput += OnTextInput;
+    }
+
+    void OnTextInput(char c)
+    {
+        if (!_open) return;
+        if (c < 32 || c == 127) return;              // skip control characters
+        if (_typedText.Length >= MAX_MSG_LEN) return;
+        _typedText  += c;
+        _input.text  = _typedText;
     }
 
     void CloseInput(bool send)
     {
+        Keyboard.current.onTextInput -= OnTextInput;
+
         if (send)
         {
-            string txt = _input.text.Trim();
+            string txt = _typedText.Trim();
             if (!string.IsNullOrEmpty(txt))
                 CmdSendChat(txt);
         }
-        _open = false;
+        _typedText = "";
+        _open      = false;
         _inputArea.SetActive(false);
         _lastMsgTime = Time.unscaledTime;
     }
@@ -318,7 +349,7 @@ public class RodChatManager : NetworkBehaviour
         _input.textViewport   = inputGO.GetComponent<RectTransform>();
         _input.caretColor     = new Color(0.5f, 0.8f, 1f);
         _input.characterLimit = MAX_MSG_LEN;
-        _input.onSubmit.AddListener(_ => CloseInput(send: true));
+        // Enter is handled in Update() — onSubmit is unreliable with new Input System.
 
         _inputArea.SetActive(false);
         _panel.SetActive(false);
