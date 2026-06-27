@@ -30,8 +30,7 @@ public class CameraFollow : MonoBehaviour
     public float maxPitch =  70f;
 
     [Header("Follow")]
-    public float heightOffset    = 1.6f;
-    public float positionDamping = 12f;
+    public float heightOffset = 1.6f;
 
     // ── Target property — snaps camera immediately on assign ──────────────
     Transform _target;
@@ -47,13 +46,14 @@ public class CameraFollow : MonoBehaviour
 
     // Read by PlayerMovement
     public float Yaw            => _yaw;
-    public bool  RightMouseHeld => _rightHeld &&
-        !(EventSystem.current != null && EventSystem.current.IsPointerOverGameObject());
+    public bool  RightMouseHeld => _rightHeld && !_typingInUI;
 
     float   _yaw;
     float   _pitch = 18f;
     bool    _rightHeld;
     bool    _leftHeld;
+    bool    _typingInUI;
+    bool    _prevLookActive;   // detect first frame of look to discard stale delta
     Vector3 _smoothPos;
 
     // ── Lifecycle ─────────────────────────────────────────────────────────
@@ -77,10 +77,12 @@ public class CameraFollow : MonoBehaviour
         _rightHeld = mouse.rightButton.isPressed;
         _leftHeld  = mouse.leftButton.isPressed;
 
+        // Only block orbit when the player is actively typing in a text field.
+        // Deliberately skip IsPointerOverGameObject() — any invisible UI canvas
+        // returns true permanently and would kill all camera rotation.
         var selGO = EventSystem.current?.currentSelectedGameObject;
-        bool typingInUI = selGO != null && selGO.GetComponent<TMPro.TMP_InputField>() != null;
-        bool overUI     = EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
-        bool lookActive = (_rightHeld || _leftHeld) && !overUI && !typingInUI;
+        _typingInUI = selGO != null && selGO.GetComponent<TMPro.TMP_InputField>() != null;
+        bool lookActive = (_rightHeld || _leftHeld) && !_typingInUI;
 
         // ── Cursor lock / unlock ──────────────────────────────────────────
         if (lookActive && Cursor.lockState != CursorLockMode.Locked)
@@ -95,10 +97,17 @@ public class CameraFollow : MonoBehaviour
         }
 
         // ── Camera rotation ───────────────────────────────────────────────
-        // mouse.delta is per-frame pixels — do NOT multiply by Time.deltaTime
-        if (lookActive)
+        // mouse.delta accumulates while cursor is free. On the FIRST frame we enter
+        // look mode that stale delta would cause a violent swing — discard it.
+        bool justEnteredLook = lookActive && !_prevLookActive;
+        _prevLookActive = lookActive;
+
+        if (lookActive && !justEnteredLook)
         {
             Vector2 delta = mouse.delta.ReadValue();
+            // Clamp per-frame delta to prevent single-frame spikes
+            delta.x = Mathf.Clamp(delta.x, -50f, 50f);
+            delta.y = Mathf.Clamp(delta.y, -50f, 50f);
             _yaw   += delta.x * mouseSensitivity;
             _pitch -= delta.y * mouseSensitivity;
             _pitch  = Mathf.Clamp(_pitch, minPitch, maxPitch);
@@ -110,8 +119,11 @@ public class CameraFollow : MonoBehaviour
             distance = Mathf.Clamp(distance - scroll * zoomSpeed * 0.01f,
                                    minDistance, maxDistance);
 
-        // ── Position ──────────────────────────────────────────────────────
-        _smoothPos = Vector3.Lerp(_smoothPos, _target.position, positionDamping * Time.deltaTime);
+        // ── Position — instant follow, no lag ─────────────────────────────
+        // Positional smoothing causes the character to drift out of frame.
+        // WoW-style cameras follow position immediately; smoothness comes from
+        // character animation, not camera lag.
+        _smoothPos = _target.position;
 
         Quaternion rot    = Quaternion.Euler(_pitch, _yaw, 0f);
         Vector3    offset = rot * new Vector3(0f, 0f, -distance);

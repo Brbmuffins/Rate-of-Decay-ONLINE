@@ -52,3 +52,9 @@ ServerBuild/
 # ── Test zips / scratch ───────────────────────────────────────────────────────
 *.zip
 TestDemo*
+
+# ── Shareable builds (distribute via download page, not git) ─────────────────
+Shareable Windows Build/
+
+# ── Debug symbols ─────────────────────────────────────────────────────────────
+*_BackUpThisFolder_ButDontShipItWithYourGame/

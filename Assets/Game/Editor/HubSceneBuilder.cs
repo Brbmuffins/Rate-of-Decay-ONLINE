@@ -194,6 +194,19 @@ public static class HubSceneBuilder
                 cp2, Quaternion.Euler(0f, ca, 0f), Vector3.one * 0.6f);
         }
 
+        // ── NetworkStartPosition — spawn points spread around the clearing ──
+        // Mirror picks these via GetStartPosition() when spawning players.
+        // 8 points evenly spaced at radius 4, slightly above ground.
+        for (int i = 0; i < 8; i++)
+        {
+            float angle = (360f / 8f * i) * Mathf.Deg2Rad;
+            Vector3 sp  = new Vector3(Mathf.Sin(angle) * 4f, 0.1f, Mathf.Cos(angle) * 4f);
+            var spGO    = new GameObject($"SpawnPoint_{i}");
+            spGO.transform.SetParent(root.transform);
+            spGO.transform.position = sp;
+            spGO.AddComponent<Mirror.NetworkStartPosition>();
+        }
+
         // ── Mark scene dirty — remind user to save ────────────────────────
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
 

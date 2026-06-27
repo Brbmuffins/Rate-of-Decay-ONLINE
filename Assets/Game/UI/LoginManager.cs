@@ -80,6 +80,13 @@ public class LoginManager : MonoBehaviour
         // Awake builds the fields; Start is the earliest safe time to assign text values.
         if (_serverInput != null)
             _serverInput.text = PlayerPrefs.GetString("game_server_ip", "15.204.243.36");
+
+        // Auto-focus username so the player can start typing immediately
+        if (_userInput != null)
+        {
+            _userInput.ActivateInputField();
+            _userInput.Select();
+        }
     }
 
     void Update()
@@ -100,11 +107,29 @@ public class LoginManager : MonoBehaviour
             _borderBot.color = new Color(BorderColor.r, BorderColor.g, BorderColor.b, b * 0.6f);
         }
 
-        // Enter key support (canvas may be null on dedicated server)
+        // Enter key
         if (_loginPanel != null && !_busy && Keyboard.current != null && Keyboard.current.enterKey.wasPressedThisFrame)
         {
             if (_loginPanel.activeSelf)         OnLoginClicked();
             else if (_registerPanel.activeSelf) OnRegisterClicked();
+        }
+
+        // Tab key — cycle focus between fields
+        if (_loginPanel != null && Keyboard.current != null && Keyboard.current.tabKey.wasPressedThisFrame)
+        {
+            bool shift = Keyboard.current.leftShiftKey.isPressed || Keyboard.current.rightShiftKey.isPressed;
+            if (_loginPanel.activeSelf)
+            {
+                // Login panel: username → password → server IP → username
+                TMP_InputField[] loginFields = { _userInput, _passInput, _serverInput };
+                CycleFields(loginFields, shift);
+            }
+            else if (_registerPanel.activeSelf)
+            {
+                // Register panel: username → email → password → username
+                TMP_InputField[] regFields = { _regUserInput, _regEmailInput, _regPassInput };
+                CycleFields(regFields, shift);
+            }
         }
     }
 
@@ -644,6 +669,22 @@ public class LoginManager : MonoBehaviour
     }
 
     // ── Helpers ────────────────────────────────────────────────────────────
+
+    static void CycleFields(TMP_InputField[] fields, bool reverse)
+    {
+        int current = -1;
+        for (int i = 0; i < fields.Length; i++)
+            if (fields[i].isFocused) { current = i; break; }
+
+        int next = current < 0
+            ? 0
+            : (reverse
+                ? (current - 1 + fields.Length) % fields.Length
+                : (current + 1) % fields.Length);
+
+        fields[next].ActivateInputField();
+        fields[next].Select();
+    }
 
     void SetStatus(TMP_Text label, string msg, bool good)
     {

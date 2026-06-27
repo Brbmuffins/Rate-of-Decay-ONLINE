@@ -119,16 +119,30 @@ public class RodNetworkManager : NetworkManager
             prefab = classPrefabs[0];
         }
 
-        // Spawn position: DB saved position, or Mirror start position, or safe default
+        // Spawn position: DB saved position, or Mirror start position, or safe default.
+        // Guard: if DB coords are all zero the character has never saved a position
+        // (first login). Treat that as a fresh spawn so players don't pile up at origin.
         Vector3 spawnPos;
-        if (auth != null && auth.fromDB)
+        bool hasSavedPos = auth != null && auth.fromDB
+                           && (auth.spawnX != 0f || auth.spawnY != 0f || auth.spawnZ != 0f);
+
+        if (hasSavedPos)
         {
             spawnPos = new Vector3(auth.spawnX, auth.spawnY, auth.spawnZ);
         }
         else
         {
             Transform startPos = GetStartPosition();
-            spawnPos = startPos != null ? startPos.position : new Vector3(0f, 2f, 0f);
+            if (startPos != null)
+            {
+                spawnPos = startPos.position;
+            }
+            else
+            {
+                // Scatter players in a ring so they don't spawn inside each other
+                float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
+                spawnPos = new Vector3(Mathf.Sin(angle) * 3f, 1f, Mathf.Cos(angle) * 3f);
+            }
         }
 
         // Prefer server-verified username from auth data; fall back to client-sent value
@@ -156,7 +170,7 @@ public class RodNetworkManager : NetworkManager
 
         NetworkServer.AddPlayerForConnection(conn, player);
         Debug.Log($"[RodNM] Spawned {username} as class {classIndex} at {spawnPos} " +
-                  $"(fromDB={auth?.fromDB})");
+                  $"(fromDB={auth?.fromDB}, hasSavedPos={hasSavedPos})");
     }
 
     public override void OnServerDisconnect(NetworkConnectionToClient conn)

@@ -19,8 +19,11 @@ using UnityEngine.UI;
 //  heal              — full heal self
 //  kill              — kill all enemies in scene
 //  spawn <count>     — spawn <count> basic enemies near you (uses EnemyAI capsules)
-//  wave <n>          — jump WaveManager to wave index n
+//  wave [n]          — start WaveManager, or jump to wave n if running
 //  tp <x> <y> <z>   — teleport self to world position
+//  pos               — print current world position (useful for level building)
+//  players           — list all networked players + positions
+//  goto <name>       — teleport to a named player
 //  noclip            — toggle collider pass-through (disables own colliders)
 //  clear             — clear console history
 //  help              — list all commands
@@ -33,6 +36,22 @@ using UnityEngine.UI;
 
 public class GmConsole : MonoBehaviour
 {
+    // ── Auto-bootstrap ────────────────────────────────────────────────────
+    // Creates itself once per play session — no scene object required.
+    static GmConsole _instance;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+    static void AutoCreate()
+    {
+        if (SystemInfo.graphicsDeviceType == UnityEngine.Rendering.GraphicsDeviceType.Null)
+            return; // headless server — no console
+        if (_instance != null) return;
+
+        var go = new GameObject("GmConsole");
+        DontDestroyOnLoad(go);
+        _instance = go.AddComponent<GmConsole>();
+    }
+
     // ── GM allowlist ──────────────────────────────────────────────────────
     static readonly HashSet<string> GM_USERS = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
@@ -200,6 +219,9 @@ public class GmConsole : MonoBehaviour
             case "wave":    CmdWave(parts);    break;
             case "tp":      CmdTp(parts);      break;
             case "noclip":  CmdNoclip();       break;
+            case "pos":     CmdPos();          break;
+            case "players": CmdPlayers();      break;
+            case "goto":    CmdGoto(parts);    break;
             case "clear":   _history.Clear(); _log.text = ""; break;
             case "help":    CmdHelp();         break;
             default:        Log($"<color=#f87171>Unknown command: {cmd}. Type 'help'.</color>"); break;
@@ -294,15 +316,67 @@ public class GmConsole : MonoBehaviour
     {
         var wm = FindAnyObjectByType<WaveManager>();
         if (wm == null) { Log("<color=#f87171>No WaveManager found in scene.</color>"); return; }
-        if (!wm.IsRunning)
+
+        if (parts.Length >= 2 && int.TryParse(parts[1], out int waveNum))
+        {
+            // Jump to a specific wave index
+            wm.JumpToWave(waveNum);
+            Log($"<color=#4ade80>Jumped to wave {waveNum}.</color>");
+        }
+        else if (!wm.IsRunning)
         {
             wm.StartArena();
             Log("<color=#4ade80>WaveManager started.</color>");
         }
         else
         {
-            Log($"<color=#94a3b8>WaveManager already running — current wave {wm.CurrentWave}/{wm.TotalWaves}</color>");
+            Log($"<color=#94a3b8>WaveManager running — wave {wm.CurrentWave}/{wm.TotalWaves}. Use 'wave <n>' to jump.</color>");
         }
+    }
+
+    void CmdPos()
+    {
+        if (_localPlayer == null) { Log("<color=#f87171>No player found.</color>"); return; }
+        Vector3 p = _localPlayer.transform.position;
+        Log($"<color=#4ade80>Position: ({p.x:F2}, {p.y:F2}, {p.z:F2})</color>");
+    }
+
+    void CmdPlayers()
+    {
+        var identities = UnityEngine.Object.FindObjectsByType<PlayerIdentity>(FindObjectsSortMode.None);
+        if (identities.Length == 0)
+        {
+            Log("<color=#94a3b8>No players found in scene.</color>");
+            return;
+        }
+        Log($"<color=#60a5fa>── {identities.Length} Player(s) ────────────────</color>");
+        foreach (var id in identities)
+        {
+            Vector3 p = id.transform.position;
+            string local = id.isLocalPlayer ? " <color=#fbbf24>(you)</color>" : "";
+            Log($"  <color=#e2e8f0>{id.playerName}</color> [{id.ClassName}]{local} @ ({p.x:F1},{p.y:F1},{p.z:F1})");
+        }
+    }
+
+    void CmdGoto(string[] parts)
+    {
+        if (_localPlayer == null) { Log("<color=#f87171>No local player found.</color>"); return; }
+        if (parts.Length < 2) { Log("Usage: goto <playername>"); return; }
+
+        string target = string.Join(" ", parts, 1, parts.Length - 1);
+        var identities = UnityEngine.Object.FindObjectsByType<PlayerIdentity>(FindObjectsSortMode.None);
+        foreach (var id in identities)
+        {
+            if (string.Equals(id.playerName, target, StringComparison.OrdinalIgnoreCase))
+            {
+                Vector3 dest = id.transform.position + id.transform.forward * 2f + Vector3.up * 0.1f;
+                _localPlayer.transform.position = dest;
+                if (_rb != null) _rb.linearVelocity = Vector3.zero;
+                Log($"<color=#4ade80>Teleported to {id.playerName}.</color>");
+                return;
+            }
+        }
+        Log($"<color=#f87171>Player '{target}' not found.</color>");
     }
 
     void CmdTp(string[] parts)
@@ -341,8 +415,11 @@ public class GmConsole : MonoBehaviour
         Log("  <color=#e2e8f0>heal</color>            — full heal self");
         Log("  <color=#e2e8f0>kill</color>            — kill all enemies");
         Log("  <color=#e2e8f0>spawn [count]</color>   — spawn enemies near you");
-        Log("  <color=#e2e8f0>wave</color>            — start / status WaveManager");
+        Log("  <color=#e2e8f0>wave [n]</color>        — start WaveManager / jump to wave n");
         Log("  <color=#e2e8f0>tp <x> <y> <z></color> — teleport to position");
+        Log("  <color=#e2e8f0>pos</color>             — print current world position");
+        Log("  <color=#e2e8f0>players</color>         — list all players in scene");
+        Log("  <color=#e2e8f0>goto <name></color>     — teleport to a player");
         Log("  <color=#e2e8f0>noclip</color>          — toggle collision");
         Log("  <color=#e2e8f0>clear</color>           — clear console");
         Log("  <color=#e2e8f0>help</color>            — show this list");

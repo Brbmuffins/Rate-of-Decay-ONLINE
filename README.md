@@ -7,6 +7,19 @@
 
 ---
 
+## Quick Links
+
+| | |
+|--|--|
+| Full Developer Reference | [`DEVDOC.md`](DEVDOC.md) |
+| GM Commands | [DEVDOC → Section 4](DEVDOC.md#4-gm-console) |
+| Controls | [DEVDOC → Section 3](DEVDOC.md#3-controls-reference) |
+| Architecture | [DEVDOC → Section 7](DEVDOC.md#7-technical-architecture) |
+| VPS & Server | [DEVDOC → Section 8](DEVDOC.md#8-vps--server-infrastructure) |
+| Download Page | http://15.204.243.36 |
+
+---
+
 ## Classes
 
 | Class | Role | Identity |
@@ -75,8 +88,14 @@ LoginScene → CharacterSelect → GameWorld
 | `World/Populate GameWorld with NPCs` | Places Zompy, Bob, Kodiac, Turret NPCs with VFX and ground plane |
 | `World/Build Combat Base` | Populates GameWorld: arena floor, cover blocks, Sentinel Turret (ElectricalSparks VFX), 3 zone indicators (Circle/Cone/Rect with Dark Arts VFX), 3 enemy clusters, WaveChest, ambient VFX |
 
+### UI Systems
+- **ESC Menu** (`EscMenu.cs`) — Escape key → Resume / Logout / Quit. Self-bootstrapping, persists across scenes.
+- **Chat** (`RodChatManager.cs`) — Enter or T to open. Mirror-networked, all clients see all messages.
+- **Who's Online** (`PlayerListUI.cs`) — P to toggle. Top-right panel, shows all connected players with class color. Updates instantly on join/leave.
+- **Nameplates** (`PlayerNameplate.cs`) — Floating billboard above each player. Shows name + class. Hides on local player. Fades 20–40u from camera.
+
 ### GM Console (`GmConsole.cs`)
-Attach to any persistent GameObject in GameWorld. Toggle with `` ` `` or **F1**.
+Self-bootstrapping — no scene object needed. Toggle with `` ` `` or **F1**.
 
 | Command | Effect |
 |---------|--------|
@@ -86,12 +105,15 @@ Attach to any persistent GameObject in GameWorld. Toggle with `` ` `` or **F1**.
 | `heal` | Full heal self |
 | `kill` | Kill all `"Enemy"`-tagged objects |
 | `spawn [n]` | Spawn n red capsule enemies near player |
-| `wave` | Start WaveManager / show status |
+| `wave [n]` | Start WaveManager or jump to wave n |
 | `tp <x> <y> <z>` | Teleport player to world coords |
+| `pos` | Print current world position (useful for level building) |
+| `players` | List all connected players + class + position |
+| `goto <name>` | Teleport to another player |
 | `noclip` | Toggle player colliders off |
 | `clear` / `help` | Clear log / list commands |
 
-Access is gated by the `GM_USERS` allowlist in `GmConsole.cs` — add usernames there. Command history navigable with ↑/↓.
+Access gated by `GM_USERS` allowlist in `GmConsole.cs`. Command history: ↑/↓ arrows.
 
 ### VFX
 - brbmuffins Technologies particle pack (ElectricalSparks, EnergyExplosion, SmallExplosion, FireFlies, HeatDistortion)
@@ -116,25 +138,70 @@ Access is gated by the `GM_USERS` allowlist in `GmConsole.cs` — add usernames 
 ## Project Structure
 
 ```
-Assets/
-├── Game/
-│   ├── Combat/Scripts/   — Health, EnemyAI, TurretController, WaveChest, WaveManager,
-│   │                       WraithAbilities, StatusEffect(Manager), EnemyDeathVFX, RodBillboard
-│   ├── Editor/           — RodEditorSetup, RodCombatWorldBuilder, RodNpcBuilder,
-│   │                       RodPrefabBuilder, RodProjectSettings (HTTP fix, InitializeOnLoad)
-│   ├── Networking/       — RodNetworkManager, RodNetworkAuthenticator, RodPositionSaver
-│   ├── Player/           — PlayerMovement (dodge roll), CameraFollow, ability handlers
-│   ├── Prefabs/          — Engineer, Guardian, Wraith, Medic
-│   ├── Scenes/           — LoginScene.unity, CharacterSelect.unity
-│   └── UI/               — LoginManager, CharacterSelectManager, LoginScreenVFX, AbilityCaster, AbilityBar, GmConsole
-├── brbmuffins */         — VFX asset packs
-├── Mirror/               — Mirror Networking
-└── Docs/                 — vps-character-system-prompt.txt, BackendSetup
-brbmuffins Skybox/
-└── Scenes/GameWorld.unity
-COMBAT.md                 — Combat bible: dodge system, class breakdowns, combos
-DESIGN_DOCUMENT.md        — Full system design and architecture decisions
+Rate of Decay ONLINE/
+│
+├── Assets/
+│   └── Game/
+│       ├── Networking/       — Mirror network scripts
+│       │   ├── RodNetworkManager.cs        spawn, auth, class prefabs
+│       │   ├── RodNetworkAuthenticator.cs  JWT verification
+│       │   ├── PlayerIdentity.cs           synced player name + class
+│       │   ├── RodChatManager.cs           networked chat
+│       │   └── RodPositionSaver.cs         save position to DB on disconnect
+│       │
+│       ├── UI/               — All UI: self-bootstrapping, no prefabs required
+│       │   ├── LoginManager.cs             login screen, Tab field cycling
+│       │   ├── CharacterSelectManager.cs   class picker + 3D preview
+│       │   ├── EscMenu.cs                  ESC → Resume / Logout / Quit
+│       │   ├── GmConsole.cs                GM console (` or F1)
+│       │   ├── PlayerListUI.cs             Who's Online panel (P)
+│       │   └── PlayerNameplate.cs          floating name/class above players
+│       │
+│       ├── Combat/Scripts/   — Combat systems
+│       │   ├── Health.cs                   shields, downed state, gear stats
+│       │   ├── StatusEffectManager.cs      Slow, Stagger, Suppress, DoT, Exposed, Tethered
+│       │   ├── EnemyAI.cs                  aggro, attack, stealth suppression
+│       │   ├── TurretController.cs         range scan, muzzle flash, burst mode
+│       │   ├── AbilityCaster.cs            targeting indicators, full spellbook
+│       │   ├── WraithAbilities.cs          DoT kit: Corruption → stack → Collapse
+│       │   ├── WaveChest.cs                hold-E activation, wave spawning, loot
+│       │   └── WaveManager.cs              arena orchestrator, difficulty scaling
+│       │
+│       ├── Characters/       — Per-class prefabs and scripts
+│       │   └── Engineer/Scripts/
+│       │       └── CameraFollow.cs         WoW-style 3rd-person camera
+│       │
+│       └── Editor/           — Editor tools (not included in builds)
+│           ├── HubSceneBuilder.cs          RoD → Build Hub Scene
+│           ├── BuildScript.cs              RoD/Build/ menu + CI entry
+│           ├── RodEditorSetup.cs           RoD/Setup/ scene builders
+│           ├── RodCombatWorldBuilder.cs    RoD/World/Build Combat Base
+│           └── RodPrefabBuilder.cs         RoD/Setup/4 class prefab creator
+│
+├── Scenes/
+│   ├── LoginScene              index 0 — login + register
+│   ├── CharacterSelect         index 1 — class picker
+│   └── Hub                     index 2 — social Hub (run HubSceneBuilder first)
+│
+├── brbmuffins */               VFX + magic + skybox asset packs
+├── Mirror/                     Mirror Networking package
+├── Docs/                       vps-character-system-prompt.txt, BackendSetup
+│
+├── DEVDOC.md                   ← Full developer + feature reference
+├── COMBAT.md                   Combat bible: dodge system, class breakdowns, combos
+├── DESIGN_DOCUMENT.md          Full system design and architecture decisions
+└── README.md                   This file
 ```
+
+### VPS Ports at a Glance
+
+| Port | Service |
+|------|---------|
+| 80 | Nginx — public download page |
+| 3000 | Auth server (DO NOT TOUCH) |
+| 4000 | Manager dashboard |
+| 7777 UDP | Mirror game server |
+| 3001 | Uptime Kuma monitoring |
 
 ---
 
