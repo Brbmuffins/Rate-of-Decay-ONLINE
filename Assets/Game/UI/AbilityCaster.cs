@@ -1,3 +1,4 @@
+using Mirror;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
@@ -202,6 +203,16 @@ public class AbilityCaster : MonoBehaviour
 
     void Awake()
     {
+        // Mirror: remote player clones must not process local input or register
+        // with client-only systems. Only the local player's caster stays active.
+        // (Matches the isLocalPlayer guard in PlayerMovement.Start.)
+        var netId = GetComponent<NetworkIdentity>();
+        if (netId != null && !netId.isLocalPlayer)
+        {
+            enabled = false;
+            return;
+        }
+
         SyncEquippedFromSpellbook();
 
         _passive        = GetComponent<ClassPassive>();

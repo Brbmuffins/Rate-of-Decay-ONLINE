@@ -52,6 +52,15 @@ public class EnemyAI : MonoBehaviour
         // Bound: movement handled externally by IronTetherHandler
         if (_status.IsBound) return;
 
+        // Drop a target that has died or been downed — reacquire a living one
+        // instead of swinging forever at a corpse.
+        if (aggroTarget != null)
+        {
+            var targetHealth = aggroTarget.GetComponent<Health>();
+            if (targetHealth != null && !targetHealth.IsAlive)
+                aggroTarget = null;
+        }
+
         if (aggroTarget == null)
         {
             // Only search if the confusion window has passed (prevents re-acquiring
@@ -115,6 +124,8 @@ public class EnemyAI : MonoBehaviour
         float best = Mathf.Infinity;
         foreach (var p in players)
         {
+            var ph = p.GetComponent<Health>();
+            if (ph != null && !ph.IsAlive) continue;   // ignore dead / downed players
             float d = Vector3.Distance(transform.position, p.transform.position);
             if (d < best) { best = d; aggroTarget = p.transform; }
         }

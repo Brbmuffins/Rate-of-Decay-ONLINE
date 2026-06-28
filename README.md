@@ -162,6 +162,38 @@ Access gated by `GM_USERS` allowlist in `GmConsole.cs`. Command history: ↑/↓
 
 ---
 
+## Changelog
+
+### 2026-06-28 — Stability & networking bug-fix pass
+
+Audit pass across combat, networking, abilities, and status systems. All fixes are
+localized and behavior-preserving for existing working paths.
+
+- **Abilities** (`AbilityCaster.cs`) — added an `isLocalPlayer` guard so remote player
+  clones no longer process local keyboard/mouse input. Previously pressing an ability key
+  fired the ability on *every* player object on the client at once (and each grabbed the cursor).
+- **Position save** (`RodPositionSaver.cs`) — floats now serialize with `InvariantCulture`.
+  On OS locales that use a `,` decimal separator the old JSON was malformed (`"x":1,234`)
+  and the `PATCH /character/position` save silently failed.
+- **Spawning** (`RodNetworkManager.cs`) — `OnCreatePlayer` now rejects a duplicate
+  `CreatePlayerMessage` (`conn.identity != null`), preventing orphaned player objects on the server.
+- **Waves** (`WaveManager.cs`) — GM `wave <n>` (`JumpToWave`) now despawns current enemies
+  instead of orphaning them alive and untracked.
+- **Enemy AI** (`EnemyAI.cs`) — enemies drop dead/downed targets and ignore them when
+  acquiring, instead of swinging forever at a corpse.
+- **Status effects** (`StatusEffectManager.cs`) — re-applying an effect now refreshes its
+  magnitude/source, so a stronger slow or curse actually takes effect.
+- **Damage redirect** (`Health.cs`) — added a self-guard and re-entrancy guard to the
+  Transfer Protocol redirect, eliminating an infinite loop when two targets redirect to each other.
+- **Chat** (`RodChatManager.cs`) — server now logs `[CHAT] <user>: <msg>` so messages are
+  visible in `crossworlds.log`.
+
+> **Not yet addressed (architectural — tracked separately):** enemies are not
+> `NetworkServer.Spawn`'d and combat damage is client-local; the GM allowlist is client-side.
+> These require the server-authoritative combat build-out, not a point fix.
+
+---
+
 ## Known TODOs
 
 | Priority | Item |
