@@ -4,6 +4,7 @@ using Mirror;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -72,8 +73,26 @@ public class RodChatManager : NetworkBehaviour
         if (Instance != null && Instance != this) return;
         Instance = this;
 
+        EnsureEventSystem();
         BuildUI();
         AddSystemMessage("Connected to Hub.");
+    }
+
+    /// <summary>
+    /// Hub scene wipes all non-Network objects (including the EventSystem from LoginScene).
+    /// Without an EventSystem, UI button clicks never fire and IsPointerOverGameObject() is
+    /// always false — causing every left-click to lock the cursor and re-center it.
+    /// </summary>
+    static void EnsureEventSystem()
+    {
+        if (EventSystem.current != null) return;
+
+        var go = new GameObject("EventSystem",
+            typeof(EventSystem),
+            typeof(InputSystemUIInputModule));
+
+        // Don't destroy across scenes — Mirror may load scenes mid-session
+        DontDestroyOnLoad(go);
     }
 
     void OnDestroy()

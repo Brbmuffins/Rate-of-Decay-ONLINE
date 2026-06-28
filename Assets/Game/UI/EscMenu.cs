@@ -54,8 +54,12 @@ public class EscMenu : MonoBehaviour
         if (kb == null) return;
         if (!kb.escapeKey.wasPressedThisFrame) return;
 
-        // If a chat / input field is focused, first ESC defocuses it (standard MMO behaviour).
-        // Second ESC will then open the menu normally.
+        // If chat is open, let RodChatManager handle Escape (closes chat).
+        // Don't open the ESC menu at the same time.
+        if (RodChatManager.Instance != null && RodChatManager.Instance.IsOpen)
+            return;
+
+        // If a chat / input field is focused via EventSystem, first ESC defocuses it.
         var es  = UnityEngine.EventSystems.EventSystem.current;
         var sel = es?.currentSelectedGameObject;
         if (sel != null && sel.GetComponent<TMP_InputField>() != null)
