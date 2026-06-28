@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crossworlds Phase 1 Roadmap v3</title>
+  <style>
+    :root {
+      --bg: #0e1118;
+      --panel: #171c27;
+      --panel2: #202838;
+      --text: #eef3ff;
+      --muted: #aab4c7;
+      --gold: #d6ad55;
+      --blue: #4cc9f0;
+      --green: #6ee7b7;
+      --red: #f87171;
+      --purple: #a78bfa;
+      --orange: #fb923c;
+      --teal: #2dd4bf;
+      --line: rgba(255,255,255,0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(76,201,240,.18), transparent 32%),
+        radial-gradient(circle at top right, rgba(214,173,85,.16), transparent 34%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .page { max-width: 1280px; margin: 0 auto; padding: 42px 22px 80px; }
+
+    /* HERO */
+    .hero {
+      border: 1px solid var(--line);
+      background: linear-gradient(135deg, rgba(32,40,56,.95), rgba(18,22,32,.95));
+      border-radius: 28px; padding: 36px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.35);
+      position: relative; overflow: hidden;
+    }
+    .hero:after {
+      content: ""; position: absolute;
+      width: 260px; height: 260px; right: -80px; top: -80px;
+      border-radius: 50%;
+      border: 22px solid rgba(76,201,240,.16);
+      box-shadow: inset 0 0 60px rgba(214,173,85,.16);
+    }
+    .eyebrow {
+      color: var(--gold); text-transform: uppercase;
+      letter-spacing: .16em; font-weight: 800; font-size: 13px; margin-bottom: 10px;
+    }
+    h1 { margin: 0; font-size: clamp(36px, 6vw, 72px); line-height: .9; letter-spacing: -0.06em; }
+    .subtitle { color: var(--muted); font-size: 17px; max-width: 820px; margin-top: 16px; }
+    .stats-row { margin-top: 26px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .stat-card {
+      background: rgba(255,255,255,.055); border: 1px solid var(--line);
+      border-radius: 16px; padding: 16px 14px;
+    }
+    .stat-card .num { font-size: 34px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; margin-bottom: 4px; }
+    .stat-card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+
+    /* PROGRESS */
+    .progress-section {
+      margin-top: 30px; background: var(--panel);
+      border: 1px solid var(--line); border-radius: 22px; padding: 24px 28px;
+    }
+    .progress-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .progress-label h3 { margin: 0; font-size: 17px; }
+    .progress-label span { color: var(--green); font-weight: 700; font-size: 22px; }
+    .bar-track { background: rgba(255,255,255,.08); border-radius: 999px; height: 18px; overflow: hidden; }
+    .bar-fill {
+      height: 100%; border-radius: 999px;
+      background: linear-gradient(90deg, var(--green), var(--blue));
+      position: relative;
+    }
+    .bar-fill::after {
+      content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 60px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.3));
+    }
+    .week-markers { display: flex; justify-content: space-between; margin-top: 8px; padding: 0 2px; }
+    .week-markers span { font-size: 11px; color: var(--muted); text-align: center; }
+
+    /* LAYER LEGEND */
+    .legend {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      margin-top: 14px; padding-top: 14px;
+      border-top: 1px solid var(--line);
+    }
+    .legend-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* SECTION */
+    .section-title {
+      display: flex; align-items: center; gap: 12px;
+      margin: 44px 0 18px; font-size: 24px;
+    }
+    .section-title .icon-box {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 12px;
+      background: var(--panel2); border: 1px solid var(--line);
+    }
+
+    /* BADGES */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+    }
+    .badge-done    { background: rgba(110,231,183,.15); color: var(--green);  border: 1px solid rgba(110,231,183,.3); }
+    .badge-active  { background: rgba(251,146,60,.15);  color: var(--orange); border: 1px solid rgba(251,146,60,.3); }
+    .badge-next    { background: rgba(76,201,240,.12);  color: var(--blue);   border: 1px solid rgba(76,201,240,.28); }
+    .badge-future  { background: rgba(167,139,250,.1);  color: var(--purple); border: 1px solid rgba(167,139,250,.22); }
+    .badge-bonus   { background: rgba(214,173,85,.14);  color: var(--gold);   border: 1px solid rgba(214,173,85,.3); }
+    .badge-server  { background: rgba(45,212,191,.12);  color: var(--teal);   border: 1px solid rgba(45,212,191,.28); }
+    .badge-stub    { background: rgba(167,139,250,.1);  color: var(--purple); border: 1px solid rgba(167,139,250,.22); }
+
+    /* TIMELINE */
+    .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    .week {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 22px; padding: 20px 18px 16px;
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .week.done   { border-color: rgba(110,231,183,.25); }
+    .week.active { border-color: rgba(251,146,60,.3); }
+    .week.next   { border-color: rgba(76,201,240,.2); }
+
+    .week-stripe { position: absolute; inset: 0 0 auto 0; height: 5px; }
+    .week.done   .week-stripe { background: linear-gradient(90deg, var(--green), #22d3ee); }
+    .week.active .week-stripe { background: linear-gradient(90deg, var(--orange), var(--gold)); }
+    .week.next   .week-stripe { background: linear-gradient(90deg, var(--blue), var(--purple)); }
+    .week.future .week-stripe { background: linear-gradient(90deg, var(--purple), #6366f1); }
+
+    .week-top { display: flex; justify-content: space-between; align-items: flex-start; }
+    .week-num { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em; font-weight: 800; }
+    .week h3 { margin: 5px 0 0; font-size: 19px; }
+
+    /* SPLIT TASK SECTIONS */
+    .layer-label {
+      font-size: 10px; font-weight: 800; letter-spacing: .12em;
+      text-transform: uppercase; padding: 4px 8px; border-radius: 6px;
+      margin-bottom: 2px; display: inline-block;
+    }
+    .layer-server { background: rgba(45,212,191,.12); color: var(--teal); }
+    .layer-client { background: rgba(251,146,60,.1);  color: var(--orange); }
+    .layer-done   { background: rgba(110,231,183,.1); color: var(--green); }
+
+    .task-list {
+      padding: 0; margin: 0; list-style: none;
+      display: flex; flex-direction: column; gap: 4px; flex: 1;
+    }
+    .task-list li {
+      font-size: 13px; color: var(--muted);
+      padding: 4px 6px; border-radius: 6px;
+      display: flex; align-items: flex-start; gap: 6px;
+    }
+    .task-list li.done-item  { color: #9ecab4; }
+    .task-list li.done-item::before  { content: "✓"; color: var(--green);  font-weight: 700; flex-shrink: 0; }
+    .task-list li.todo-item::before  { content: "○"; color: var(--blue);   flex-shrink: 0; }
+    .task-list li.bonus-item { color: #c9b87a; }
+    .task-list li.bonus-item::before { content: "★"; color: var(--gold);   flex-shrink: 0; }
+    .task-list li.server-item { color: #7ee8da; }
+    .task-list li.server-item::before { content: "◈"; color: var(--teal); flex-shrink: 0; }
+
+    .milestone-box {
+      background: rgba(76,201,240,.08); border: 1px solid rgba(76,201,240,.2);
+      border-radius: 11px; padding: 9px 11px; font-size: 13px; font-weight: 600;
+    }
+    .week.done   .milestone-box { background: rgba(110,231,183,.08); border-color: rgba(110,231,183,.2); }
+    .week.active .milestone-box { background: rgba(251,146,60,.08);  border-color: rgba(251,146,60,.2); }
+
+    /* SPLIT CARD */
+    .split-card {
+      background: var(--panel2); border: 1px solid var(--line);
+      border-radius: 14px; padding: 12px;
+    }
+    .split-card + .split-card { margin-top: 8px; }
+
+    /* BANNER */
+    .bonus-banner {
+      background: linear-gradient(135deg, rgba(214,173,85,.12), rgba(76,201,240,.08));
+      border: 1px solid rgba(214,173,85,.3);
+      border-radius: 18px; padding: 20px 24px; margin-top: 16px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .bonus-banner .bonus-icon { font-size: 28px; flex-shrink: 0; }
+    .bonus-banner strong { color: var(--gold); display: block; margin-bottom: 4px; font-size: 16px; }
+    .bonus-banner p { margin: 0; color: var(--muted); font-size: 14px; }
+
+    /* SERVER STATUS TABLE */
+    .server-table {
+      width: 100%; border-collapse: collapse; margin-top: 14px; font-size: 13.5px;
+    }
+    .server-table th {
+      text-align: left; color: var(--muted); font-size: 11px;
+      text-transform: uppercase; letter-spacing: .1em;
+      padding: 8px 12px; border-bottom: 1px solid var(--line);
+    }
+    .server-table td { padding: 9px 12px; border-bottom: 1px solid rgba(255,255,255,.05); vertical-align: top; }
+    .server-table tr:last-child td { border-bottom: none; }
+    .server-table .endpoint { font-family: monospace; font-size: 12.5px; color: var(--blue); }
+    .server-table .status-done  { color: var(--green); font-weight: 700; }
+    .server-table .status-stub  { color: var(--purple); font-weight: 700; }
+
+    /* WHAT'S NEXT */
+    .next-up {
+      background: linear-gradient(135deg, rgba(76,201,240,.1), rgba(167,139,250,.08));
+      border: 1px solid rgba(76,201,240,.25);
+      border-radius: 22px; padding: 26px; margin-top: 16px;
+    }
+    .next-up h3 { margin: 0 0 14px; color: var(--blue); font-size: 20px; }
+    .next-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .next-col h4 {
+      margin: 0 0 8px; font-size: 13px;
+      text-transform: uppercase; letter-spacing: .1em; color: var(--gold);
+    }
+    .next-col ul { padding-left: 16px; margin: 0; color: var(--muted); font-size: 13px; }
+    .next-col ul li { margin: 6px 0; }
+
+    /* CORE LOOP */
+    .flow { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-top: 16px; }
+    .step {
+      background: var(--panel); border: 1px solid var(--line);
+      border-radius: 18px; padding: 16px; text-align: center;
+    }
+    .step .icon { font-size: 26px; margin-bottom: 8px; }
+    .step strong { display: block; color: var(--gold); margin-bottom: 4px; font-size: 13px; }
+    .step p { margin: 0 0 8px; color: var(--muted); font-size: 12px; }
+    .step .step-layers { display: flex; flex-direction: column; gap: 3px; }
+    .step .layer-pip {
+      font-size: 10px; font-weight: 700; padding: 2px 6px;
+      border-radius: 4px; text-align: center;
+    }
+    .pip-done   { background: rgba(110,231,183,.15); color: var(--green); }
+    .pip-active { background: rgba(251,146,60,.15);  color: var(--orange); }
+    .pip-next   { background: rgba(76,201,240,.12);  color: var(--blue); }
+    .step.status-done   { border-color: rgba(110,231,183,.25); }
+    .step.status-active { border-color: rgba(251,146,60,.3); }
+    .step.status-server { border-color: rgba(45,212,191,.25); }
+
+    /* PHASE 2 */
+    .phase2-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+    .phase2-card {
+      background: var(--panel); border: 1px solid rgba(167,139,250,.2);
+      border-radius: 18px; padding: 18px; position: relative; overflow: hidden;
+    }
+    .phase2-card.stubbed { border-color: rgba(45,212,191,.3); }
+    .phase2-card::before {
+      content: ""; position: absolute; inset: 0 0 auto 0; height: 4px;
+      background: linear-gradient(90deg, var(--purple), #818cf8);
+    }
+    .phase2-card.stubbed::before { background: linear-gradient(90deg, var(--teal), var(--blue)); }
+    .phase2-card h4 { margin: 0 0 6px; color: var(--purple); font-size: 15px; }
+    .phase2-card.stubbed h4 { color: var(--teal); }
+    .phase2-card .stub-note {
+      font-size: 11px; color: var(--teal); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+    }
+    .phase2-card ul { padding-left: 16px; margin: 0; color: var(--muted); font-size: 13px; }
+    .phase2-card ul li { margin: 5px 0; }
+
+    /* FINISH LINE */
+    .grid-2 { display: grid; grid-template-columns: 1.1fr .9fr; gap: 18px; }
+    .panel-box { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 24px; }
+    .done-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 12px; }
+    .check {
+      border-radius: 11px; padding: 9px 12px; font-weight: 650; font-size: 13px;
+    }
+    .check.done-item  { background: rgba(110,231,183,.08); border: 1px solid rgba(110,231,183,.2); color: var(--green); }
+    .check.server-done{ background: rgba(45,212,191,.08);  border: 1px solid rgba(45,212,191,.25); color: var(--teal); }
+    .check.partial    { background: rgba(251,146,60,.08);  border: 1px solid rgba(251,146,60,.25); color: var(--orange); }
+    .check.todo-item  { background: rgba(76,201,240,.06);  border: 1px solid rgba(76,201,240,.2);  color: var(--blue); }
+    .avoid {
+      background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.22);
+      border-radius: 11px; padding: 9px 12px; color: #ffd9d9; font-size: 13px;
+    }
+    .quote { font-size: 21px; font-weight: 900; letter-spacing: -0.03em; color: white; margin: 0; line-height: 1.35; }
+    .quote em { color: var(--gold); font-style: normal; }
+
+    .footer { color: var(--muted); text-align: center; margin-top: 52px; font-size: 13px; }
+
+    @media (max-width: 1100px) {
+      .timeline, .phase2-grid { grid-template-columns: repeat(2, 1fr); }
+      .stats-row, .flow       { grid-template-columns: repeat(3, 1fr); }
+      .grid-2, .next-cols     { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .timeline, .phase2-grid, .stats-row, .flow { grid-template-columns: 1fr; }
+      .done-list { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<main class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow">Crossworlds BCE · Phase 1 Roadmap v3 · June 2026</div>
+    <h1>Server Unlocked.<br/>Client's Turn.</h1>
+    <p class="subtitle">
+      Weeks 1–3 shipped. Then in one session the server backend for Weeks 4, 5, and 6 went live —
+      inventory, progression, crafting, professions, economy stubs, guild schema, dashboard, and health endpoint.
+      The database is ready for everything Phase 1 needs. All remaining work is Unity client.
+    </p>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="num" style="color:var(--green)">3+</div>
+        <div class="label">Weeks shipped</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:var(--teal)">✓</div>
+        <div class="label">Server backend for Wks 4–6</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:var(--gold)">5</div>
+        <div class="label">Classes (vs 1 planned)</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:var(--purple)">2</div>
+        <div class="label">Phase 2 schemas stubbed</div>
+      </div>
+      <div class="stat-card">
+        <div class="num" style="color:var(--blue)">~3wk</div>
+        <div class="label">Saved vs original plan</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <div class="progress-section">
+    <div class="progress-label">
+      <h3>Phase 1 Progress</h3>
+      <span>~65% complete</span>
+    </div>
+    <div class="bar-track">
+      <div class="bar-fill" style="width: 65%"></div>
+    </div>
+    <div class="week-markers">
+      <span>Wk 1<br/>✅</span>
+      <span>Wk 2<br/>✅</span>
+      <span>Wk 3<br/>✅</span>
+      <span>Wk 4<br/>◈ srv<br/>🔶 client</span>
+      <span>Wk 5<br/>◈ srv<br/>○ client</span>
+      <span>Wk 6<br/>◈ srv<br/>○ client</span>
+      <span>Wk 7<br/>○</span>
+      <span>Wk 8<br/>○</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Complete</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Server done ◈</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>In progress (Unity client)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Upcoming</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Phase 2 stubbed</div>
+    </div>
+  </div>
+
+  <!-- SERVER SUMMARY -->
+  <h2 class="section-title"><span class="icon-box">◈</span> What the Server Session Built</h2>
+  <div class="panel-box">
+    <table class="server-table">
+      <thead>
+        <tr>
+          <th>Area</th>
+          <th>Schema / Tables</th>
+          <th>Endpoints</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Progression</strong></td>
+          <td>characters ← level, xp, gold, stats (str/agi/int/vit)</td>
+          <td class="endpoint">POST /api/character/save-progress</td>
+          <td class="status-done">✅ Live</td>
+        </tr>
+        <tr>
+          <td><strong>Items</strong></td>
+          <td>items (id, name, rarity, type, stat_bonus, icon_id, sell_value)</td>
+          <td class="endpoint">— seeded with 10 starter items —</td>
+          <td class="status-done">✅ Live</td>
+        </tr>
+        <tr>
+          <td><strong>Inventory</strong></td>
+          <td>inventory (character_id, slot_index, item_id, qty, equipped)</td>
+          <td class="endpoint">GET /api/inventory/:id<br/>POST /api/inventory/save<br/>POST /api/inventory/equip</td>
+          <td class="status-done">✅ Live</td>
+        </tr>
+        <tr>
+          <td><strong>Professions</strong></td>
+          <td>professions (character_id, profession_id, skill_level, skill_xp)</td>
+          <td class="endpoint">GET /api/professions/:id</td>
+          <td class="status-done">✅ Live</td>
+        </tr>
+        <tr>
+          <td><strong>Crafting</strong></td>
+          <td>recipes + recipe_ingredients — seeded: bar smelt + 3 copper gear recipes</td>
+          <td class="endpoint">GET /api/recipes?profession=mining<br/>POST /api/craft</td>
+          <td class="status-done">✅ Live</td>
+        </tr>
+        <tr>
+          <td><strong>Economy (stub)</strong></td>
+          <td>gold_transactions, marketplace_listings</td>
+          <td class="endpoint">— schema only, no endpoints yet —</td>
+          <td class="status-stub">◈ Stubbed</td>
+        </tr>
+        <tr>
+          <td><strong>Guilds (stub)</strong></td>
+          <td>guilds, guild_members</td>
+          <td class="endpoint">— schema only, no endpoints yet —</td>
+          <td class="status-stub">◈ Stubbed</td>
+        </tr>
+        <tr>
+          <td><strong>Ops</strong></td>
+          <td>—</td>
+          <td class="endpoint">GET /api/health<br/>Dashboard updated (port 4000)</td>
+          <td class="status-done">✅ Live</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- WEEKS 1–4 -->
+  <h2 class="section-title"><span class="icon-box">🗓️</span> Weeks 1–4 · Foundation</h2>
+  <section class="timeline">
+
+    <!-- WEEK 1 -->
+    <div class="week done">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 1</div><h3>Foundation</h3></div>
+        <span class="badge badge-done">Done</span>
+      </div>
+      <ul class="task-list">
+        <li class="done-item">Mirror + KCP transport</li>
+        <li class="done-item">Multiplayer player spawning</li>
+        <li class="done-item">Hub scene</li>
+        <li class="done-item">Login (JWT) + character select</li>
+        <li class="done-item">In-game chat</li>
+        <li class="bonus-item">VPS live — 15.204.243.36</li>
+        <li class="bonus-item">Auth server Node/Express/MySQL</li>
+        <li class="bonus-item">Dashboard port 4000</li>
+      </ul>
+      <div class="milestone-box">✅ Players can connect from anywhere.</div>
+    </div>
+
+    <!-- WEEK 2 -->
+    <div class="week done">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 2</div><h3>Portal System</h3></div>
+        <span class="badge badge-done">Done</span>
+      </div>
+      <ul class="task-list">
+        <li class="done-item">Scene flow: Login → CharSelect → Hub</li>
+        <li class="done-item">ESC menu + camera orbit</li>
+        <li class="done-item">Multiplayer sync confirmed</li>
+        <li class="done-item">Portal room in hub</li>
+        <li class="todo-item">Portal → arena scene load</li>
+        <li class="todo-item">Arena geometry</li>
+        <li class="todo-item">Return to hub flow</li>
+      </ul>
+      <div class="milestone-box">🔶 Hub works. Portal transition is the active gap.</div>
+    </div>
+
+    <!-- WEEK 3 -->
+    <div class="week done">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 3</div><h3>Combat — 5 Classes</h3></div>
+        <span class="badge badge-bonus">Exceeded</span>
+      </div>
+      <ul class="task-list">
+        <li class="bonus-item">Warden · Ironclad · Shadowblade</li>
+        <li class="bonus-item">Cleric · Arcanist</li>
+        <li class="done-item">Ability tables + combos designed</li>
+        <li class="done-item">Class prefabs in editor</li>
+        <li class="todo-item">Enemy chase → attack → death</li>
+        <li class="todo-item">Multiplayer hit confirmation</li>
+      </ul>
+      <div class="milestone-box">🚀 5 classes. Plan was 1.</div>
+    </div>
+
+    <!-- WEEK 4 -->
+    <div class="week active">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 4</div><h3>Loot + Enemies</h3></div>
+        <span class="badge badge-active">Active</span>
+      </div>
+      <div class="split-card">
+        <span class="layer-label layer-server">◈ Server — Done</span>
+        <ul class="task-list">
+          <li class="server-item">items table + 10 starter items seeded</li>
+          <li class="server-item">inventory table + save/equip endpoints</li>
+          <li class="server-item">GET /api/inventory loads full item data</li>
+        </ul>
+      </div>
+      <div class="split-card">
+        <span class="layer-label layer-client">Unity — Remaining</span>
+        <ul class="task-list">
+          <li class="todo-item">Enemy prefabs (grunt, ranged, elite)</li>
+          <li class="todo-item">NavMesh + aggro → attack → death</li>
+          <li class="todo-item">Drop table component on enemy</li>
+          <li class="todo-item">WorldItem prefab (float + glow)</li>
+          <li class="todo-item">Pickup zone → call inventory/save</li>
+          <li class="todo-item">Inventory bag UI (grid + tooltip)</li>
+          <li class="todo-item">Equip → call inventory/equip → stat update</li>
+          <li class="todo-item">Gold counter on HUD</li>
+        </ul>
+      </div>
+      <div class="milestone-box">🎯 Kill → drop → pick up → equip → stronger.</div>
+    </div>
+
+  </section>
+
+  <!-- WEEKS 5–8 -->
+  <h2 class="section-title"><span class="icon-box">⚡</span> Weeks 5–8 · Loop Completion</h2>
+  <section class="timeline">
+
+    <!-- WEEK 5 -->
+    <div class="week next">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 5</div><h3>Progression</h3></div>
+        <span class="badge badge-next">Up Next</span>
+      </div>
+      <div class="split-card">
+        <span class="layer-label layer-server">◈ Server — Done</span>
+        <ul class="task-list">
+          <li class="server-item">level, xp, gold, str/agi/int/vit on characters</li>
+          <li class="server-item">POST /api/character/save-progress</li>
+          <li class="server-item">Login endpoint returns full stat block</li>
+        </ul>
+      </div>
+      <div class="split-card">
+        <span class="layer-label layer-client">Unity — Remaining</span>
+        <ul class="task-list">
+          <li class="todo-item">XP bar on HUD</li>
+          <li class="todo-item">Level-up screen + stat point display</li>
+          <li class="todo-item">Class stat bonuses applied on level</li>
+          <li class="todo-item">Equip updates live stats in combat</li>
+          <li class="todo-item">Character sheet panel (C key)</li>
+          <li class="todo-item">Level-up VFX + sound</li>
+          <li class="todo-item">Call save-progress on level up + hub return</li>
+          <li class="todo-item">Level 1–15 XP curve tuning</li>
+        </ul>
+      </div>
+      <div class="milestone-box">🎯 Log off, log back in — character is stronger.</div>
+    </div>
+
+    <!-- WEEK 6 -->
+    <div class="week next">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 6</div><h3>Crafting Loop</h3></div>
+        <span class="badge badge-next">Up Next</span>
+      </div>
+      <div class="split-card">
+        <span class="layer-label layer-server">◈ Server — Done</span>
+        <ul class="task-list">
+          <li class="server-item">professions table + GET endpoint</li>
+          <li class="server-item">recipes + recipe_ingredients seeded</li>
+          <li class="server-item">POST /api/craft — validates, deducts, inserts</li>
+          <li class="server-item">Profession XP + skill level-up logic</li>
+        </ul>
+      </div>
+      <div class="split-card">
+        <span class="layer-label layer-client">Unity — Remaining</span>
+        <ul class="task-list">
+          <li class="todo-item">Copper Golem dungeon / mining portal</li>
+          <li class="todo-item">Ore node prefab + gather interaction</li>
+          <li class="todo-item">Ore node respawn timer</li>
+          <li class="todo-item">Forge NPC in hub</li>
+          <li class="todo-item">Crafting UI: recipe list → ingredients → craft</li>
+          <li class="todo-item">Call POST /api/craft → refresh inventory</li>
+          <li class="todo-item">Profession skill bar UI</li>
+        </ul>
+      </div>
+      <div class="milestone-box">🎯 Gather → smelt → craft → equip. Loop closes.</div>
+    </div>
+
+    <!-- WEEK 7 -->
+    <div class="week next">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 7</div><h3>Polish + Feel</h3></div>
+        <span class="badge badge-next">Up Next</span>
+      </div>
+      <ul class="task-list">
+        <li class="todo-item">Floating damage numbers (color by type)</li>
+        <li class="todo-item">Enemy + player health bars</li>
+        <li class="todo-item">Ability hotbar with icons</li>
+        <li class="todo-item">Hit VFX per damage type</li>
+        <li class="todo-item">Class-specific ability VFX</li>
+        <li class="todo-item">Death anim + respawn timer</li>
+        <li class="todo-item">Hit + ambient SFX</li>
+        <li class="todo-item">Wave counter / arena readability</li>
+        <li class="todo-item">Hub NPCs + lighting pass</li>
+        <li class="todo-item">Static minimap</li>
+      </ul>
+      <div class="milestone-box">🎯 First-time player says "this feels like a real game."</div>
+    </div>
+
+    <!-- WEEK 8 -->
+    <div class="week next">
+      <div class="week-stripe"></div>
+      <div class="week-top">
+        <div><div class="week-num">Week 8</div><h3>Playtest + Phase 2 Prep</h3></div>
+        <span class="badge badge-next">Up Next</span>
+      </div>
+      <ul class="task-list">
+        <li class="todo-item">Invite 10–20 testers</li>
+        <li class="todo-item">Observe silently — no explanations</li>
+        <li class="todo-item">Track session length, deaths, first moves</li>
+        <li class="todo-item">Feedback form: fun, confusion, next want</li>
+        <li class="todo-item">Stress test: 10+ concurrent players</li>
+        <li class="todo-item">Monitor /api/health under load</li>
+        <li class="todo-item">Phase 2 priority vote from testers</li>
+        <li class="todo-item">Write Phase 2 roadmap</li>
+      </ul>
+      <div class="milestone-box">🎯 "Is this fun enough to build Phase 2 around?"</div>
+    </div>
+
+  </section>
+
+  <!-- WHAT'S NEXT -->
+  <div class="next-up">
+    <h3>🎯 Immediate Focus — Week 4 Unity Work</h3>
+    <p style="margin: 0 0 16px; color: var(--muted); font-size: 14px;">
+      Server is ready. Everything below is Unity client only — no more backend blockers for Phase 1.
+    </p>
+    <div class="next-cols">
+      <div class="next-col">
+        <h4>Enemies</h4>
+        <ul>
+          <li>2 enemy prefabs (grunt + ranged)</li>
+          <li>NavMesh bake in arena</li>
+          <li>Aggro radius → chase → attack hitbox</li>
+          <li>Death → drop spawn → despawn</li>
+          <li>Wave spawner script (N enemies, escalate)</li>
+        </ul>
+      </div>
+      <div class="next-col">
+        <h4>Drop System</h4>
+        <ul>
+          <li>DropTable ScriptableObject on each enemy</li>
+          <li>Roll on death → instantiate WorldItem prefab</li>
+          <li>WorldItem: float, rotate, glow by rarity color</li>
+          <li>Pickup sphere → POST /api/inventory/save</li>
+          <li>Gold added to character.gold + save-progress</li>
+        </ul>
+      </div>
+      <div class="next-col">
+        <h4>Inventory UI</h4>
+        <ul>
+          <li>Bag: 4×6 grid, load from GET /api/inventory</li>
+          <li>Slot hover tooltip (name, stats, rarity color)</li>
+          <li>Right-click: equip → POST /api/inventory/equip</li>
+          <li>Equipped items update player stat block live</li>
+          <li>Auto-save inventory on hub return</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- CORE LOOP -->
+  <h2 class="section-title"><span class="icon-box">🔁</span> Core Loop Status</h2>
+  <section class="flow">
+    <div class="step status-done">
+      <div class="icon">🏰</div><strong>Hub</strong>
+      <p>Live on VPS. Chat, ESC, camera all work.</p>
+      <div class="step-layers">
+        <div class="layer-pip pip-done">Client ✅</div>
+        <div class="layer-pip pip-done">Server ✅</div>
+      </div>
+    </div>
+    <div class="step status-active">
+      <div class="icon">🌀</div><strong>Portal</strong>
+      <p>Hub exists. Arena transition in progress.</p>
+      <div class="step-layers">
+        <div class="layer-pip pip-active">Client 🔶</div>
+        <div class="layer-pip pip-done">Server ✅</div>
+      </div>
+    </div>
+    <div class="step status-done">
+      <div class="icon">⚔️</div><strong>Combat</strong>
+      <p>5 classes designed. Enemy AI next.</p>
+      <div class="step-layers">
+        <div class="layer-pip pip-active">Client 🔶</div>
+        <div class="layer-pip pip-done">Server ✅</div>
+      </div>
+    </div>
+    <div class="step status-server">
+      <div class="icon">💰</div><strong>Loot</strong>
+      <p>Inventory + items API ready.</p>
+      <div class="step-layers">
+        <div class="layer-pip pip-active">Client 🔶 now</div>
+        <div class="layer-pip pip-done">Server ✅</div>
+      </div>
+    </div>
+    <div class="step status-server">
+      <div class="icon">📈</div><strong>Progress</strong>
+      <p>level/xp/gold/stats API ready.</p>
+      <div class="step-layers">
+        <div class="layer-pip pip-next">Client ○ Wk 5</div>
+        <div class="layer-pip pip-done">Server ✅</div>
+      </div>
+    </div>
+    <div class="step status-server">
+      <div class="icon">🔥</div><strong>Craft</strong>
+      <p>Recipes + craft endpoint live.</p>
+      <div class="step-layers">
+        <div class="layer-pip pip-next">Client ○ Wk 6</div>
+        <div class="layer-pip pip-done">Server ✅</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHASE 2 -->
+  <h2 class="section-title"><span class="icon-box">🔭</span> Phase 2 — Schema Already Stubbed</h2>
+  <p style="color:var(--muted); margin: 0 0 4px; font-size: 14px;">
+    The teal cards have tables in the DB already. Phase 2 work is endpoints + Unity client — the hardest design decisions are done.
+  </p>
+  <div class="phase2-grid">
+    <div class="phase2-card stubbed">
+      <h4>🏪 Marketplace</h4>
+      <div class="stub-note">◈ Schema in DB</div>
+      <ul>
+        <li>marketplace_listings table live</li>
+        <li>gold_transactions table live</li>
+        <li>Need: list/buy/cancel endpoints</li>
+        <li>Need: Unity AH browser UI</li>
+      </ul>
+    </div>
+    <div class="phase2-card stubbed">
+      <h4>⚔️ Guilds</h4>
+      <div class="stub-note">◈ Schema in DB</div>
+      <ul>
+        <li>guilds + guild_members tables live</li>
+        <li>Need: create/join/leave endpoints</li>
+        <li>Need: Unity guild panel UI</li>
+        <li>Need: guild chat channel</li>
+      </ul>
+    </div>
+    <div class="phase2-card">
+      <h4>📜 Quests</h4>
+      <ul>
+        <li>Quest giver NPCs in hub</li>
+        <li>Kill N / gather N / deliver types</li>
+        <li>Quest log UI</li>
+        <li>XP + unique item rewards</li>
+      </ul>
+    </div>
+    <div class="phase2-card">
+      <h4>🏰 More Dungeons</h4>
+      <ul>
+        <li>3–5 tier dungeon progression</li>
+        <li>Boss at end of each dungeon</li>
+        <li>World boss (hub-wide timed event)</li>
+        <li>Daily / weekly challenges</li>
+      </ul>
+    </div>
+    <div class="phase2-card">
+      <h4>🎯 Talent Trees</h4>
+      <ul>
+        <li>3 paths per class</li>
+        <li>Points at levels 5, 10, 15…</li>
+        <li>Respec cost (gold sink)</li>
+        <li>Passive + active talents</li>
+      </ul>
+    </div>
+    <div class="phase2-card">
+      <h4>🌍 World Expansion</h4>
+      <ul>
+        <li>Second hub biome</li>
+        <li>Outdoor overworld portal</li>
+        <li>Mounts (speed boost)</li>
+        <li>Housing — instanced rooms</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- FINISH LINE -->
+  <h2 class="section-title"><span class="icon-box">🎯</span> Phase 1 Finish Line</h2>
+  <section class="grid-2">
+    <div class="panel-box">
+      <p class="quote">
+        Can four players <em>log in from anywhere</em>, enter a portal together,
+        kill monsters for loot, level up, craft an upgrade, and return to the hub
+        <em>wanting to do it again?</em>
+      </p>
+    </div>
+    <div class="panel-box">
+      <h3 style="margin: 0 0 12px; font-size: 17px;">End of Phase 1 Checklist</h3>
+      <div class="done-list">
+        <div class="check done-item">✅ Login (JWT)</div>
+        <div class="check done-item">✅ Character select</div>
+        <div class="check done-item">✅ Multiplayer hub</div>
+        <div class="check done-item">✅ Chat</div>
+        <div class="check done-item">✅ VPS live server</div>
+        <div class="check done-item">✅ 5 classes built</div>
+        <div class="check server-done">◈ Inventory API</div>
+        <div class="check server-done">◈ Progression API</div>
+        <div class="check server-done">◈ Crafting API</div>
+        <div class="check partial">🔶 Portal to arena</div>
+        <div class="check todo-item">○ Kill → loot (Unity)</div>
+        <div class="check todo-item">○ Level up (Unity)</div>
+        <div class="check todo-item">○ Craft an item (Unity)</div>
+        <div class="check todo-item">○ Return to hub</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOT PHASE 1 -->
+  <h2 class="section-title"><span class="icon-box">🚫</span> Still Not Phase 1</h2>
+  <section class="panel-box">
+    <div class="done-list">
+      <div class="avoid">AH endpoints (schema done)</div>
+      <div class="avoid">Guild endpoints (schema done)</div>
+      <div class="avoid">Quests</div>
+      <div class="avoid">Mail</div>
+      <div class="avoid">Housing</div>
+      <div class="avoid">Mounts</div>
+      <div class="avoid">Raids</div>
+      <div class="avoid">PvP</div>
+      <div class="avoid">Talent Trees</div>
+      <div class="avoid">Multiple Dungeons</div>
+      <div class="avoid">Multiple Continents</div>
+      <div class="avoid">A 6th Class</div>
+    </div>
+  </section>
+
+  <div class="footer">
+    Crossworlds BCE · Phase 1 Roadmap v3 · June 2026 · Server unlocked. Build the client.
+  </div>
+
+</main>
+</body>
+</html>
