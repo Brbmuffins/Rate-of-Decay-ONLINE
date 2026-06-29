@@ -144,6 +144,15 @@ public class RodNetworkManager : NetworkManager
             return;
         }
 
+        // Guard against a client sending CreatePlayerMessage more than once.
+        // A second AddPlayerForConnection throws and leaks the just-instantiated
+        // prefab as an orphan in the server scene.
+        if (conn.identity != null)
+        {
+            Debug.LogWarning("[RodNM] Connection already has a player — ignoring duplicate CreatePlayerMessage.");
+            return;
+        }
+
         var auth = conn.authenticationData as RodPlayerAuth;
 
         // Class: prefer DB value; fall back to what the client sent (dev mode only)

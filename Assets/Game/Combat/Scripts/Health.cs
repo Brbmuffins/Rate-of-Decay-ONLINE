@@ -35,6 +35,7 @@ public class Health : MonoBehaviour
     private Health _redirectTarget      = null;
     private float  _redirectFraction    = 0f;
     private float  _redirectExpiry      = 0f;
+    private bool   _isRedirecting       = false; // re-entrancy guard for mutual redirects
 
     // ── Damage Absorption (Kinetic Reversal) ──────────────────────
     // When active, absorbed damage accumulates instead of hitting HP.
@@ -103,12 +104,17 @@ public class Health : MonoBehaviour
         // Gear damage reduction (attunement system) — stacks multiplicatively
         amount *= (1f - _gearDamageReduction);
 
-        // Damage redirect (Transfer Protocol) — redirect sends a portion to the medic
-        if (_redirectTarget != null && _redirectTarget.IsAlive && Time.time < _redirectExpiry)
+        // Damage redirect (Transfer Protocol) — redirect sends a portion to the medic.
+        // _isRedirecting prevents an infinite loop when two Healths redirect to each
+        // other (A→B while B→A): the re-entrant call skips its own redirect branch.
+        if (_redirectTarget != null && _redirectTarget.IsAlive
+            && Time.time < _redirectExpiry && !_isRedirecting)
         {
             float redirected = amount * _redirectFraction;
             amount -= redirected;
+            _isRedirecting = true;
             _redirectTarget.TakeDamage(redirected); // no source override for the redirect
+            _isRedirecting = false;
         }
 
         // Absorption (Kinetic Reversal) — intercept damage before shield/HP
@@ -161,6 +167,7 @@ public class Health : MonoBehaviour
     // Redirects `fraction` (0–1) of incoming damage to `target` for `duration` seconds.
     public void SetDamageRedirect(Health target, float fraction, float duration)
     {
+        if (target == this) return;   // never redirect to self (would loop)
         _redirectTarget   = target;
         _redirectFraction = fraction;
         _redirectExpiry   = Time.time + duration;

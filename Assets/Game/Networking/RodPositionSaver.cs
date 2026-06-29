@@ -56,8 +56,16 @@ class PositionSaveRoutine : MonoBehaviour
 
     IEnumerator DoSave(string url, string jwt, int charId, Vector3 pos, float orientation)
     {
-        string json = $"{{\"x\":{pos.x:F3},\"y\":{pos.y:F3},\"z\":{pos.z:F3}," +
-                      $"\"map\":\"GameWorld\",\"orientation\":{orientation:F3}}}";
+        // Force invariant culture so floats always serialize with a '.' decimal
+        // separator. On a build whose OS locale uses ',' (much of Europe) the old
+        // interpolation produced "x":1,234 — invalid JSON — and the save silently failed.
+        var ic = System.Globalization.CultureInfo.InvariantCulture;
+        string json = "{" +
+                      $"\"x\":{pos.x.ToString("F3", ic)}," +
+                      $"\"y\":{pos.y.ToString("F3", ic)}," +
+                      $"\"z\":{pos.z.ToString("F3", ic)}," +
+                      $"\"map\":\"GameWorld\"," +
+                      $"\"orientation\":{orientation.ToString("F3", ic)}}}";
 
         using var req = new UnityWebRequest($"{url}/character/position", "PATCH");
         req.uploadHandler   = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));

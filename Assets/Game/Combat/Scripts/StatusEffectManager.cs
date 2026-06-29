@@ -74,6 +74,8 @@ public class StatusEffectManager : MonoBehaviour
             if (_effects[i].type == effect.type)
             {
                 _effects[i].remainingTime = Mathf.Max(_effects[i].remainingTime, effect.duration);
+                _effects[i].value         = Mathf.Max(_effects[i].value, effect.value); // keep the stronger magnitude on refresh
+                _effects[i].source        = effect.source;
                 return;
             }
         }

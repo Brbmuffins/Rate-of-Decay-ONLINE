@@ -128,7 +128,7 @@ public class WaveManager : MonoBehaviour
     public void JumpToWave(int waveIndex)
     {
         StopAllCoroutines();
-        _aliveEnemies.Clear();
+        DespawnRemaining(); // destroy current enemies instead of orphaning them (also clears the list)
         waveIndex = Mathf.Clamp(waveIndex - 1, 0, waves.Length - 1); // convert 1-based to 0-based
         _currentWave = waveIndex;
         _running     = true;

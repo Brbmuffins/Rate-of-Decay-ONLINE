@@ -171,6 +171,7 @@ public class RodChatManager : NetworkBehaviour
             username = auth.username;
 
         long ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        Debug.Log($"[CHAT] {username}: {message}");
         RpcReceiveChat(username, message, ts);
     }
 
