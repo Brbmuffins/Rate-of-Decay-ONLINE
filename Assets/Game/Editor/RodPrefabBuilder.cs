@@ -17,6 +17,11 @@ public static class RodPrefabBuilder
     const string ANIM_CTRL     = "Assets/Game/Characters/Engineer/Animations/AnimationController.controller";
 
     static readonly string[] ClassNames = { "Warden", "Ironclad", "Shadowblade", "Cleric", "Arcanist" };
+    static readonly string[] ExistingCombatPrefabNames =
+    {
+        "Warden", "Ironclad", "Shadowblade", "Cleric", "Arcanist",
+        "Engineer", "Guardian", "Medic", "Wraith"
+    };
 
     [MenuItem("BCE/Setup/4 ▶ Create Class Prefabs (5 Classes)", priority = 4)]
     static void Build()
@@ -67,6 +72,8 @@ public static class RodPrefabBuilder
 
             // Player movement (handles local-vs-remote check internally)
             go.AddComponent<PlayerMovement>();
+
+            EnsureCombatStack(go);
 
             // Attach the FBX model as a child
             GameObject modelChild = (GameObject)PrefabUtility.InstantiatePrefab(sourceFbx, go.transform);
@@ -142,6 +149,54 @@ public static class RodPrefabBuilder
         }
 
         ShowDone(builtPaths, wired);
+    }
+
+    [MenuItem("BCE/Setup/4f ▶ Add Combat Stack To Class Prefabs", priority = 6)]
+    static void AddCombatStackToExistingPrefabs()
+    {
+        Directory.CreateDirectory(PREFABS_DIR);
+
+        int updated = 0;
+        foreach (var className in ExistingCombatPrefabNames)
+        {
+            string path = PREFABS_DIR + "/" + className + ".prefab";
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning("[BCE] Prefab not found: " + path);
+                continue;
+            }
+
+            using (var scope = new PrefabUtility.EditPrefabContentsScope(path))
+            {
+                EnsureCombatStack(scope.prefabContentsRoot);
+                updated++;
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+        EditorUtility.DisplayDialog("Combat Stack Added",
+            $"Updated {updated} class prefab(s).\n\nAdded missing Health, StatusEffectManager, CharacterStats, and AbilityCaster components.",
+            "Done");
+    }
+
+    static void EnsureCombatStack(GameObject root)
+    {
+        if (root.GetComponent<Health>() == null)
+        {
+            var health = root.AddComponent<Health>();
+            health.isPlayer = true;
+            health.maxHealth = 100f;
+        }
+
+        if (root.GetComponent<StatusEffectManager>() == null)
+            root.AddComponent<StatusEffectManager>();
+
+        if (root.GetComponent<CharacterStats>() == null)
+            root.AddComponent<CharacterStats>();
+
+        if (root.GetComponent<AbilityCaster>() == null)
+            root.AddComponent<AbilityCaster>();
     }
 
     // ── Step 5: Fix AnimatorController on existing prefabs ────────────────────

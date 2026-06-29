@@ -60,7 +60,7 @@ public class AbilityDef
     public GameObject deployablePrefab;
 }
 
-public class AbilityCaster : MonoBehaviour
+public class AbilityCaster : NetworkBehaviour
 {
     public Camera cam;
     public Inventory inventory;
@@ -207,7 +207,7 @@ public class AbilityCaster : MonoBehaviour
         // with client-only systems. Only the local player's caster stays active.
         // (Matches the isLocalPlayer guard in PlayerMovement.Start.)
         var netId = GetComponent<NetworkIdentity>();
-        if (netId != null && !netId.isLocalPlayer)
+        if (netId != null && NetworkClient.active && !NetworkServer.active && !netId.isLocalPlayer)
         {
             enabled = false;
             return;
@@ -227,6 +227,8 @@ public class AbilityCaster : MonoBehaviour
 
     void Start()
     {
+        if (!ShouldProcessLocalInput()) return;
+
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -247,8 +249,23 @@ public class AbilityCaster : MonoBehaviour
         if (spellbookIndex < 0 || spellbookIndex >= spellbook.Length) return;
         if (!IsAllowedByClass(spellbookIndex)) return;
 
+        if (ShouldRouteCastToServer())
+            CmdEquipSpell(spellbookIndex, slot);
+
         if (heldAbilityIndex == slot)
             CancelAim();
+
+        equippedIndices[slot] = spellbookIndex;
+        _equippedAbilities[slot] = spellbook[spellbookIndex];
+        cooldownTimers[slot] = 0f;
+    }
+
+    [Command]
+    void CmdEquipSpell(int spellbookIndex, int slot)
+    {
+        if (slot < 0 || slot >= 4) return;
+        if (spellbookIndex < 0 || spellbookIndex >= spellbook.Length) return;
+        if (!IsAllowedByClass(spellbookIndex)) return;
 
         equippedIndices[slot] = spellbookIndex;
         _equippedAbilities[slot] = spellbook[spellbookIndex];
@@ -310,6 +327,9 @@ public class AbilityCaster : MonoBehaviour
                 activeShieldVFX = null;
             }
         }
+
+        if (!ShouldProcessLocalInput())
+            return;
 
         for (int i = 0; i < 4; i++)
         {
@@ -408,6 +428,17 @@ public class AbilityCaster : MonoBehaviour
             case 3: return Keyboard.current.digit4Key;
             default: return null;
         }
+    }
+
+    bool ShouldProcessLocalInput()
+    {
+        if (!NetworkClient.active && !NetworkServer.active) return true;
+        return isLocalPlayer;
+    }
+
+    bool ShouldRouteCastToServer()
+    {
+        return NetworkClient.active && !NetworkServer.active && isLocalPlayer;
     }
 
     Vector3 GetCameraAimPoint()
@@ -565,6 +596,27 @@ public class AbilityCaster : MonoBehaviour
 
     void FinalizeCast(AbilityDef ability, GameObject indicator, float aimTime)
     {
+        if (ShouldRouteCastToServer())
+        {
+            int spellbookIndex = FindSpellbookIndex(ability);
+            if (spellbookIndex < 0)
+            {
+                Debug.LogWarning($"[COMBAT] Could not route unknown ability '{ability?.abilityName}' to server.");
+                return;
+            }
+
+            Vector3    castPosition = indicator != null ? indicator.transform.position : transform.position;
+            Quaternion castRotation = indicator != null ? indicator.transform.rotation : transform.rotation;
+            Vector3    castScale    = indicator != null ? indicator.transform.localScale : Vector3.one;
+
+            CmdFinalizeCast(spellbookIndex, castPosition, castRotation, castScale, aimTime);
+            PlayLocalCastFeedback(ability, castPosition, castRotation);
+
+            if (indicator != null)
+                Destroy(indicator, castDelay);
+            return;
+        }
+
         Debug.Log("Cast ability: " + ability.abilityName);
 
         // Notify passive (Phase Charge meter, etc.)
@@ -620,6 +672,73 @@ public class AbilityCaster : MonoBehaviour
 
         if (indicator != null)
             Destroy(indicator, castDelay);
+    }
+
+    [Command]
+    void CmdFinalizeCast(int spellbookIndex, Vector3 castPosition, Quaternion castRotation, Vector3 castScale, float aimTime)
+    {
+        if (spellbookIndex < 0 || spellbookIndex >= spellbook.Length) return;
+
+        int equippedSlot = FindEquippedSlotForSpellbookIndex(spellbookIndex);
+        if (equippedSlot < 0)
+        {
+            Debug.LogWarning($"[COMBAT] Rejected unequipped ability index {spellbookIndex} from {name}.");
+            return;
+        }
+
+        AbilityDef ability = spellbook[spellbookIndex];
+        if (ability == null) return;
+        if (cooldownTimers[equippedSlot] > 0f) return;
+
+        GameObject serverIndicator = CreateServerCastProxy(ability, castPosition, castRotation, castScale);
+        FinalizeCast(ability, serverIndicator, aimTime);
+        cooldownTimers[equippedSlot] = CooldownFor(ability);
+
+        RpcCastConfirmed(spellbookIndex, castPosition, castRotation);
+    }
+
+    [ClientRpc]
+    void RpcCastConfirmed(int spellbookIndex, Vector3 position, Quaternion rotation)
+    {
+        if (isLocalPlayer) return;
+        if (spellbookIndex < 0 || spellbookIndex >= spellbook.Length) return;
+        PlayLocalCastFeedback(spellbook[spellbookIndex], position, rotation);
+    }
+
+    GameObject CreateServerCastProxy(AbilityDef ability, Vector3 position, Quaternion rotation, Vector3 scale)
+    {
+        if (ability == null || ability.range <= 0f) return null;
+
+        GameObject proxy = new GameObject($"ServerCast_{ability.abilityName}");
+        proxy.transform.position = position;
+        proxy.transform.rotation = rotation;
+        proxy.transform.localScale = scale;
+        Destroy(proxy, 1f);
+        return proxy;
+    }
+
+    void PlayLocalCastFeedback(AbilityDef ability, Vector3 position, Quaternion rotation)
+    {
+        if (ability == null) return;
+        castAnimator?.PlayCast(ability.category);
+        if (ability.castVFX != null)
+            SpawnVFX(ability.castVFX, position + Vector3.up, rotation);
+    }
+
+    int FindSpellbookIndex(AbilityDef ability)
+    {
+        if (ability == null || spellbook == null) return -1;
+        for (int i = 0; i < spellbook.Length; i++)
+            if (ReferenceEquals(spellbook[i], ability)) return i;
+        return -1;
+    }
+
+    int FindEquippedSlotForSpellbookIndex(int spellbookIndex)
+    {
+        if (equippedIndices == null) return -1;
+        for (int i = 0; i < equippedIndices.Length && i < cooldownTimers.Length; i++)
+            if (equippedIndices[i] == spellbookIndex) return i;
+        return -1;
     }
 
     // ── Ability dispatch ─────────────────────────────────────────

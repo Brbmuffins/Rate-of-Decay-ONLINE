@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.Events;
+using Mirror;
 
 // Extended Health — replaces the original.
 // Backward compatible: TakeDamage / Heal / ApplyShield / currentHealth / maxHealth
 // all work identically. New features are additive.
-public class Health : MonoBehaviour
+public class Health : NetworkBehaviour
 {
     [Header("Settings")]
+    [SyncVar(hook = nameof(OnMaxHealthSynced))]
     public float maxHealth = 100f;
+    [SyncVar(hook = nameof(OnCurrentHealthSynced))]
     public float currentHealth;
     public bool isPlayer  = false;  // players go downed instead of dying outright
     public bool isRobotic = false;  // Defibrillator deals 60 burst dmg to robotics
@@ -26,6 +29,7 @@ public class Health : MonoBehaviour
     public  float ShieldRemaining => _shieldRemaining;
 
     // ── Down State (players only) ──────────────────────────────────
+    [SyncVar(hook = nameof(OnDownedSynced))]
     private bool _isDowned = false;
     public  bool IsDowned  => _isDowned;
     public  bool IsAlive   => !_isDowned && currentHealth > 0f;
@@ -62,12 +66,30 @@ public class Health : MonoBehaviour
     void Awake()
     {
         _baseMaxHealth = maxHealth;
-        currentHealth  = maxHealth;
+        if (!NetworkClient.active && !NetworkServer.active)
+            currentHealth = maxHealth;
         _statusEffects = GetComponent<StatusEffectManager>();
+    }
+
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+        if (currentHealth <= 0f)
+            currentHealth = maxHealth;
+    }
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        onHealthChanged?.Invoke(currentHealth, maxHealth);
+        onDownedChanged?.Invoke(_isDowned);
     }
 
     void Update()
     {
+        if (NetworkClient.active && !NetworkServer.active)
+            return;
+
         // Clear expired redirect
         if (_redirectTarget != null && Time.time >= _redirectExpiry)
             ClearRedirect();
@@ -81,6 +103,7 @@ public class Health : MonoBehaviour
 
     public void ApplyShield(float amount)
     {
+        if (!CanMutateCombatState()) return;
         _shieldRemaining = Mathf.Max(_shieldRemaining, amount);
     }
 
@@ -90,6 +113,7 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(float amount, GameObject source = null)
     {
+        if (!CanMutateCombatState()) return;
         if (_isDowned) return;
         if (currentHealth <= 0f) return;
         if (isInvulnerable) return;   // dodge roll i-frames
@@ -145,6 +169,7 @@ public class Health : MonoBehaviour
 
     public void Heal(float amount)
     {
+        if (!CanMutateCombatState()) return;
         if (_isDowned || currentHealth <= 0f) return;
         float actual = Mathf.Min(amount, maxHealth - currentHealth);
         if (actual <= 0f) return;
@@ -156,6 +181,7 @@ public class Health : MonoBehaviour
     // Defibrillator: revive a downed player at hpPercent (e.g. 0.3 = 30%)
     public void Revive(float hpPercent)
     {
+        if (!CanMutateCombatState()) return;
         if (!_isDowned) return;
         _isDowned     = false;
         currentHealth = maxHealth * Mathf.Clamp01(hpPercent);
@@ -167,6 +193,7 @@ public class Health : MonoBehaviour
     // Redirects `fraction` (0–1) of incoming damage to `target` for `duration` seconds.
     public void SetDamageRedirect(Health target, float fraction, float duration)
     {
+        if (!CanMutateCombatState()) return;
         if (target == this) return;   // never redirect to self (would loop)
         _redirectTarget   = target;
         _redirectFraction = fraction;
@@ -175,6 +202,7 @@ public class Health : MonoBehaviour
 
     public void ClearRedirect()
     {
+        if (!CanMutateCombatState()) return;
         _redirectTarget   = null;
         _redirectFraction = 0f;
     }
@@ -182,6 +210,7 @@ public class Health : MonoBehaviour
     // ── Kinetic Reversal ──────────────────────────────────────────
     public void BeginAbsorption(float duration)
     {
+        if (!CanMutateCombatState()) return;
         _absorbing        = true;
         _absorbedAmount   = 0f;
         _absorptionExpiry = Time.time + duration;
@@ -189,18 +218,29 @@ public class Health : MonoBehaviour
 
     public void EndAbsorption()
     {
+        if (!CanMutateCombatState()) return;
         _absorbing = false;
     }
 
     // ── Siege Mode / Threat Protocol ─────────────────────────────
-    public void SetDamageReduction(float fraction) => _damageReductionBonus = Mathf.Clamp01(fraction);
-    public void ClearDamageReduction()             => _damageReductionBonus = 0f;
+    public void SetDamageReduction(float fraction)
+    {
+        if (!CanMutateCombatState()) return;
+        _damageReductionBonus = Mathf.Clamp01(fraction);
+    }
+
+    public void ClearDamageReduction()
+    {
+        if (!CanMutateCombatState()) return;
+        _damageReductionBonus = 0f;
+    }
 
     // ── Gear / Attunement channels (called by CharacterStats) ─────
     // Adjusts max HP by the gear bonus, preserving current HP (and granting
     // the added HP on equip; clamping on unequip).
     public void SetGearMaxHealthBonus(float bonus)
     {
+        if (!CanMutateCombatState()) return;
         if (_baseMaxHealth <= 0f) _baseMaxHealth = maxHealth; // safety if called pre-Awake
         float delta = bonus - _gearMaxHealthBonus;
         _gearMaxHealthBonus = bonus;
@@ -210,16 +250,44 @@ public class Health : MonoBehaviour
     }
 
     public void SetGearDamageReduction(float fraction)
-        => _gearDamageReduction = Mathf.Clamp01(fraction);
+    {
+        if (!CanMutateCombatState()) return;
+        _gearDamageReduction = Mathf.Clamp01(fraction);
+    }
 
     // ── Adaptive Shield ───────────────────────────────────────────
     // Called by AdaptiveShieldHandler each time the target takes a hit.
     public void GrowShield(float amount)
     {
+        if (!CanMutateCombatState()) return;
         _shieldRemaining = Mathf.Min(_shieldRemaining + amount, 80f);
     }
 
     // ── Private ───────────────────────────────────────────────────
+    private bool CanMutateCombatState()
+    {
+        if (!NetworkClient.active && !NetworkServer.active) return true;
+        if (NetworkServer.active) return true;
+
+        Debug.LogWarning($"[COMBAT] Ignored client-side Health mutation on {name}. Combat state must change on the server.");
+        return false;
+    }
+
+    void OnCurrentHealthSynced(float oldValue, float newValue)
+    {
+        onHealthChanged?.Invoke(newValue, maxHealth);
+    }
+
+    void OnMaxHealthSynced(float oldValue, float newValue)
+    {
+        onHealthChanged?.Invoke(currentHealth, newValue);
+    }
+
+    void OnDownedSynced(bool oldValue, bool newValue)
+    {
+        onDownedChanged?.Invoke(newValue);
+    }
+
     private void HandleDeath(GameObject source)
     {
         if (isPlayer)
